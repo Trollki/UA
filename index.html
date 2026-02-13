@@ -1,2195 +1,456 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Music.UA — Ukrainian Music Streaming</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music.UA | The Sound of Ukraine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-black: #020406;
+            --bg-dark: #0a0e14;
+            --bg-card: #151b23;
+            --accent: #d4af37; /* Ukrainian Gold */
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --text-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --sidebar-w: 260px;
+            --player-h: 100px;
+        }
 
-  <style>
-    /* ═══════════════════════════════════════
-       RESET & CUSTOM PROPERTIES
-    ═══════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-black);
+            color: var(--text-white);
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    :root {
-      --bg-base:        #0a0c12;
-      --bg-surface:     #111420;
-      --bg-elevated:    #181c2a;
-      --bg-card:        #1d2235;
-      --bg-hover:       #252a3d;
-      --border:         rgba(255,255,255,0.07);
+        /* Layout */
+        .app-shell {
+            display: grid;
+            grid-template-columns: var(--sidebar-w) 1fr;
+            grid-template-rows: 1fr var(--player-h);
+            height: 100vh;
+        }
 
-      --gold:           #d4a017;
-      --gold-light:     #f0c040;
-      --gold-dim:       rgba(212,160,23,0.15);
-      --amber:          #e8820c;
-      --amber-dim:      rgba(232,130,12,0.12);
+        /* Sidebar */
+        .sidebar {
+            background-color: #000;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1a1a1a;
+        }
 
-      --navy:           #1a2540;
-      --navy-mid:       #243050;
-      --periwinkle:     #4a6fa5;
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: var(--accent);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-      --text-primary:   #f0f2f8;
-      --text-secondary: #8a91ab;
-      --text-muted:     #4e5570;
+        .nav-group { margin-bottom: 30px; }
+        .nav-item {
+            padding: 12px 0;
+            color: var(--text-gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .nav-item:hover, .nav-item.active { color: var(--accent); }
+        .nav-item svg { width: 20px; height: 20px; }
 
-      --player-h:       82px;
-      --sidebar-w:      260px;
-      --sidebar-collapsed: 72px;
+        /* Main Content */
+        .content {
+            background: linear-gradient(180deg, #10161e 0%, var(--bg-black) 100%);
+            overflow-y: auto;
+            padding: 30px;
+            scroll-behavior: smooth;
+        }
 
-      --radius-sm:  6px;
-      --radius-md:  12px;
-      --radius-lg:  18px;
-      --radius-xl:  24px;
-      --radius-pill: 999px;
+        .search-container {
+            position: sticky;
+            top: -30px;
+            z-index: 10;
+            background: rgba(10, 14, 20, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
 
-      --shadow-card:    0 4px 24px rgba(0,0,0,0.45);
-      --shadow-glow:    0 0 24px rgba(212,160,23,0.25);
-      --shadow-deep:    0 8px 40px rgba(0,0,0,0.7);
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid #333;
+            background: var(--bg-card);
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 
-      --transition:     0.22s cubic-bezier(0.4,0,0.2,1);
-      --transition-slow:0.4s cubic-bezier(0.4,0,0.2,1);
-    }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
 
-    html { scroll-behavior: smooth; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: grid;
-      grid-template-columns: var(--sidebar-w) 1fr;
-      grid-template-rows: 1fr var(--player-h);
-      grid-template-areas:
-        "sidebar main"
-        "player  player";
-    }
+        .card {
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid transparent;
+        }
+        .card:hover {
+            background: #1e2630;
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: translateY(-5px);
+        }
 
-    /* ═══════════════════════════════════════
-       SCROLLBAR
-    ═══════════════════════════════════════ */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--periwinkle); }
+        .card img {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
 
-    /* ═══════════════════════════════════════
-       SIDEBAR
-    ═══════════════════════════════════════ */
-    #sidebar {
-      grid-area: sidebar;
-      background: var(--bg-surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - var(--player-h));
-      position: sticky;
-      top: 0;
-      overflow: hidden;
-      z-index: 100;
-      transition: width var(--transition-slow);
-    }
+        .play-overlay {
+            position: absolute;
+            right: 25px;
+            bottom: 80px;
+            width: 45px;
+            height: 45px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        .card:hover .play-overlay { opacity: 1; transform: translateY(0); }
 
-    .logo {
-      padding: 28px 24px 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .logo-icon {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, var(--gold), var(--amber));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-glow);
-      position: relative;
-      overflow: hidden;
-    }
-    .logo-icon::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15));
-    }
-    .logo-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      line-height: 1;
-    }
-    .logo-text span { color: var(--gold); }
-    .logo-tagline {
-      font-size: 9px;
-      color: var(--text-muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
+        /* Player */
+        .player {
+            grid-column: 1 / -1;
+            background: #080a0d;
+            border-top: 1px solid #222;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            align-items: center;
+            padding: 0 25px;
+        }
 
-    .nav-section { padding: 8px 12px; flex-shrink: 0; }
-    .nav-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 8px 12px 4px;
-    }
+        .now-playing { display: flex; align-items: center; gap: 15px; }
+        .now-playing img { width: 60px; height: 60px; border-radius: 5px; }
+        .track-meta h4 { font-size: 15px; margin-bottom: 4px; }
+        .track-meta p { font-size: 13px; color: var(--text-gray); }
 
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-      text-decoration: none;
-      user-select: none;
-    }
-    .nav-item::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 50%;
-      transform: translateY(-50%) scaleY(0);
-      width: 3px; height: 60%;
-      background: var(--gold);
-      border-radius: 0 2px 2px 0;
-      transition: transform var(--transition);
-    }
-    .nav-item:hover { color: var(--text-primary); background: var(--bg-elevated); }
-    .nav-item:hover::before { transform: translateY(-50%) scaleY(1); }
-    .nav-item.active { color: var(--gold-light); background: var(--gold-dim); }
-    .nav-item.active::before { transform: translateY(-50%) scaleY(1); }
+        .player-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .nav-icon {
-      width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
+        .controls { display: flex; align-items: center; gap: 25px; }
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 20px;
+            transition: 0.2s;
+        }
+        .ctrl-btn:hover { color: var(--text-white); }
+        .btn-main {
+            width: 40px;
+            height: 40px;
+            background: var(--text-white);
+            color: black;
+            border-radius: 50%;
+            font-size: 16px;
+        }
 
-    /* Library section */
-    .library-section {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 12px 12px;
-      min-height: 0;
-    }
-    .library-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 12px 8px;
-    }
-    .library-header span {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .btn-add {
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      transition: all var(--transition);
-    }
-    .btn-add:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+        .progress-area {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
 
-    .playlist-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background var(--transition);
-    }
-    .playlist-item:hover { background: var(--bg-elevated); }
-    .playlist-thumb {
-      width: 40px; height: 40px;
-      border-radius: 6px;
-      flex-shrink: 0;
-      font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .playlist-info { overflow: hidden; }
-    .playlist-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .playlist-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
 
-    /* ═══════════════════════════════════════
-       MAIN CONTENT
-    ═══════════════════════════════════════ */
-    #main {
-      grid-area: main;
-      overflow-y: auto;
-      height: calc(100vh - var(--player-h));
-      background: var(--bg-base);
-    }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            border-radius: 10px;
+            position: relative;
+        }
 
-    /* Top nav bar */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(10,12,18,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
+        .volume-area {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .nav-arrows { display: flex; gap: 8px; }
-    .nav-arrow {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      transition: all var(--transition);
-    }
-    .nav-arrow:hover { background: var(--bg-hover); color: var(--text-primary); }
+        input[type="range"] {
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
 
-    .topbar-tabs {
-      display: flex;
-      gap: 4px;
-      background: var(--bg-elevated);
-      border-radius: var(--radius-pill);
-      padding: 4px;
-    }
-    .tab-btn {
-      padding: 6px 18px;
-      border-radius: var(--radius-pill);
-      border: none;
-      background: none;
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition);
-      font-family: 'Inter', sans-serif;
-    }
-    .tab-btn.active { background: var(--bg-card); color: var(--text-primary); }
-    .tab-btn:hover:not(.active) { color: var(--text-primary); }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .topbar-search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 7px 14px;
-      transition: border-color var(--transition);
-    }
-    .topbar-search:focus-within { border-color: var(--gold); }
-    .topbar-search input {
-      background: none;
-      border: none;
-      outline: none;
-      color: var(--text-primary);
-      font-size: 13px;
-      font-family: 'Inter', sans-serif;
-      width: 180px;
-    }
-    .topbar-search input::placeholder { color: var(--text-muted); }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 14px 5px 5px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-    .user-badge:hover { border-color: var(--gold); }
-    .user-avatar {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--periwinkle), var(--gold));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .user-name { font-size: 12px; font-weight: 600; }
-
-    /* ═══════════════════════════════════════
-       PAGE SECTIONS
-    ═══════════════════════════════════════ */
-    .page { display: none; padding: 32px; }
-    .page.active { display: block; }
-
-    /* Featured Banner */
-    .featured-banner {
-      border-radius: var(--radius-xl);
-      background: linear-gradient(135deg, #1a2540 0%, #0d1520 40%, #1a0d2e 100%);
-      padding: 40px 48px;
-      margin-bottom: 40px;
-      position: relative;
-      overflow: hidden;
-      min-height: 200px;
-      display: flex;
-      align-items: flex-end;
-      cursor: pointer;
-    }
-    .featured-banner::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: 
-        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(212,160,23,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 20% 80%, rgba(74,111,165,0.2) 0%, transparent 70%);
-    }
-    .featured-pattern {
-      position: absolute;
-      right: 40px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 120px;
-      opacity: 0.08;
-      line-height: 1;
-      user-select: none;
-    }
-    .featured-deco {
-      position: absolute;
-      top: 0; right: 0; bottom: 0;
-      width: 300px;
-      background: linear-gradient(90deg, transparent, rgba(212,160,23,0.06));
-      pointer-events: none;
-    }
-    .featured-content { position: relative; z-index: 1; }
-    .featured-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--gold-dim);
-      border: 1px solid rgba(212,160,23,0.3);
-      color: var(--gold-light);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      margin-bottom: 14px;
-    }
-    .featured-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 38px;
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 10px;
-    }
-    .featured-title em {
-      font-style: italic;
-      color: var(--gold-light);
-    }
-    .featured-subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
-    .featured-actions { display: flex; gap: 10px; align-items: center; }
-    .btn-play-featured {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, var(--gold), var(--amber));
-      color: #000;
-      border: none;
-      padding: 11px 24px;
-      border-radius: var(--radius-pill);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all var(--transition);
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 0.3px;
-    }
-    .btn-play-featured:hover { transform: scale(1.04); box-shadow: 0 4px 20px rgba(212,160,23,0.4); }
-    .btn-secondary {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.08);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
-      padding: 11px 20px;
-      border-radius: var(--radius-pill);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition);
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-secondary:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
-
-    /* Section headers */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-    .section-title span { color: var(--gold); }
-    .see-all {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: color var(--transition);
-    }
-    .see-all:hover { color: var(--gold); }
-
-    /* Content section spacing */
-    .content-section { margin-bottom: 44px; }
-
-    /* ═══════════════════════════════════════
-       SONG LIST (Trending)
-    ═══════════════════════════════════════ */
-    .song-list { display: flex; flex-direction: column; gap: 2px; }
-
-    .song-row {
-      display: grid;
-      grid-template-columns: 24px 1fr auto;
-      align-items: center;
-      gap: 16px;
-      padding: 10px 12px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: background var(--transition);
-      position: relative;
-      group: true;
-    }
-    .song-row:hover { background: var(--bg-elevated); }
-    .song-row.playing { background: var(--gold-dim); }
-    .song-row.playing .song-title { color: var(--gold-light); }
-
-    .song-num {
-      font-size: 13px;
-      color: var(--text-muted);
-      text-align: center;
-      font-weight: 500;
-      transition: opacity var(--transition);
-    }
-    .song-row:hover .song-num { opacity: 0; }
-    .song-play-btn {
-      position: absolute;
-      left: 8px;
-      width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px;
-      color: var(--text-primary);
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-    .song-row:hover .song-play-btn { opacity: 1; }
-
-    .song-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .song-thumb {
-      width: 44px; height: 44px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-    .song-thumb::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.06));
-    }
-    .song-text { min-width: 0; }
-    .song-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .song-artist {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .song-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .song-duration {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-    .like-btn {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px;
-      transition: all var(--transition);
-      opacity: 0;
-    }
-    .song-row:hover .like-btn { opacity: 1; }
-    .like-btn:hover { color: var(--gold); }
-    .like-btn.liked { color: var(--gold); opacity: 1; }
-
-    /* ═══════════════════════════════════════
-       CARD GRIDS
-    ═══════════════════════════════════════ */
-    .card-grid {
-      display: grid;
-      gap: 18px;
-    }
-    .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
-    .card-grid-5 { grid-template-columns: repeat(5, 1fr); }
-    .card-grid-6 { grid-template-columns: repeat(6, 1fr); }
-    .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
-
-    /* Album / Playlist Card */
-    .album-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      cursor: pointer;
-      transition: all var(--transition);
-      border: 1px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-    .album-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 60%, rgba(212,160,23,0.04));
-      pointer-events: none;
-    }
-    .album-card:hover {
-      background: var(--bg-hover);
-      border-color: rgba(212,160,23,0.2);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-card);
-    }
-    .album-art-wrap {
-      position: relative;
-      width: 100%;
-      padding-bottom: 100%;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-    .album-art {
-      position: absolute;
-      inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 50px;
-    }
-    .album-art::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
-    }
-    .card-play-btn {
-      position: absolute;
-      bottom: 10px; right: 10px;
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: var(--gold);
-      border: none;
-      color: #000;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transform: translateY(8px);
-      opacity: 0;
-      transition: all var(--transition);
-      box-shadow: 0 4px 16px rgba(212,160,23,0.4);
-      z-index: 2;
-    }
-    .album-card:hover .card-play-btn { opacity: 1; transform: translateY(0); }
-    .card-play-btn:hover { transform: scale(1.08) !important; background: var(--gold-light); }
-
-    .album-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .album-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Artist Card */
-    .artist-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
-      padding: 20px 16px;
-      cursor: pointer;
-      transition: all var(--transition);
-      border: 1px solid transparent;
-      text-align: center;
-    }
-    .artist-card:hover {
-      background: var(--bg-hover);
-      border-color: rgba(212,160,23,0.2);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-card);
-    }
-    .artist-avatar {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      margin: 0 auto 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      position: relative;
-    }
-    .artist-avatar::after {
-      content: '';
-      position: absolute;
-      inset: -3px;
-      border-radius: 50%;
-      background: conic-gradient(var(--gold), var(--amber), var(--periwinkle), var(--gold));
-      z-index: -1;
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-    .artist-card:hover .artist-avatar::after { opacity: 1; }
-    .artist-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-    .artist-genre { font-size: 11px; color: var(--text-muted); }
-    .artist-followers { font-size: 11px; color: var(--gold); margin-top: 4px; font-weight: 500; }
-
-    /* Genre Card */
-    .genre-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 12px;
-    }
-    .genre-card {
-      border-radius: var(--radius-md);
-      padding: 18px 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-      border: 1px solid transparent;
-    }
-    .genre-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.04));
-      pointer-events: none;
-    }
-    .genre-card:hover { transform: translateY(-3px) scale(1.02); border-color: rgba(255,255,255,0.15); box-shadow: var(--shadow-card); }
-    .genre-icon { font-size: 32px; margin-bottom: 8px; }
-    .genre-name { font-size: 12px; font-weight: 600; }
-
-    /* Mini banner cards */
-    .mini-banners {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 40px;
-    }
-    .mini-banner {
-      border-radius: var(--radius-lg);
-      padding: 22px 20px;
-      cursor: pointer;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    .mini-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow-deep); }
-    .mini-banner-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
-    .mini-banner-title { font-size: 17px; font-weight: 800; line-height: 1.2; }
-    .mini-banner-count { font-size: 11px; margin-top: 5px; opacity: 0.6; }
-    .mini-banner-icon { font-size: 42px; position: absolute; right: 18px; bottom: 14px; opacity: 0.25; }
-
-    /* ═══════════════════════════════════════
-       SEARCH PAGE
-    ═══════════════════════════════════════ */
-    .search-hero {
-      text-align: center;
-      padding: 40px 0 32px;
-    }
-    .search-hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
-    .search-hero p { color: var(--text-secondary); font-size: 15px; }
-
-    .search-bar-large {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg-elevated);
-      border: 2px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 14px 20px;
-      max-width: 600px;
-      margin: 0 auto 36px;
-      transition: border-color var(--transition);
-    }
-    .search-bar-large:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
-    .search-bar-large input {
-      flex: 1;
-      background: none;
-      border: none;
-      outline: none;
-      font-size: 16px;
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
-    }
-    .search-bar-large input::placeholder { color: var(--text-muted); }
-
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
-    .filter-chip {
-      padding: 7px 16px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition);
-      font-family: 'Inter', sans-serif;
-    }
-    .filter-chip:hover { border-color: var(--gold); color: var(--gold-light); }
-    .filter-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-light); }
-
-    .search-results-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    .results-col-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-
-    /* ═══════════════════════════════════════
-       LIKED SONGS PAGE
-    ═══════════════════════════════════════ */
-    .liked-hero {
-      background: linear-gradient(135deg, #1a1040, #2a0a50, #0d1a35);
-      border-radius: var(--radius-xl);
-      padding: 40px;
-      display: flex;
-      align-items: flex-end;
-      gap: 28px;
-      margin-bottom: 32px;
-      position: relative;
-      overflow: hidden;
-    }
-    .liked-hero::before {
-      content: '♥';
-      position: absolute;
-      right: 40px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 120px;
-      opacity: 0.07;
-    }
-    .liked-thumb {
-      width: 130px; height: 130px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, #7b2d8b, #3d1a6e, #1a3080);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 64px;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-deep);
-    }
-    .liked-info { position: relative; }
-    .liked-type { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 6px; }
-    .liked-title { font-size: 42px; font-weight: 900; font-family: 'Playfair Display', serif; margin-bottom: 8px; }
-    .liked-meta { font-size: 13px; color: var(--text-secondary); }
-    .liked-meta span { color: var(--gold-light); font-weight: 600; }
-
-    /* ═══════════════════════════════════════
-       BOTTOM MUSIC PLAYER
-    ═══════════════════════════════════════ */
-    #player {
-      grid-area: player;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      display: grid;
-      grid-template-columns: 300px 1fr 300px;
-      align-items: center;
-      padding: 0 24px;
-      gap: 16px;
-      z-index: 200;
-    }
-
-    /* Now Playing Info */
-    .now-playing {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-    .np-thumb {
-      width: 52px; height: 52px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    .np-thumb.playing-pulse {
-      animation: thumbPulse 2s ease-in-out infinite;
-    }
-    @keyframes thumbPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(212,160,23,0); }
-      50% { box-shadow: 0 0 0 6px rgba(212,160,23,0.15); }
-    }
-    .np-info { min-width: 0; }
-    .np-title {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .np-artist {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .np-like {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      transition: all var(--transition);
-      flex-shrink: 0;
-    }
-    .np-like:hover { color: var(--gold); transform: scale(1.1); }
-    .np-like.liked { color: var(--gold); }
-
-    /* Player Controls */
-    .player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .control-btns {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .ctrl-btn {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      transition: all var(--transition);
-    }
-    .ctrl-btn:hover { color: var(--text-primary); transform: scale(1.08); }
-    .ctrl-btn.active { color: var(--gold); }
-
-    .play-btn-main {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: var(--text-primary);
-      border: none;
-      color: var(--bg-base);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      transition: all var(--transition);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
-    }
-    .play-btn-main:hover { transform: scale(1.08); background: var(--gold-light); }
-    .play-btn-main:active { transform: scale(0.97); }
-
-    .progress-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      max-width: 480px;
-    }
-    .time-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-      min-width: 30px;
-      text-align: center;
-    }
-
-    /* Slider base */
-    .slider-track {
-      position: relative;
-      flex: 1;
-      height: 4px;
-      background: var(--bg-hover);
-      border-radius: 2px;
-      cursor: pointer;
-    }
-    .slider-fill {
-      position: absolute;
-      top: 0; left: 0;
-      height: 100%;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--gold), var(--amber));
-      pointer-events: none;
-      transition: width 0.1s linear;
-    }
-    .slider-handle {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: #fff;
-      pointer-events: none;
-      transition: transform var(--transition);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.5);
-    }
-    .slider-track:hover .slider-handle { transform: translate(-50%, -50%) scale(1); }
-    .slider-track:hover .slider-fill { background: linear-gradient(90deg, var(--gold-light), var(--gold)); }
-
-    /* Volume */
-    .player-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    .vol-icon {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-size: 16px;
-      transition: color var(--transition);
-      padding: 4px;
-    }
-    .vol-icon:hover { color: var(--text-primary); }
-    .vol-slider { width: 90px; }
-
-    .quality-badge {
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--gold);
-      border: 1px solid var(--gold-dim);
-      border-radius: 3px;
-      padding: 2px 5px;
-    }
-
-    /* Playing indicator (bars) */
-    .eq-bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 14px;
-    }
-    .eq-bar {
-      width: 3px;
-      background: var(--gold);
-      border-radius: 1px;
-      animation: eqAnim 0.8s ease-in-out infinite alternate;
-    }
-    .eq-bar:nth-child(1) { animation-delay: 0s; }
-    .eq-bar:nth-child(2) { animation-delay: 0.2s; }
-    .eq-bar:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes eqAnim {
-      from { height: 4px; }
-      to { height: 14px; }
-    }
-    .eq-bars.paused .eq-bar { animation-play-state: paused; }
-
-    /* ═══════════════════════════════════════
-       TOAST
-    ═══════════════════════════════════════ */
-    .toast-container {
-      position: fixed;
-      bottom: calc(var(--player-h) + 16px);
-      right: 20px;
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-    .toast {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 10px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      animation: toastIn 0.3s ease forwards;
-      box-shadow: var(--shadow-card);
-    }
-    .toast.fade-out { animation: toastOut 0.3s ease forwards; }
-    @keyframes toastIn {
-      from { transform: translateX(20px); opacity: 0; }
-      to   { transform: translateX(0);   opacity: 1; }
-    }
-    @keyframes toastOut {
-      from { transform: translateX(0);   opacity: 1; }
-      to   { transform: translateX(20px); opacity: 0; }
-    }
-
-    /* ═══════════════════════════════════════
-       RESPONSIVE
-    ═══════════════════════════════════════ */
-    @media (max-width: 1200px) {
-      .card-grid-5 { grid-template-columns: repeat(4, 1fr); }
-      .card-grid-6 { grid-template-columns: repeat(4, 1fr); }
-      .genre-grid { grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 1024px) {
-      body { grid-template-columns: var(--sidebar-collapsed) 1fr; }
-      #sidebar { width: var(--sidebar-collapsed); }
-      .logo-text, .logo-tagline, .nav-item span, .library-section { display: none; }
-      .logo { padding: 20px 16px; justify-content: center; }
-      .nav-item { justify-content: center; padding: 12px; }
-      .nav-item::before { display: none; }
-      .nav-section { padding: 8px 6px; }
-      .card-grid-4 { grid-template-columns: repeat(3, 1fr); }
-      .mini-banners { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      body { grid-template-columns: 1fr; grid-template-areas: "main" "player"; }
-      #sidebar { display: none; }
-      .topbar { padding: 12px 20px; }
-      .page { padding: 20px; }
-      .card-grid-4, .card-grid-3 { grid-template-columns: repeat(2, 1fr); }
-      .genre-grid { grid-template-columns: repeat(3, 1fr); }
-      .featured-title { font-size: 26px; }
-      #player { grid-template-columns: 1fr; grid-template-rows: auto auto; padding: 10px 16px; height: auto; }
-      .player-right { display: none; }
-    }
-    @media (max-width: 480px) {
-      .card-grid-4 { grid-template-columns: repeat(2, 1fr); }
-      .genre-grid { grid-template-columns: repeat(2, 1fr); }
-      .mini-banners { grid-template-columns: 1fr; }
-      .search-results-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ═══════════════════════════════════════
-       MISC UTILITIES
-    ═══════════════════════════════════════ */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 32px 0;
-    }
-
-    /* Color palettes for cards */
-    .c1  { background: linear-gradient(135deg,#1a3a5c,#0d2040); }
-    .c2  { background: linear-gradient(135deg,#3a1a1a,#200d0d); }
-    .c3  { background: linear-gradient(135deg,#1a3a1a,#0d2010); }
-    .c4  { background: linear-gradient(135deg,#3a2a0a,#20180d); }
-    .c5  { background: linear-gradient(135deg,#2a1a3a,#180d20); }
-    .c6  { background: linear-gradient(135deg,#1a2a3a,#0d1820); }
-    .c7  { background: linear-gradient(135deg,#3a1a2a,#200d18); }
-    .c8  { background: linear-gradient(135deg,#1a3a3a,#0d2020); }
-    .c9  { background: linear-gradient(135deg,#2a2a1a,#181808); }
-    .c10 { background: linear-gradient(135deg,#2a1a1a,#180808); }
-
-    .gc-pop      { background: linear-gradient(135deg,#3a1a4a,#1a0a2a); }
-    .gc-hiphop   { background: linear-gradient(135deg,#1a1a1a,#2a0a0a); }
-    .gc-elec     { background: linear-gradient(135deg,#0a1a3a,#0a2a2a); }
-    .gc-rock     { background: linear-gradient(135deg,#2a0a0a,#0a0a0a); }
-    .gc-folk     { background: linear-gradient(135deg,#2a1a0a,#1a1a0a); }
-    .gc-jazz     { background: linear-gradient(135deg,#0a1a1a,#0a0a2a); }
-    .gc-indie    { background: linear-gradient(135deg,#1a1a2a,#2a1a1a); }
-
-    /* Mobile menu toggle */
-    .mobile-menu-btn {
-      display: none;
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-primary);
-      padding: 6px 10px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 18px;
-    }
-    @media (max-width: 768px) { .mobile-menu-btn { display: flex; } }
-
-    /* "Now streaming" live dot */
-    .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: #ff4545;
-      animation: livePulse 1.4s ease-in-out infinite;
-      flex-shrink: 0;
-    }
-    @keyframes livePulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.7); }
-    }
-
-  </style>
+        /* Mobile */
+        @media (max-width: 768px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .player { grid-template-columns: 1fr 1fr; }
+            .volume-area { display: none; }
+        }
+    </style>
 </head>
-
 <body>
 
-  <!-- ═══════════════════════════════════════
-       SIDEBAR
-  ═══════════════════════════════════════ -->
-  <nav id="sidebar">
-
-    <!-- Logo -->
-    <a class="logo" onclick="navigate('home')">
-      <div class="logo-icon">🎵</div>
-      <div>
-        <div class="logo-text">Music<span>.UA</span></div>
-        <div class="logo-tagline">Музика без меж</div>
-      </div>
-    </a>
-
-    <!-- Main nav -->
-    <div class="nav-section">
-      <div class="nav-item active" id="nav-home" onclick="navigate('home')">
-        <div class="nav-icon">⌂</div>
-        <span>Головна</span>
-      </div>
-      <div class="nav-item" id="nav-search" onclick="navigate('search')">
-        <div class="nav-icon">⊙</div>
-        <span>Пошук</span>
-      </div>
-    </div>
-
-    <div class="nav-section" style="margin-top:8px;">
-      <div class="nav-label">Бібліотека</div>
-      <div class="nav-item" id="nav-library" onclick="navigate('library')">
-        <div class="nav-icon">▤</div>
-        <span>Ваша бібліотека</span>
-      </div>
-      <div class="nav-item" id="nav-liked" onclick="navigate('liked')">
-        <div class="nav-icon" style="color:var(--gold)">♥</div>
-        <span>Улюблені пісні</span>
-      </div>
-    </div>
-
-    <!-- Library / Playlists -->
-    <div class="library-section">
-      <div class="library-header">
-        <span>Плейлисти</span>
-        <button class="btn-add" title="Новий плейлист">+</button>
-      </div>
-
-      <div class="playlist-item" onclick="playPlaylist('Вечірній настрій')">
-        <div class="playlist-thumb c1">🌙</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Вечірній настрій</div>
-          <div class="playlist-meta">Плейлист • 12 пісень</div>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="logo">Music.UA</div>
+        <div class="nav-group">
+            <div class="nav-item active" onclick="showSection('home')">🏠 Головна</div>
+            <div class="nav-item" onclick="showSection('explore')">🌐 Огляд</div>
+            <div class="nav-item" onclick="showSection('library')">📚 Бібліотека</div>
+            <div class="nav-item">❤ Улюблені</div>
         </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Ранковий кайф')">
-        <div class="playlist-thumb c4">☀️</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Ранковий кайф</div>
-          <div class="playlist-meta">Плейлист • 8 пісень</div>
+        <div style="margin-top: auto; border-top: 1px solid #222; padding-top: 20px;">
+            <p style="font-size: 12px; color: var(--text-gray);">© 2026 Music.UA <br>Українська музична платформа</p>
         </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Українська душа')">
-        <div class="playlist-thumb c9">🌻</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Українська душа</div>
-          <div class="playlist-meta">Плейлист • 15 пісень</div>
-        </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Workout Beats')">
-        <div class="playlist-thumb c2">⚡</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Workout Beats</div>
-          <div class="playlist-meta">Плейлист • 20 пісень</div>
-        </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Chill Vibes')">
-        <div class="playlist-thumb c5">🌊</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Chill Vibes</div>
-          <div class="playlist-meta">Плейлист • 11 пісень</div>
-        </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Хіти 2024')">
-        <div class="playlist-thumb c7">🔥</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Хіти 2024</div>
-          <div class="playlist-meta">Плейлист • 25 пісень</div>
-        </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Jazz Nights')">
-        <div class="playlist-thumb c8">🎷</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Jazz Nights</div>
-          <div class="playlist-meta">Плейлист • 9 пісень</div>
-        </div>
-      </div>
-      <div class="playlist-item" onclick="playPlaylist('Indie World')">
-        <div class="playlist-thumb c6">🎸</div>
-        <div class="playlist-info">
-          <div class="playlist-name">Indie World</div>
-          <div class="playlist-meta">Плейлист • 17 пісень</div>
-        </div>
-      </div>
-    </div>
+    </aside>
 
-  </nav>
-
-  <!-- ═══════════════════════════════════════
-       MAIN CONTENT
-  ═══════════════════════════════════════ -->
-  <main id="main">
-
-    <!-- Top Bar -->
-    <div class="topbar">
-      <div class="nav-arrows">
-        <button class="nav-arrow" onclick="window.history.back()">←</button>
-        <button class="nav-arrow" onclick="window.history.forward()">→</button>
-      </div>
-
-      <div class="topbar-tabs">
-        <button class="tab-btn active" onclick="navigate('home'); setTabActive(this)">Головна</button>
-        <button class="tab-btn" onclick="navigate('search'); setTabActive(this)">Пошук</button>
-        <button class="tab-btn" onclick="navigate('library'); setTabActive(this)">Бібліотека</button>
-      </div>
-
-      <div class="topbar-right">
-        <div class="topbar-search">
-          <span style="color:var(--text-muted);font-size:14px">⊙</span>
-          <input type="text" placeholder="Пісні, артисти, альбоми…" oninput="quickSearch(this.value)" />
+    <main class="content" id="main-content">
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-box" placeholder="Шукати пісні, артистів..." onkeyup="filterSongs()">
         </div>
-        <div class="user-badge">
-          <div class="user-avatar">МА</div>
-          <span class="user-name">Мій акаунт</span>
-        </div>
-      </div>
-    </div>
 
-    <!-- ── HOME PAGE ── -->
-    <section id="page-home" class="page active">
-
-      <!-- Featured Banner -->
-      <div class="featured-banner" onclick="playSong(0)">
-        <div class="featured-pattern">🇺🇦</div>
-        <div class="featured-deco"></div>
-        <div class="featured-content">
-          <div class="featured-label"><div class="live-dot"></div> Топ тижня</div>
-          <div class="featured-title">Серце б'є<br><em>в такт мелодії</em></div>
-          <div class="featured-subtitle">Велика добірка найкращої музики тижня — від українського фолку до світових хітів</div>
-          <div class="featured-actions">
-            <button class="btn-play-featured" onclick="event.stopPropagation();playSong(0)">▶ Слухати</button>
-            <button class="btn-secondary" onclick="event.stopPropagation();">☆ Зберегти</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick pick banners -->
-      <div class="mini-banners">
-        <div class="mini-banner c1" onclick="playSong(7)" style="color:#a0c4ff;">
-          <div class="mini-banner-label">Настрій</div>
-          <div class="mini-banner-title">Нічний Київ</div>
-          <div class="mini-banner-count">18 треків</div>
-          <div class="mini-banner-icon">🌃</div>
-        </div>
-        <div class="mini-banner" style="background:linear-gradient(135deg,#3a1a0a,#1a0a00);color:#ffd599;" onclick="playSong(10)">
-          <div class="mini-banner-label">Збірка</div>
-          <div class="mini-banner-title">Українські хіти</div>
-          <div class="mini-banner-count">42 треки</div>
-          <div class="mini-banner-icon">🌻</div>
-        </div>
-        <div class="mini-banner" style="background:linear-gradient(135deg,#0a1a3a,#050d20);color:#9fb4ff;" onclick="playSong(14)">
-          <div class="mini-banner-label">Electronic</div>
-          <div class="mini-banner-title">Deep in the Night</div>
-          <div class="mini-banner-count">24 треки</div>
-          <div class="mini-banner-icon">🎛️</div>
-        </div>
-      </div>
-
-      <!-- Trending Songs -->
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-title">🔥 Тренди <span>зараз</span></div>
-          <div class="see-all" onclick="navigate('search')">Всі →</div>
-        </div>
-        <div class="song-list" id="trending-list"></div>
-      </div>
-
-      <!-- Genre Categories -->
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-title">Жанри</div>
-        </div>
-        <div class="genre-grid">
-          <div class="genre-card gc-pop" onclick="filterGenre('Pop')">
-            <div class="genre-icon">🎤</div>
-            <div class="genre-name">Pop</div>
-          </div>
-          <div class="genre-card gc-hiphop" onclick="filterGenre('Hip-Hop')">
-            <div class="genre-icon">🎧</div>
-            <div class="genre-name">Hip-Hop</div>
-          </div>
-          <div class="genre-card gc-elec" onclick="filterGenre('Electronic')">
-            <div class="genre-icon">🎛️</div>
-            <div class="genre-name">Electronic</div>
-          </div>
-          <div class="genre-card gc-rock" onclick="filterGenre('Rock')">
-            <div class="genre-icon">🎸</div>
-            <div class="genre-name">Rock</div>
-          </div>
-          <div class="genre-card gc-folk" onclick="filterGenre('Ukrainian Folk')">
-            <div class="genre-icon">🌻</div>
-            <div class="genre-name">Укр. Фолк</div>
-          </div>
-          <div class="genre-card gc-jazz" onclick="filterGenre('Jazz')">
-            <div class="genre-icon">🎷</div>
-            <div class="genre-name">Jazz</div>
-          </div>
-          <div class="genre-card gc-indie" onclick="filterGenre('Indie')">
-            <div class="genre-icon">🎹</div>
-            <div class="genre-name">Indie</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- New Releases -->
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-title">🆕 Нові <span>релізи</span></div>
-          <div class="see-all">Дивитись всі →</div>
-        </div>
-        <div class="card-grid card-grid-5" id="new-releases"></div>
-      </div>
-
-      <!-- Recommended Artists -->
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-title">✨ Рекомендовані <span>артисти</span></div>
-          <div class="see-all">Більше →</div>
-        </div>
-        <div class="card-grid card-grid-6" id="artists-grid"></div>
-      </div>
-
-      <!-- Popular Albums -->
-      <div class="content-section">
-        <div class="section-header">
-          <div class="section-title">💿 Популярні <span>альбоми</span></div>
-          <div class="see-all">Всі альбоми →</div>
-        </div>
-        <div class="card-grid card-grid-4" id="albums-grid"></div>
-      </div>
-
-    </section>
-
-    <!-- ── SEARCH PAGE ── -->
-    <section id="page-search" class="page">
-      <div class="search-hero">
-        <h1>Знайди <em style="color:var(--gold);font-style:normal;">будь-що</em></h1>
-        <p>Пісні, артисти, альбоми, плейлисти — все тут</p>
-      </div>
-
-      <div class="search-bar-large">
-        <span style="font-size:20px;color:var(--text-muted)">⊙</span>
-        <input type="text" id="main-search" placeholder="Почни вводити…" oninput="doSearch(this.value)" />
-        <span id="search-clear" style="color:var(--text-muted);cursor:pointer;font-size:18px;display:none;" onclick="clearSearch()">✕</span>
-      </div>
-
-      <!-- Filters -->
-      <div class="filter-row" id="filter-genres">
-        <button class="filter-chip active" onclick="filterGenre('All',this)">Всі</button>
-        <button class="filter-chip" onclick="filterGenre('Pop',this)">Pop</button>
-        <button class="filter-chip" onclick="filterGenre('Hip-Hop',this)">Hip-Hop</button>
-        <button class="filter-chip" onclick="filterGenre('Electronic',this)">Electronic</button>
-        <button class="filter-chip" onclick="filterGenre('Rock',this)">Rock</button>
-        <button class="filter-chip" onclick="filterGenre('Ukrainian Folk',this)">Укр. Фолк</button>
-        <button class="filter-chip" onclick="filterGenre('Jazz',this)">Jazz</button>
-        <button class="filter-chip" onclick="filterGenre('Indie',this)">Indie</button>
-      </div>
-      <div class="filter-row">
-        <span style="font-size:12px;color:var(--text-muted);align-self:center;margin-right:4px;">Настрій:</span>
-        <button class="filter-chip" onclick="filterMood('energetic',this)">⚡ Енергія</button>
-        <button class="filter-chip" onclick="filterMood('chill',this)">🧊 Чіл</button>
-        <button class="filter-chip" onclick="filterMood('romantic',this)">🌹 Романтика</button>
-        <button class="filter-chip" onclick="filterMood('melancholy',this)">🌧️ Меланхолія</button>
-        <button class="filter-chip" onclick="filterMood('upbeat',this)">🎉 Весело</button>
-      </div>
-
-      <div class="search-results-grid">
-        <div>
-          <div class="results-col-title">Пісні</div>
-          <div class="song-list" id="search-results"></div>
-        </div>
-        <div>
-          <div class="results-col-title">Артисти та альбоми</div>
-          <div class="card-grid card-grid-3" id="search-artist-results"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── LIBRARY PAGE ── -->
-    <section id="page-library" class="page">
-      <div class="section-header" style="margin-bottom:28px;">
-        <div class="section-title">📚 Ваша <span>бібліотека</span></div>
-      </div>
-
-      <div class="mini-banners">
-        <div class="mini-banner c5" style="cursor:pointer;" onclick="navigate('liked')">
-          <div class="mini-banner-label">Спеціальний</div>
-          <div class="mini-banner-title">Улюблені пісні</div>
-          <div class="mini-banner-count" id="liked-count-badge">0 пісень</div>
-          <div class="mini-banner-icon">♥</div>
-        </div>
-        <div class="mini-banner c4" style="cursor:pointer;">
-          <div class="mini-banner-label">Нещодавно</div>
-          <div class="mini-banner-title">Нещодавно прослухані</div>
-          <div class="mini-banner-count">Останні 50 треків</div>
-          <div class="mini-banner-icon">🕐</div>
-        </div>
-        <div class="mini-banner c1" style="cursor:pointer;">
-          <div class="mini-banner-label">Завантажені</div>
-          <div class="mini-banner-title">Офлайн треки</div>
-          <div class="mini-banner-count">0 треків</div>
-          <div class="mini-banner-icon">⬇️</div>
-        </div>
-      </div>
-
-      <div class="content-section">
-        <div class="section-header"><div class="section-title">Ваші <span>плейлисти</span></div></div>
-        <div class="card-grid card-grid-4">
-          <div class="album-card" onclick="playPlaylist('Вечірній настрій')">
-            <div class="album-art-wrap"><div class="album-art c1">🌙<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Вечірній настрій</div>
-            <div class="album-sub">Плейлист • 12 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Ранковий кайф')">
-            <div class="album-art-wrap"><div class="album-art c4">☀️<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Ранковий кайф</div>
-            <div class="album-sub">Плейлист • 8 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Українська душа')">
-            <div class="album-art-wrap"><div class="album-art c9">🌻<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Українська душа</div>
-            <div class="album-sub">Плейлист • 15 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Workout Beats')">
-            <div class="album-art-wrap"><div class="album-art c2">⚡<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Workout Beats</div>
-            <div class="album-sub">Плейлист • 20 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Chill Vibes')">
-            <div class="album-art-wrap"><div class="album-art c5">🌊<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Chill Vibes</div>
-            <div class="album-sub">Плейлист • 11 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Хіти 2024')">
-            <div class="album-art-wrap"><div class="album-art c7">🔥<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Хіти 2024</div>
-            <div class="album-sub">Плейлист • 25 пісень</div>
-          </div>
-          <div class="album-card" onclick="playPlaylist('Jazz Nights')">
-            <div class="album-art-wrap"><div class="album-art c8">🎷<button class="card-play-btn">▶</button></div></div>
-            <div class="album-name">Jazz Nights</div>
-            <div class="album-sub">Плейлист • 9 пісень</div>
-          </div>
-          <div class="album-card">
-            <div class="album-art-wrap">
-              <div class="album-art" style="background:var(--bg-elevated);border:2px dashed var(--border);font-size:28px;color:var(--text-muted);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;">
-                +<span style="font-size:11px;font-family:'Inter',sans-serif;font-weight:600;">Новий</span>
-              </div>
+        <div id="dynamic-content">
             </div>
-            <div class="album-name">Створити плейлист</div>
-            <div class="album-sub">Твоя музика, твої правила</div>
-          </div>
+    </main>
+
+    <footer class="player">
+        <div class="now-playing">
+            <img src="https://via.placeholder.com/60" id="current-art">
+            <div class="track-meta">
+                <h4 id="current-title">Почніть прослуховування</h4>
+                <p id="current-artist">Music.UA</p>
+            </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ── LIKED SONGS PAGE ── -->
-    <section id="page-liked" class="page">
-      <div class="liked-hero">
-        <div class="liked-thumb">♥</div>
-        <div class="liked-info">
-          <div class="liked-type">Плейлист</div>
-          <div class="liked-title">Улюблені</div>
-          <div class="liked-meta"><span id="liked-count">0</span> пісень • <span style="color:var(--text-secondary)">Обновлено сьогодні</span></div>
-          <div style="margin-top:16px;display:flex;gap:10px;">
-            <button class="btn-play-featured" onclick="playLiked()">▶ Слухати</button>
-            <button class="btn-secondary">⇄ Перемішати</button>
-          </div>
+        <div class="player-center">
+            <div class="controls">
+                <button class="ctrl-btn">🔀</button>
+                <button class="ctrl-btn" onclick="prevSong()">⏮</button>
+                <button class="ctrl-btn btn-main" id="play-pause" onclick="togglePlay()">▶</button>
+                <button class="ctrl-btn" onclick="nextSong()">⏭</button>
+                <button class="ctrl-btn">🔁</button>
+            </div>
+            <div class="progress-area">
+                <span id="time-current">0:00</span>
+                <div class="progress-bar" id="seek-bar" onclick="seek(event)">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span id="time-total">0:00</span>
+            </div>
         </div>
-      </div>
-      <div class="song-list" id="liked-list"></div>
-      <div id="liked-empty" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
-        <div style="font-size:64px;margin-bottom:16px;">♥</div>
-        <div style="font-size:18px;font-weight:600;margin-bottom:8px;">Ще немає улюблених пісень</div>
-        <div>Натискай ♥ поряд із піснею, щоб зберегти її сюди</div>
-      </div>
-    </section>
 
-  </main><!-- /#main -->
-
-  <!-- ═══════════════════════════════════════
-       BOTTOM PLAYER
-  ═══════════════════════════════════════ -->
-  <footer id="player">
-
-    <!-- Now Playing -->
-    <div class="now-playing">
-      <div class="np-thumb" id="np-thumb">🎵</div>
-      <div class="np-info">
-        <div class="np-title" id="np-title">Оберіть пісню</div>
-        <div class="np-artist" id="np-artist">Music.UA</div>
-      </div>
-      <button class="np-like" id="np-like-btn" onclick="toggleLikeCurrentSong()" title="Додати до улюблених">♡</button>
-    </div>
-
-    <!-- Controls -->
-    <div class="player-controls">
-      <div class="control-btns">
-        <button class="ctrl-btn" id="btn-shuffle" onclick="toggleShuffle()" title="Перемішати">⇄</button>
-        <button class="ctrl-btn" onclick="prevSong()" title="Попередня">⏮</button>
-        <button class="play-btn-main" id="btn-play" onclick="togglePlay()" title="Відтворити / Пауза">▶</button>
-        <button class="ctrl-btn" onclick="nextSong()" title="Наступна">⏭</button>
-        <button class="ctrl-btn" id="btn-repeat" onclick="toggleRepeat()" title="Повторити">↻</button>
-      </div>
-      <div class="progress-row">
-        <span class="time-label" id="current-time">0:00</span>
-        <div class="slider-track" id="progress-track" onclick="seekTo(event)">
-          <div class="slider-fill" id="progress-fill" style="width:0%"></div>
-          <div class="slider-handle" id="progress-handle" style="left:0%"></div>
+        <div class="volume-area">
+            <span>🔊</span>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume()">
         </div>
-        <span class="time-label" id="total-time">0:00</span>
-      </div>
-    </div>
+    </footer>
+</div>
 
-    <!-- Right controls -->
-    <div class="player-right">
-      <div class="eq-bars" id="eq-bars">
-        <div class="eq-bar"></div>
-        <div class="eq-bar"></div>
-        <div class="eq-bar"></div>
-      </div>
-      <div class="quality-badge">HQ</div>
-      <button class="vol-icon" id="vol-icon" onclick="toggleMute()" title="Вимкнути звук">🔊</button>
-      <div class="slider-track vol-slider" onclick="setVolume(event)">
-        <div class="slider-fill" id="vol-fill" style="width:80%"></div>
-        <div class="slider-handle" id="vol-handle" style="left:80%"></div>
-      </div>
-    </div>
+<audio id="audio-engine"></audio>
 
-  </footer>
-
-  <!-- Toast container -->
-  <div class="toast-container" id="toast-container"></div>
-
-  <!-- ═══════════════════════════════════════
-       JAVASCRIPT
-  ═══════════════════════════════════════ -->
-  <script>
-    'use strict';
-
-    /* ─────────────────────────────────────
-       DATA: 22 mock songs
-    ───────────────────────────────────── */
-    const SONGS = [
-      { id:0,  title:"Ніч над Дніпром",          artist:"Kalush Orchestra",  album:"Тіні",          genre:"Ukrainian Folk", mood:"melancholy",  duration:215, emoji:"🌙", color:"c1" },
-      { id:1,  title:"Батько",                    artist:"Антитіла",         album:"Безкінечність",  genre:"Rock",           mood:"energetic",   duration:198, emoji:"⚡", color:"c2" },
-      { id:2,  title:"Квіти на асфальті",         artist:"Океан Ельзи",      album:"Dolce vita",     genre:"Rock",           mood:"melancholy",  duration:241, emoji:"🌸", color:"c3" },
-      { id:3,  title:"Honey",                     artist:"Jenia Lubich",     album:"Golden Side",    genre:"Pop",            mood:"romantic",    duration:187, emoji:"🍯", color:"c4" },
-      { id:4,  title:"Midnight Kiev",             artist:"Drozdov",          album:"Neon Nights",    genre:"Electronic",     mood:"chill",       duration:330, emoji:"🎛️", color:"c5" },
-      { id:5,  title:"Вітер з Карпат",            artist:"ДахаБраха",        album:"Горизонт",       genre:"Ukrainian Folk", mood:"melancholy",  duration:278, emoji:"🌄", color:"c6" },
-      { id:6,  title:"Summer Storm",              artist:"The Hardkiss",     album:"Drama",          genre:"Indie",          mood:"energetic",   duration:203, emoji:"⛈️", color:"c7" },
-      { id:7,  title:"Синє небо",                 artist:"Христина Соловій", album:"Місто",          genre:"Ukrainian Folk", mood:"romantic",    duration:224, emoji:"🌻", color:"c8" },
-      { id:8,  title:"Catch Me If You Can",       artist:"Ivan Dorn",        album:"Randorn",        genre:"Pop",            mood:"upbeat",      duration:193, emoji:"🎤", color:"c9" },
-      { id:9,  title:"Techno Taras",              artist:"Acid House UA",    album:"Kyiv Underground",genre:"Electronic",    mood:"energetic",   duration:412, emoji:"🔊", color:"c10" },
-      { id:10, title:"Моя душа",                  artist:"Тіна Кароль",      album:"Небо",           genre:"Pop",            mood:"romantic",    duration:210, emoji:"💫", color:"c1" },
-      { id:11, title:"Street Level",              artist:"Alyona Alyona",    album:"Нью Йорк",       genre:"Hip-Hop",        mood:"energetic",   duration:177, emoji:"🎧", color:"c2" },
-      { id:12, title:"Фіолетовий вечір",          artist:"Go-A",             album:"Будьмо",         genre:"Electronic",     mood:"chill",       duration:265, emoji:"🟣", color:"c3" },
-      { id:13, title:"Running in Circles",        artist:"ONUKA",            album:"VIDLIK",         genre:"Electronic",     mood:"melancholy",  duration:299, emoji:"⭕", color:"c4" },
-      { id:14, title:"Зорі",                      artist:"Skryabin",         album:"Маніпуляція",    genre:"Rock",           mood:"melancholy",  duration:232, emoji:"⭐", color:"c5" },
-      { id:15, title:"Gold Rush",                 artist:"Monatik",          album:"Vitamin D",      genre:"Pop",            mood:"upbeat",      duration:208, emoji:"🏆", color:"c6" },
-      { id:16, title:"Late Night Blues",          artist:"Lviv Jazz Trio",   album:"After Midnight", genre:"Jazz",           mood:"chill",       duration:358, emoji:"🎷", color:"c7" },
-      { id:17, title:"Roz dvin",                  artist:"Jamala",           album:"Подих",          genre:"Pop",            mood:"melancholy",  duration:222, emoji:"🌬️", color:"c8" },
-      { id:18, title:"Бажаю",                     artist:"Макс Барських",    album:"Синій",          genre:"Pop",            mood:"upbeat",      duration:189, emoji:"🌊", color:"c9" },
-      { id:19, title:"Полонина",                  artist:"Лесь Курило",      album:"Карпати",        genre:"Ukrainian Folk", mood:"chill",       duration:315, emoji:"🏔️", color:"c10" },
-      { id:20, title:"Digital Sunset",            artist:"Kyiv Synthwave",   album:"Neuro City",     genre:"Electronic",     mood:"chill",       duration:384, emoji:"🌆", color:"c1" },
-      { id:21, title:"Rebel Heart",               artist:"Latexfauna",       album:"Freaks",         genre:"Indie",          mood:"energetic",   duration:196, emoji:"💙", color:"c2" },
+<script>
+    // Database of Ukrainian Music
+    const library = [
+        { id: 1, title: "Stefania", artist: "Kalush Orchestra", art: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300", url: "", genre: "Folk", dur: "2:59" },
+        { id: 2, title: "Shum", artist: "Go_A", art: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300", url: "", genre: "Electronic", dur: "3:07" },
+        { id: 3, title: "Фортеця Бахмут", artist: "Антитіла", art: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300", url: "", genre: "Rock", dur: "4:02" },
+        { id: 4, title: "Тримай", artist: "Христина Соловій", art: "https://images.unsplash.com/photo-1514525253361-bee8a48740d0?w=300", url: "", genre: "Pop", dur: "3:35" },
+        { id: 5, title: "1944", artist: "Jamala", art: "https://images.unsplash.com/photo-1459749411177-042180ce673c?w=300", url: "", genre: "Jazz", dur: "3:00" },
+        { id: 6, title: "Mriya", artist: "Jerry Heil", art: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=300", url: "", genre: "Pop", dur: "2:45" },
+        { id: 7, title: "Чути гімн", artist: "Skofka", art: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?w=300", url: "", genre: "Hip-Hop", dur: "2:30" },
+        { id: 8, title: "Вільна", artist: "Тіна Кароль & Юлія Саніна", art: "https://images.unsplash.com/photo-1526218626217-dc65a29bb444?w=300", url: "", genre: "Pop", dur: "3:15" },
+        { id: 9, title: "Heart of Steel", artist: "TVORCHI", art: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300", url: "", genre: "Electronic", dur: "2:52" },
+        { id: 10, title: "Обійми", artist: "Океан Ельзи", art: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300", url: "", genre: "Rock", dur: "3:44" },
+        { id: 11, title: "Дежавю", artist: "Артем Пивоваров", art: "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300", url: "", genre: "Pop", dur: "3:20" },
+        { id: 12, title: "Bakhmut", artist: "Probass ∆ Hardi", art: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=300", url: "", genre: "Electronic", dur: "3:10" }
     ];
 
-    /* Artists */
-    const ARTISTS = [
-      { name:"Kalush Orchestra", genre:"Ukrainian Folk", followers:"1.2M", emoji:"🌻", color:"c9" },
-      { name:"ONUKA",            genre:"Electronic",     followers:"890K",  emoji:"⭕", color:"c4" },
-      { name:"Océan Ельзи",      genre:"Rock",           followers:"2.1M",  emoji:"🎸", color:"c2" },
-      { name:"Alyona Alyona",    genre:"Hip-Hop",        followers:"650K",  emoji:"🎤", color:"c7" },
-      { name:"Go-A",             genre:"Electronic",     followers:"480K",  emoji:"🟣", color:"c3" },
-      { name:"Ivan Dorn",        genre:"Pop",            followers:"1.4M",  emoji:"🎶", color:"c6" },
-    ];
+    // State
+    let currentIdx = -1;
+    let isPlaying = false;
+    const audio = document.getElementById('audio-engine');
+    const playBtn = document.getElementById('play-pause');
 
-    /* Albums */
-    const ALBUMS = [
-      { title:"Тіні",         artist:"Kalush Orchestra", year:2023, emoji:"🌙", color:"c1" },
-      { title:"VIDLIK",       artist:"ONUKA",            year:2024, emoji:"⭕", color:"c5" },
-      { title:"Neon Nights",  artist:"Drozdov",          year:2024, emoji:"🌆", color:"c6" },
-      { title:"Drama",        artist:"The Hardkiss",     year:2023, emoji:"⛈️", color:"c7" },
-      { title:"Горизонт",     artist:"ДахаБраха",        year:2024, emoji:"🌄", color:"c9" },
-      { title:"Randorn",      artist:"Ivan Dorn",        year:2023, emoji:"🎤", color:"c4" },
-      { title:"After Midnight",artist:"Lviv Jazz Trio",  year:2024, emoji:"🎷", color:"c8" },
-      { title:"Freaks",       artist:"Latexfauna",       year:2024, emoji:"💙", color:"c2" },
-    ];
+    // UI Elements
+    const contentDiv = document.getElementById('dynamic-content');
 
-    /* ─────────────────────────────────────
-       STATE
-    ───────────────────────────────────── */
-    let currentIdx  = -1;   // index in SONGS
-    let isPlaying   = false;
-    let isShuffle   = false;
-    let repeatMode  = 0;    // 0=off 1=all 2=one
-    let volume      = 0.8;
-    let isMuted     = false;
-    let progress    = 0;    // 0-100 (simulated)
-    let likedSongs  = new Set();
-    let progressTimer = null;
-
-    // Simulated playback tick
-    function startProgressTimer() {
-      stopProgressTimer();
-      progressTimer = setInterval(() => {
-        if (!isPlaying || currentIdx < 0) return;
-        const dur = SONGS[currentIdx].duration;
-        progress += 100 / (dur * 10); // ~0.1s steps
-        if (progress >= 100) {
-          progress = 0;
-          onSongEnd();
-        }
-        renderProgress();
-      }, 100);
-    }
-    function stopProgressTimer() {
-      if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+    function init() {
+        renderHome();
+        // Setup audio events
+        audio.ontimeupdate = updateProgress;
+        audio.onended = nextSong;
     }
 
-    function onSongEnd() {
-      if (repeatMode === 2) { progress = 0; return; }
-      nextSong();
+    function renderHome() {
+        let html = `
+            <div class="section-header"><h2>Тренди України</h2></div>
+            <div class="grid">
+                ${library.slice(0, 6).map(song => createCard(song)).join('')}
+            </div>
+            <div class="section-header"><h2>Рекомендовано для вас</h2></div>
+            <div class="grid">
+                ${library.slice(6, 12).map(song => createCard(song)).join('')}
+            </div>
+        `;
+        contentDiv.innerHTML = html;
     }
 
-    /* ─────────────────────────────────────
-       PLAYBACK
-    ───────────────────────────────────── */
-    function playSong(idx) {
-      currentIdx = idx;
-      progress   = 0;
-      isPlaying  = true;
-      renderPlayer();
-      renderHighlight();
-      startProgressTimer();
-      toast(`▶ ${SONGS[idx].title} — ${SONGS[idx].artist}`);
+    function createCard(song) {
+        return `
+            <div class="card" onclick="loadSong(${library.indexOf(song)})">
+                <img src="${song.art}">
+                <div class="play-overlay">▶</div>
+                <h4>${song.title}</h4>
+                <p style="color:#a0a0a0; font-size:13px;">${song.artist}</p>
+            </div>
+        `;
+    }
+
+    function loadSong(index) {
+        currentIdx = index;
+        const song = library[index];
+        
+        // Update UI
+        document.getElementById('current-art').src = song.art;
+        document.getElementById('current-title').innerText = song.title;
+        document.getElementById('current-artist').innerText = song.artist;
+        document.getElementById('time-total').innerText = song.dur;
+        
+        // Audio Logic
+        // In a real app, song.url would be an MP3 link. For this demo, we simulate playback.
+        audio.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
+        playSong();
     }
 
     function togglePlay() {
-      if (currentIdx < 0) { playSong(0); return; }
-      isPlaying = !isPlaying;
-      if (isPlaying) startProgressTimer(); else stopProgressTimer();
-      renderPlayBtn();
-      renderEQ();
+        if(currentIdx === -1) return loadSong(0);
+        isPlaying ? pauseSong() : playSong();
+    }
+
+    function playSong() {
+        isPlaying = true;
+        playBtn.innerText = "⏸";
+        audio.play();
+    }
+
+    function pauseSong() {
+        isPlaying = false;
+        playBtn.innerText = "▶";
+        audio.pause();
     }
 
     function nextSong() {
-      if (currentIdx < 0) { playSong(0); return; }
-      let next;
-      if (isShuffle) {
-        do { next = Math.floor(Math.random() * SONGS.length); } while (next === currentIdx);
-      } else {
-        next = (currentIdx + 1) % SONGS.length;
-      }
-      playSong(next);
+        currentIdx = (currentIdx + 1) % library.length;
+        loadSong(currentIdx);
     }
 
     function prevSong() {
-      if (progress > 15) { progress = 0; renderProgress(); return; }
-      let prev = currentIdx <= 0 ? SONGS.length - 1 : currentIdx - 1;
-      playSong(prev);
+        currentIdx = (currentIdx - 1 + library.length) % library.length;
+        loadSong(currentIdx);
     }
 
-    function toggleShuffle() {
-      isShuffle = !isShuffle;
-      document.getElementById('btn-shuffle').classList.toggle('active', isShuffle);
-      toast(isShuffle ? '⇄ Перемішування увімк.' : '⇄ Перемішування вимк.');
+    function updateProgress() {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        document.getElementById('progress-fill').style.width = percent + "%";
+        
+        // Time format
+        let mins = Math.floor(audio.currentTime / 60);
+        let secs = Math.floor(audio.currentTime % 60);
+        document.getElementById('time-current').innerText = `${mins}:${secs < 10 ? '0'+secs : secs}`;
     }
 
-    function toggleRepeat() {
-      repeatMode = (repeatMode + 1) % 3;
-      const btn = document.getElementById('btn-repeat');
-      btn.classList.toggle('active', repeatMode > 0);
-      btn.textContent = repeatMode === 2 ? '↻¹' : '↻';
-      const msgs = ['Повтор вимкнено','Повтор усіх','Повтор однієї'];
-      toast('↻ ' + msgs[repeatMode]);
+    function seek(e) {
+        const bar = document.getElementById('seek-bar');
+        const width = bar.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
     }
 
-    /* ─────────────────────────────────────
-       PROGRESS / SEEK
-    ───────────────────────────────────── */
-    function seekTo(e) {
-      const track = document.getElementById('progress-track');
-      const rect  = track.getBoundingClientRect();
-      progress = Math.max(0, Math.min(100, (e.clientX - rect.left) / rect.width * 100));
-      renderProgress();
+    function changeVolume() {
+        audio.volume = document.getElementById('volume-slider').value;
     }
 
-    function renderProgress() {
-      if (currentIdx < 0) return;
-      const dur = SONGS[currentIdx].duration;
-      const elapsed = Math.floor(dur * progress / 100);
-      document.getElementById('progress-fill').style.width   = progress + '%';
-      document.getElementById('progress-handle').style.left  = progress + '%';
-      document.getElementById('current-time').textContent    = formatTime(elapsed);
-      document.getElementById('total-time').textContent      = formatTime(dur);
-    }
-
-    /* ─────────────────────────────────────
-       VOLUME
-    ───────────────────────────────────── */
-    function setVolume(e) {
-      const track = document.getElementById('vol-fill').parentElement;
-      const rect  = track.getBoundingClientRect();
-      volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      isMuted = false;
-      renderVolume();
-    }
-
-    function toggleMute() {
-      isMuted = !isMuted;
-      renderVolume();
-    }
-
-    function renderVolume() {
-      const v = isMuted ? 0 : volume;
-      const pct = (v * 100).toFixed(1) + '%';
-      document.getElementById('vol-fill').style.width  = pct;
-      document.getElementById('vol-handle').style.left = pct;
-      document.getElementById('vol-icon').textContent  = v === 0 ? '🔇' : v < 0.4 ? '🔉' : '🔊';
-    }
-
-    /* ─────────────────────────────────────
-       LIKES
-    ───────────────────────────────────── */
-    function toggleLike(songId) {
-      if (likedSongs.has(songId)) {
-        likedSongs.delete(songId);
-        toast('✕ Видалено з улюблених');
-      } else {
-        likedSongs.add(songId);
-        toast('♥ Додано до улюблених');
-      }
-      renderLikeButtons();
-      renderLikedPage();
-    }
-
-    function toggleLikeCurrentSong() {
-      if (currentIdx < 0) return;
-      toggleLike(currentIdx);
-    }
-
-    function playLiked() {
-      if (likedSongs.size === 0) { toast('♥ Немає улюблених пісень'); return; }
-      playSong([...likedSongs][0]);
-    }
-
-    /* ─────────────────────────────────────
-       RENDER: PLAYER
-    ───────────────────────────────────── */
-    function renderPlayer() {
-      if (currentIdx < 0) return;
-      const s = SONGS[currentIdx];
-      document.getElementById('np-thumb').textContent   = s.emoji;
-      document.getElementById('np-thumb').className     = `np-thumb ${s.color} playing-pulse`;
-      document.getElementById('np-title').textContent   = s.title;
-      document.getElementById('np-artist').textContent  = s.artist;
-      document.getElementById('total-time').textContent = formatTime(s.duration);
-      renderPlayBtn();
-      renderLikeButtons();
-      renderEQ();
-    }
-
-    function renderPlayBtn() {
-      document.getElementById('btn-play').textContent = isPlaying ? '⏸' : '▶';
-    }
-
-    function renderEQ() {
-      document.getElementById('eq-bars').classList.toggle('paused', !isPlaying);
-    }
-
-    function renderLikeButtons() {
-      // player
-      const btn = document.getElementById('np-like-btn');
-      if (currentIdx >= 0) {
-        const liked = likedSongs.has(currentIdx);
-        btn.textContent = liked ? '♥' : '♡';
-        btn.classList.toggle('liked', liked);
-      }
-      // inline like buttons
-      document.querySelectorAll('.like-btn').forEach(b => {
-        const id = parseInt(b.dataset.songId);
-        const liked = likedSongs.has(id);
-        b.textContent = liked ? '♥' : '♡';
-        b.classList.toggle('liked', liked);
-      });
-      // liked count
-      const count = likedSongs.size;
-      const el = document.getElementById('liked-count');
-      if (el) el.textContent = count;
-      const badge = document.getElementById('liked-count-badge');
-      if (badge) badge.textContent = count + ' пісень';
-    }
-
-    function renderHighlight() {
-      document.querySelectorAll('.song-row').forEach(row => {
-        row.classList.toggle('playing', parseInt(row.dataset.songId) === currentIdx);
-      });
-    }
-
-    /* ─────────────────────────────────────
-       RENDER: SONG ROW HTML
-    ───────────────────────────────────── */
-    function songRowHTML(s, num) {
-      return `
-        <div class="song-row" data-song-id="${s.id}" onclick="playSong(${s.id})">
-          <div style="position:relative;width:24px;">
-            <div class="song-num">${num}</div>
-            <div class="song-play-btn">▶</div>
-          </div>
-          <div class="song-info">
-            <div class="song-thumb ${s.color}">${s.emoji}</div>
-            <div class="song-text">
-              <div class="song-title">${s.title}</div>
-              <div class="song-artist">${s.artist} • ${s.album}</div>
+    function filterSongs() {
+        const query = document.getElementById('search-box').value.toLowerCase();
+        const filtered = library.filter(s => 
+            s.title.toLowerCase().includes(query) || 
+            s.artist.toLowerCase().includes(query)
+        );
+        
+        contentDiv.innerHTML = `
+            <div class="section-header"><h2>Результати пошуку: "${query}"</h2></div>
+            <div class="grid">
+                ${filtered.map(song => createCard(song)).join('')}
             </div>
-          </div>
-          <div class="song-actions">
-            <span class="song-artist" style="display:none;">${s.genre}</span>
-            <button class="like-btn ${likedSongs.has(s.id)?'liked':''}" 
-              data-song-id="${s.id}" 
-              onclick="event.stopPropagation();toggleLike(${s.id})"
-              title="Додати до улюблених">
-              ${likedSongs.has(s.id)?'♥':'♡'}
-            </button>
-            <span class="song-duration">${formatTime(s.duration)}</span>
-          </div>
-        </div>`;
+        `;
+        if(query === "") renderHome();
     }
 
-    /* ─────────────────────────────────────
-       RENDER: HOME PAGE LISTS
-    ───────────────────────────────────── */
-    function renderTrending() {
-      const container = document.getElementById('trending-list');
-      if (!container) return;
-      const top10 = SONGS.slice(0, 10);
-      container.innerHTML = top10.map((s, i) => songRowHTML(s, i + 1)).join('');
+    function showSection(type) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+        if(type === 'home') renderHome();
+        else contentDiv.innerHTML = `<h1>Розділ ${type} в розробці</h1>`;
     }
 
-    function renderNewReleases() {
-      const container = document.getElementById('new-releases');
-      if (!container) return;
-      container.innerHTML = SONGS.slice(8, 13).map(s => `
-        <div class="album-card" onclick="playSong(${s.id})">
-          <div class="album-art-wrap">
-            <div class="album-art ${s.color}">${s.emoji}
-              <button class="card-play-btn" onclick="event.stopPropagation();playSong(${s.id})">▶</button>
-            </div>
-          </div>
-          <div class="album-name">${s.title}</div>
-          <div class="album-sub">${s.artist} • 2024</div>
-        </div>`).join('');
-    }
-
-    function renderArtists() {
-      const container = document.getElementById('artists-grid');
-      if (!container) return;
-      container.innerHTML = ARTISTS.map(a => `
-        <div class="artist-card" onclick="toast('🎤 ${a.name}')">
-          <div class="artist-avatar ${a.color}">${a.emoji}</div>
-          <div class="artist-name">${a.name}</div>
-          <div class="artist-genre">${a.genre}</div>
-          <div class="artist-followers">${a.followers} слухачів</div>
-        </div>`).join('');
-    }
-
-    function renderAlbums() {
-      const container = document.getElementById('albums-grid');
-      if (!container) return;
-      container.innerHTML = ALBUMS.map((a, i) => `
-        <div class="album-card" onclick="playSong(${i * 2})">
-          <div class="album-art-wrap">
-            <div class="album-art ${a.color}">${a.emoji}
-              <button class="card-play-btn" onclick="event.stopPropagation();playSong(${i * 2})">▶</button>
-            </div>
-          </div>
-          <div class="album-name">${a.title}</div>
-          <div class="album-sub">${a.artist} • ${a.year}</div>
-        </div>`).join('');
-    }
-
-    /* ─────────────────────────────────────
-       RENDER: SEARCH
-    ───────────────────────────────────── */
-    let activeGenre = 'All';
-    let activeMood  = null;
-
-    function renderSearchResults(query) {
-      let results = SONGS.filter(s => {
-        const matchGenre = (activeGenre === 'All' || s.genre === activeGenre);
-        const matchMood  = (!activeMood || s.mood === activeMood);
-        const q = query.toLowerCase();
-        const matchQuery = !q ||
-          s.title.toLowerCase().includes(q) ||
-          s.artist.toLowerCase().includes(q) ||
-          s.album.toLowerCase().includes(q);
-        return matchGenre && matchMood && matchQuery;
-      });
-
-      const songContainer = document.getElementById('search-results');
-      songContainer.innerHTML = results.length
-        ? results.map((s, i) => songRowHTML(s, i + 1)).join('')
-        : `<div style="padding:40px;text-align:center;color:var(--text-muted);">Нічого не знайдено 🔍</div>`;
-
-      // Artists side
-      const artists = [...new Map(results.map(s => [s.artist, s])).values()].slice(0, 6);
-      const artistContainer = document.getElementById('search-artist-results');
-      artistContainer.innerHTML = artists.map(s => `
-        <div class="album-card" onclick="filterArtist('${s.artist}')">
-          <div class="album-art-wrap">
-            <div class="album-art ${s.color}">${s.emoji}
-              <button class="card-play-btn" onclick="event.stopPropagation();playSong(${s.id})">▶</button>
-            </div>
-          </div>
-          <div class="album-name">${s.artist}</div>
-          <div class="album-sub">${s.genre}</div>
-        </div>`).join('');
-
-      // Show clear button
-      const clear = document.getElementById('search-clear');
-      if (clear) clear.style.display = (query) ? 'block' : 'none';
-    }
-
-    function doSearch(val) {
-      renderSearchResults(val || '');
-    }
-
-    function clearSearch() {
-      const input = document.getElementById('main-search');
-      if (input) input.value = '';
-      document.getElementById('search-clear').style.display = 'none';
-      renderSearchResults('');
-    }
-
-    function filterGenre(genre, el) {
-      activeGenre = genre;
-      if (el) {
-        document.querySelectorAll('#filter-genres .filter-chip').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-      }
-      const input = document.getElementById('main-search');
-      renderSearchResults(input ? input.value : '');
-      if (document.getElementById('page-search').classList.contains('active')) return;
-      navigate('search');
-    }
-
-    function filterMood(mood, el) {
-      activeMood = (activeMood === mood) ? null : mood;
-      document.querySelectorAll('.filter-row:last-of-type .filter-chip').forEach(c => c.classList.remove('active'));
-      if (activeMood && el) el.classList.add('active');
-      const input = document.getElementById('main-search');
-      renderSearchResults(input ? input.value : '');
-    }
-
-    function filterArtist(name) {
-      const input = document.getElementById('main-search');
-      if (input) { input.value = name; doSearch(name); }
-    }
-
-    function quickSearch(val) {
-      if (!val) return;
-      navigate('search');
-      const mainInput = document.getElementById('main-search');
-      if (mainInput) { mainInput.value = val; renderSearchResults(val); }
-    }
-
-    /* ─────────────────────────────────────
-       RENDER: LIKED PAGE
-    ───────────────────────────────────── */
-    function renderLikedPage() {
-      const container = document.getElementById('liked-list');
-      const empty     = document.getElementById('liked-empty');
-      if (!container) return;
-      const songs = SONGS.filter(s => likedSongs.has(s.id));
-      container.innerHTML = songs.map((s, i) => songRowHTML(s, i + 1)).join('');
-      if (empty) empty.style.display = songs.length ? 'none' : 'block';
-    }
-
-    /* ─────────────────────────────────────
-       NAVIGATION
-    ───────────────────────────────────── */
-    function navigate(page) {
-      // Pages
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-' + page)?.classList.add('active');
-
-      // Sidebar nav
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('nav-' + page)?.classList.add('active');
-
-      // Render page-specific content
-      if (page === 'liked')   renderLikedPage();
-      if (page === 'search')  renderSearchResults('');
-    }
-
-    function setTabActive(el) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-    }
-
-    function playPlaylist(name) {
-      const idx = Math.floor(Math.random() * SONGS.length);
-      playSong(idx);
-      toast(`▶ Плейлист "${name}" — ${SONGS[idx].title}`);
-    }
-
-    /* ─────────────────────────────────────
-       TOAST
-    ───────────────────────────────────── */
-    function toast(msg, duration = 2800) {
-      const container = document.getElementById('toast-container');
-      const el = document.createElement('div');
-      el.className = 'toast';
-      el.innerHTML = msg;
-      container.appendChild(el);
-      setTimeout(() => {
-        el.classList.add('fade-out');
-        el.addEventListener('animationend', () => el.remove());
-      }, duration);
-    }
-
-    /* ─────────────────────────────────────
-       UTIL
-    ───────────────────────────────────── */
-    function formatTime(secs) {
-      const m = Math.floor(secs / 60);
-      const s = Math.floor(secs % 60);
-      return `${m}:${s.toString().padStart(2,'0')}`;
-    }
-
-    /* ─────────────────────────────────────
-       KEYBOARD SHORTCUTS
-    ───────────────────────────────────── */
-    document.addEventListener('keydown', e => {
-      // Don't hijack typing
-      if (e.target.tagName === 'INPUT') return;
-      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-      if (e.code === 'ArrowRight') { nextSong(); }
-      if (e.code === 'ArrowLeft')  { prevSong(); }
-      if (e.code === 'KeyM')       { toggleMute(); }
-    });
-
-    /* ─────────────────────────────────────
-       INIT
-    ───────────────────────────────────── */
-    function init() {
-      renderTrending();
-      renderNewReleases();
-      renderArtists();
-      renderAlbums();
-      renderSearchResults('');
-      renderVolume();
-      renderLikedPage();
-    }
     init();
+</script>
 
-  </script>
 </body>
 </html>
