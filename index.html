@@ -1,1206 +1,1841 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Music.UA — Ukrainian Music Streaming</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Major Crimes Investigation System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #06080f;
+    --bg2: #0a0d16;
+    --bg3: #0d1120;
+    --bg4: #111828;
+    --border: #1a2235;
+    --border2: #243050;
+    --text: #c8d4e8;
+    --text2: #7a8aaa;
+    --text3: #3a4a6a;
+    --accent: #3a7bd5;
+    --accent2: #5a9bf5;
+    --red: #e05050;
+    --red2: #ff6060;
+    --green: #3ac87a;
+    --amber: #e0a040;
+    --purple: #9a70d5;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
 
-    :root {
-      --bg-base:        #0a0c12;
-      --bg-surface:     #111420;
-      --bg-elevated:    #181c2a;
-      --bg-card:        #1d2235;
-      --bg-hover:       #252a3d;
-      --border:         rgba(255,255,255,0.07);
-      --gold:           #d4a017;
-      --gold-light:     #f0c040;
-      --gold-dim:       rgba(212,160,23,0.15);
-      --amber:          #e8820c;
-      --navy:           #1a2540;
-      --periwinkle:     #4a6fa5;
-      --text-primary:   #f0f2f8;
-      --text-secondary: #8a91ab;
-      --text-muted:     #4e5570;
-      --player-h:       88px;
-      --sidebar-w:      260px;
-      --radius-sm:  6px;
-      --radius-md:  12px;
-      --radius-lg:  18px;
-      --radius-xl:  24px;
-      --radius-pill: 999px;
-      --shadow-card:    0 4px 24px rgba(0,0,0,0.45);
-      --shadow-glow:    0 0 24px rgba(212,160,23,0.25);
-      --shadow-deep:    0 8px 40px rgba(0,0,0,0.7);
-      --transition:     0.22s cubic-bezier(0.4,0,0.2,1);
-      --transition-slow:0.4s cubic-bezier(0.4,0,0.2,1);
-    }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: grid;
-      grid-template-columns: var(--sidebar-w) 1fr;
-      grid-template-rows: 1fr var(--player-h);
-      grid-template-areas: "sidebar main" "player player";
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--periwinkle); }
+  /* Scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
 
-    /* ── SIDEBAR ── */
-    #sidebar {
-      grid-area: sidebar;
-      background: var(--bg-surface);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      height: calc(100vh - var(--player-h));
-      position: sticky; top: 0;
-      overflow: hidden; z-index: 100;
-    }
-    .logo {
-      padding: 26px 22px 18px;
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; flex-shrink: 0;
-    }
-    .logo-icon {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, var(--gold), var(--amber));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
-      box-shadow: var(--shadow-glow);
-    }
-    .logo-text { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
-    .logo-text span { color: var(--gold); }
-    .logo-tagline { font-size: 9px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  /* CRT flicker */
+  @keyframes flicker { 0%,100%{opacity:1} 92%{opacity:.98} 94%{opacity:.94} 96%{opacity:.99} }
+  body { animation: flicker 8s infinite; }
 
-    .nav-section { padding: 6px 10px; flex-shrink: 0; }
-    .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); padding: 8px 10px 4px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 12px; border-radius: var(--radius-md);
-      cursor: pointer; color: var(--text-secondary);
-      font-size: 14px; font-weight: 500;
-      transition: all var(--transition);
-      position: relative; user-select: none;
-    }
-    .nav-item::before {
-      content: ''; position: absolute; left: 0; top: 50%;
-      transform: translateY(-50%) scaleY(0);
-      width: 3px; height: 60%; background: var(--gold);
-      border-radius: 0 2px 2px 0; transition: transform var(--transition);
-    }
-    .nav-item:hover { color: var(--text-primary); background: var(--bg-elevated); }
-    .nav-item:hover::before { transform: translateY(-50%) scaleY(1); }
-    .nav-item.active { color: var(--gold-light); background: var(--gold-dim); }
-    .nav-item.active::before { transform: translateY(-50%) scaleY(1); }
-    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  @keyframes scanDown { from{top:-100px} to{top:100%} }
+  @keyframes blink { 0%,100%{opacity:1} 49%{opacity:1} 50%{opacity:0} }
 
-    .library-section { flex: 1; overflow-y: auto; padding: 0 10px 12px; min-height: 0; }
-    .library-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 10px 6px; }
-    .library-header span { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
-    .btn-add { width: 24px; height: 24px; border-radius: 50%; background: none; border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all var(--transition); }
-    .btn-add:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
-    .playlist-item { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition); }
-    .playlist-item:hover { background: var(--bg-elevated); }
-    .playlist-thumb { width: 38px; height: 38px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-    .playlist-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .playlist-meta { font-size: 11px; color: var(--text-muted); }
+  .page { display: none; }
+  .page.active { display: flex; flex-direction: column; min-height: 100vh; animation: fadeIn .3s ease; }
 
-    /* ── MAIN ── */
-    #main { grid-area: main; overflow-y: auto; height: calc(100vh - var(--player-h)); background: var(--bg-base); }
+  /* ─── TOP BAR ─── */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+  .topbar-logo {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-logo span { color: var(--text3); font-size: 10px; letter-spacing: 2px; margin-left: 4px; }
+  .topbar-divider { width: 1px; height: 28px; background: var(--border); }
+  .topbar-info { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .clock-display { color: var(--accent2); font-size: 14px; letter-spacing: 3px; }
+  .det-badge {
+    background: rgba(58,123,213,.1);
+    border: 1px solid rgba(58,123,213,.3);
+    color: var(--accent2);
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+  }
 
-    .topbar {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(10,12,18,0.85);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 28px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    }
-    .nav-arrows { display: flex; gap: 8px; }
-    .nav-arrow { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all var(--transition); }
-    .nav-arrow:hover { background: var(--bg-hover); color: var(--text-primary); }
-    .topbar-tabs { display: flex; gap: 4px; background: var(--bg-elevated); border-radius: var(--radius-pill); padding: 4px; }
-    .tab-btn { padding: 6px 18px; border-radius: var(--radius-pill); border: none; background: none; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: 'Inter', sans-serif; }
-    .tab-btn.active { background: var(--bg-card); color: var(--text-primary); }
-    .tab-btn:hover:not(.active) { color: var(--text-primary); }
-    .topbar-right { display: flex; align-items: center; gap: 10px; }
-    .topbar-search { display: flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 7px 14px; transition: border-color var(--transition); }
-    .topbar-search:focus-within { border-color: var(--gold); }
-    .topbar-search input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 13px; font-family: 'Inter', sans-serif; width: 160px; }
-    .topbar-search input::placeholder { color: var(--text-muted); }
-    .user-badge { display: flex; align-items: center; gap: 8px; padding: 5px 14px 5px 5px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-pill); cursor: pointer; transition: all var(--transition); }
-    .user-badge:hover { border-color: var(--gold); }
-    .user-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--periwinkle), var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
-    .user-name { font-size: 12px; font-weight: 600; }
+  /* ─── NOTIFICATION ─── */
+  #notification {
+    position: fixed;
+    top: 60px; right: 20px;
+    background: var(--bg3);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 10px 16px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    z-index: 8888;
+    display: none;
+    animation: fadeIn .3s ease;
+  }
+  #notification.warn { border-color: var(--amber); color: var(--amber); }
+  #notification.error { border-color: var(--red); color: var(--red); }
 
-    /* ── PAGES ── */
-    .page { display: none; padding: 28px; }
-    .page.active { display: block; }
+  /* ─── DASHBOARD ─── */
+  .dashboard-body { padding: 24px 28px; flex: 1; max-width: 1280px; width: 100%; margin: 0 auto; }
 
-    /* Featured Banner */
-    .featured-banner { border-radius: var(--radius-xl); background: linear-gradient(135deg,#1a2540 0%,#0d1520 40%,#1a0d2e 100%); padding: 36px 44px; margin-bottom: 36px; position: relative; overflow: hidden; min-height: 185px; display: flex; align-items: flex-end; cursor: pointer; }
-    .featured-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 80% 50%,rgba(212,160,23,0.12) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 20% 80%,rgba(74,111,165,0.2) 0%,transparent 70%); }
-    .featured-pattern { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 110px; opacity: 0.08; line-height: 1; user-select: none; }
-    .featured-content { position: relative; z-index: 1; }
-    .featured-label { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-dim); border: 1px solid rgba(212,160,23,0.3); color: var(--gold-light); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: var(--radius-pill); margin-bottom: 12px; }
-    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff4545; animation: livePulse 1.4s ease-in-out infinite; flex-shrink: 0; }
-    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
-    .featured-title { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
-    .featured-title em { font-style: italic; color: var(--gold-light); }
-    .featured-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 18px; }
-    .featured-actions { display: flex; gap: 10px; align-items: center; }
-    .btn-play-featured { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--gold), var(--amber)); color: #000; border: none; padding: 10px 22px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 700; cursor: pointer; transition: all var(--transition); font-family: 'Inter', sans-serif; }
-    .btn-play-featured:hover { transform: scale(1.04); box-shadow: 0 4px 20px rgba(212,160,23,0.4); }
-    .btn-secondary { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1px solid var(--border); padding: 10px 18px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: 'Inter', sans-serif; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.14); }
+  .dash-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+  }
+  .stat-card.red::after { background: var(--red); }
+  .stat-card.blue::after { background: var(--accent); }
+  .stat-card.green::after { background: var(--green); }
+  .stat-card.amber::after { background: var(--amber); }
+  .stat-num { font-family: var(--sans); font-size: 36px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stat-label { color: var(--text3); font-size: 9px; letter-spacing: 2px; }
+  .stat-card.red .stat-num { color: var(--red); }
+  .stat-card.blue .stat-num { color: var(--accent2); }
+  .stat-card.green .stat-num { color: var(--green); }
+  .stat-card.amber .stat-num { color: var(--amber); }
 
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    .section-title { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
-    .section-title span { color: var(--gold); }
-    .see-all { font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: color var(--transition); }
-    .see-all:hover { color: var(--gold); }
-    .content-section { margin-bottom: 40px; }
+  .section-hdr {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--text3); font-size: 9px; letter-spacing: 3px;
+    margin-bottom: 14px;
+  }
+  .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-    /* Mini banners */
-    .mini-banners { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 36px; }
-    .mini-banner { border-radius: var(--radius-lg); padding: 20px 18px; cursor: pointer; transition: all var(--transition); position: relative; overflow: hidden; }
-    .mini-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow-deep); }
-    .mini-banner-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; }
-    .mini-banner-title { font-size: 16px; font-weight: 800; line-height: 1.2; }
-    .mini-banner-count { font-size: 11px; margin-top: 4px; opacity: 0.6; }
-    .mini-banner-icon { font-size: 38px; position: absolute; right: 16px; bottom: 12px; opacity: 0.22; }
+  .case-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(380px,1fr)); gap: 14px; }
+  .case-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .case-card:hover { border-color: var(--border2); background: var(--bg4); }
+  .case-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .case-card.OPEN::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .case-card.CLOSED::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .case-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .case-code { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
+  .status-tag {
+    font-size: 9px; letter-spacing: 2px; padding: 2px 8px;
+    border: 1px solid; font-family: var(--sans); font-weight: 600;
+  }
+  .status-tag.OPEN { color: var(--red); border-color: rgba(224,80,80,.4); background: rgba(224,80,80,.08); }
+  .status-tag.CLOSED { color: var(--green); border-color: rgba(58,200,122,.4); background: rgba(58,200,122,.08); }
+  .status-tag.COLD { color: var(--text3); border-color: var(--border); }
+  .case-title { font-family: var(--sans); font-size: 18px; font-weight: 600; color: #d8e4f8; margin-bottom: 6px; letter-spacing: 1px; }
+  .case-type-loc { display: flex; gap: 10px; margin-bottom: 10px; }
+  .case-type { color: var(--accent2); font-size: 10px; }
+  .case-loc { color: var(--text3); font-size: 10px; }
+  .case-synopsis { color: var(--text2); font-size: 11px; line-height: 1.7; margin-bottom: 12px; }
+  .case-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); }
+  .priority-tag { font-size: 9px; letter-spacing: 1px; }
+  .priority-tag.CRITICAL { color: var(--red2); }
+  .priority-tag.HIGH { color: var(--amber); }
+  .suspect-mini-row { display: flex; gap: 4px; }
+  .sus-dot { width: 24px; height: 24px; background: var(--bg4); border: 1px solid var(--border2); font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--accent2); font-weight: 700; }
 
-    /* Song list */
-    .song-list { display: flex; flex-direction: column; gap: 2px; }
-    .song-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 14px; padding: 9px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition); position: relative; }
-    .song-row:hover { background: var(--bg-elevated); }
-    .song-row.playing { background: var(--gold-dim); }
-    .song-row.playing .song-title { color: var(--gold-light); }
-    .song-num { font-size: 13px; color: var(--text-muted); text-align: center; font-weight: 500; }
-    .song-row:hover .song-num { opacity: 0; }
-    .song-play-icon { position: absolute; left: 10px; font-size: 13px; color: var(--text-primary); opacity: 0; transition: opacity var(--transition); pointer-events: none; }
-    .song-row:hover .song-play-icon { opacity: 1; }
-    .song-row.playing .song-num { opacity: 0; }
-    .song-row.playing .song-play-icon { opacity: 1; color: var(--gold-light); }
-    .song-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .song-thumb { width: 42px; height: 42px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 19px; }
-    .song-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-artist { font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-actions { display: flex; align-items: center; gap: 10px; }
-    .song-duration { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-    .like-btn { width: 28px; height: 28px; border-radius: 50%; background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all var(--transition); opacity: 0; }
-    .song-row:hover .like-btn { opacity: 1; }
-    .like-btn:hover, .like-btn.liked { color: var(--gold); }
-    .like-btn.liked { opacity: 1; }
+  /* ─── CASE VIEW ─── */
+  .case-view { flex: 1; display: flex; flex-direction: column; }
 
-    /* Card grids */
-    .card-grid { display: grid; gap: 16px; }
-    .card-grid-4 { grid-template-columns: repeat(4,1fr); }
-    .card-grid-5 { grid-template-columns: repeat(5,1fr); }
-    .card-grid-6 { grid-template-columns: repeat(6,1fr); }
-    .card-grid-3 { grid-template-columns: repeat(3,1fr); }
-    .album-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 14px; cursor: pointer; transition: all var(--transition); border: 1px solid transparent; }
-    .album-card:hover { background: var(--bg-hover); border-color: rgba(212,160,23,0.2); transform: translateY(-3px); box-shadow: var(--shadow-card); }
-    .album-art-wrap { position: relative; width: 100%; padding-bottom: 100%; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; }
-    .album-art { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 46px; }
-    .album-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.4)); }
-    .card-play-btn { position: absolute; bottom: 8px; right: 8px; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); border: none; color: #000; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transform: translateY(8px); opacity: 0; transition: all var(--transition); box-shadow: 0 4px 16px rgba(212,160,23,0.4); z-index: 2; }
-    .album-card:hover .card-play-btn { opacity: 1; transform: translateY(0); }
-    .card-play-btn:hover { transform: scale(1.08) !important; background: var(--gold-light); }
-    .album-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .album-sub { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .case-topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+  .btn-back {
+    background: none; border: 1px solid var(--border);
+    color: var(--text3); padding: 5px 12px; cursor: pointer;
+    font-size: 10px; letter-spacing: 1px; font-family: var(--mono);
+    transition: all .2s;
+  }
+  .btn-back:hover { border-color: var(--border2); color: var(--text2); }
+  .case-id-title { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .case-id { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
+  .case-view-title { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; letter-spacing: 1px; }
 
-    /* Artist cards */
-    .artist-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 18px 14px; cursor: pointer; transition: all var(--transition); border: 1px solid transparent; text-align: center; }
-    .artist-card:hover { background: var(--bg-hover); border-color: rgba(212,160,23,0.2); transform: translateY(-3px); box-shadow: var(--shadow-card); }
-    .artist-avatar { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
-    .artist-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-    .artist-genre { font-size: 11px; color: var(--text-muted); }
-    .artist-followers { font-size: 11px; color: var(--gold); margin-top: 3px; font-weight: 500; }
+  .btn-accuse {
+    background: rgba(224,80,80,.1);
+    border: 1px solid rgba(224,80,80,.5);
+    color: var(--red2);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-family: var(--mono);
+    transition: all .2s;
+    margin-left: auto;
+  }
+  .btn-accuse:hover { background: rgba(224,80,80,.2); }
 
-    /* Genre cards */
-    .genre-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 10px; }
-    .genre-card { border-radius: var(--radius-md); padding: 16px 10px; cursor: pointer; text-align: center; transition: all var(--transition); border: 1px solid transparent; }
-    .genre-card:hover { transform: translateY(-3px) scale(1.02); border-color: rgba(255,255,255,0.15); box-shadow: var(--shadow-card); }
-    .genre-icon { font-size: 28px; margin-bottom: 6px; }
-    .genre-name { font-size: 11px; font-weight: 600; }
+  /* ─── TABS ─── */
+  .tab-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    color: var(--text3); padding: 12px 16px; cursor: pointer;
+    font-size: 10px; letter-spacing: 2px; font-family: var(--mono);
+    transition: all .2s;
+  }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
 
-    /* Search page */
-    .search-hero { text-align: center; padding: 36px 0 28px; }
-    .search-hero h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
-    .search-hero p { color: var(--text-secondary); font-size: 14px; }
-    .search-bar-large { display: flex; align-items: center; gap: 10px; background: var(--bg-elevated); border: 2px solid var(--border); border-radius: var(--radius-xl); padding: 13px 18px; max-width: 580px; margin: 0 auto 30px; transition: border-color var(--transition); }
-    .search-bar-large:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
-    .search-bar-large input { flex: 1; background: none; border: none; outline: none; font-size: 15px; color: var(--text-primary); font-family: 'Inter', sans-serif; }
-    .search-bar-large input::placeholder { color: var(--text-muted); }
-    .filter-row { display: flex; gap: 7px; margin-bottom: 22px; flex-wrap: wrap; }
-    .filter-chip { padding: 6px 14px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; transition: all var(--transition); font-family: 'Inter', sans-serif; }
-    .filter-chip:hover { border-color: var(--gold); color: var(--gold-light); }
-    .filter-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-light); }
-    .search-results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .results-col-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .tab-body { flex: 1; overflow: auto; padding: 20px 24px; }
 
-    /* Liked page */
-    .liked-hero { background: linear-gradient(135deg,#1a1040,#2a0a50,#0d1a35); border-radius: var(--radius-xl); padding: 36px; display: flex; align-items: flex-end; gap: 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
-    .liked-hero::before { content: '♥'; position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 110px; opacity: 0.07; }
-    .liked-thumb { width: 120px; height: 120px; border-radius: var(--radius-lg); background: linear-gradient(135deg,#7b2d8b,#3d1a6e,#1a3080); display: flex; align-items: center; justify-content: center; font-size: 58px; flex-shrink: 0; box-shadow: var(--shadow-deep); }
-    .liked-type { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 5px; }
-    .liked-title { font-size: 38px; font-weight: 900; font-family: 'Playfair Display', serif; margin-bottom: 6px; }
-    .liked-meta { font-size: 13px; color: var(--text-secondary); }
-    .liked-meta span { color: var(--gold-light); font-weight: 600; }
+  /* ─── PANELS ─── */
+  .panel {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .panel-hdr {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text3);
+  }
+  .panel-hdr .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .panel-body { padding: 16px; }
 
-    /* ── PLAYER ── */
-    #player {
-      grid-area: player;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: 300px 1fr 300px;
-      align-items: center;
-      padding: 0 22px;
-      gap: 16px;
-      z-index: 200;
-    }
-    .now-playing { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .np-thumb { width: 52px; height: 52px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; border: 1px solid var(--border); overflow: hidden; transition: box-shadow 0.5s ease; }
-    .np-thumb.pulse { animation: npPulse 2s ease-in-out infinite; }
-    @keyframes npPulse { 0%,100%{box-shadow:0 0 0 0 rgba(212,160,23,0)} 50%{box-shadow:0 0 0 6px rgba(212,160,23,0.15)} }
-    .np-info { min-width: 0; }
-    .np-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .np-artist { font-size: 11px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .np-like { width: 28px; height: 28px; border-radius: 50%; background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all var(--transition); flex-shrink: 0; }
-    .np-like:hover { color: var(--gold); transform: scale(1.15); }
-    .np-like.liked { color: var(--gold); }
+  /* ─── OVERVIEW ─── */
+  .overview-grid { display: grid; grid-template-columns: 1fr 360px; gap: 14px; }
+  .synopsis-text { color: var(--text2); font-size: 12px; line-height: 1.9; margin-bottom: 16px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .detail-item { background: var(--bg2); padding: 10px 12px; border: 1px solid var(--border); }
+  .detail-key { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 4px; }
+  .detail-val { color: var(--text); font-size: 11px; }
+  .suspect-profile-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .sus-avatar {
+    width: 42px; height: 42px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    color: var(--accent2); flex-shrink: 0;
+  }
+  .sus-name { font-family: var(--sans); font-size: 13px; font-weight: 600; color: #d8e4f8; }
+  .sus-rel { color: var(--text3); font-size: 10px; }
+  .threat-bar { margin-left: auto; text-align: right; }
+  .threat-track { width: 80px; height: 4px; background: var(--bg); margin: 3px 0; }
+  .threat-fill { height: 100%; transition: width 1s; }
+  .threat-num { font-size: 10px; }
 
-    .player-controls { display: flex; flex-direction: column; align-items: center; gap: 7px; }
-    .control-btns { display: flex; align-items: center; gap: 6px; }
-    .ctrl-btn { width: 32px; height: 32px; border-radius: 50%; background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all var(--transition); }
-    .ctrl-btn:hover { color: var(--text-primary); transform: scale(1.1); }
-    .ctrl-btn.active { color: var(--gold); }
-    .play-btn-main { width: 40px; height: 40px; border-radius: 50%; background: var(--text-primary); border: none; color: var(--bg-base); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; transition: all var(--transition); box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
-    .play-btn-main:hover { transform: scale(1.08); background: var(--gold-light); }
-    .play-btn-main:active { transform: scale(0.96); }
+  /* ─── TIMELINE ─── */
+  .timeline-wrap { padding: 8px 0; }
+  .tl-item {
+    display: flex; gap: 16px; padding: 12px 0;
+    position: relative; padding-left: 30px;
+    border-left: 1px solid var(--border);
+    margin-left: 20px;
+    animation: slideIn .4s ease both;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 16px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg3);
+  }
+  .tl-item.locked { opacity: .3; }
+  .tl-item.locked::before { background: var(--text3); }
+  .tl-time { color: var(--accent2); font-size: 11px; letter-spacing: 1px; min-width: 48px; padding-top: 1px; }
+  .tl-event { color: var(--text2); font-size: 11px; line-height: 1.7; flex: 1; }
+  .tl-lock { color: var(--text3); font-size: 10px; font-style: italic; }
 
-    .progress-row { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 460px; }
-    .time-label { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 30px; text-align: center; }
-    .slider-track { position: relative; flex: 1; height: 4px; background: var(--bg-hover); border-radius: 2px; cursor: pointer; }
-    .slider-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--amber)); pointer-events: none; }
-    .slider-handle { position: absolute; top: 50%; transform: translate(-50%,-50%) scale(0); width: 12px; height: 12px; border-radius: 50%; background: #fff; pointer-events: none; transition: transform var(--transition); box-shadow: 0 1px 6px rgba(0,0,0,.5); }
-    .slider-track:hover .slider-handle { transform: translate(-50%,-50%) scale(1); }
-    .slider-track:hover .slider-fill { background: linear-gradient(90deg, var(--gold-light), var(--gold)); }
+  /* ─── EVIDENCE ─── */
+  .ev-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; height: calc(100vh - 200px); }
+  .ev-list { background: var(--bg3); border: 1px solid var(--border); overflow: auto; }
+  .ev-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .15s;
+  }
+  .ev-item:hover { background: var(--bg4); }
+  .ev-item.active { background: var(--bg4); border-left: 2px solid var(--accent2); }
+  .ev-item.locked { opacity: .35; cursor: not-allowed; }
+  .ev-type { font-size: 8px; letter-spacing: 2px; font-weight: 700; min-width: 32px; }
+  .ev-type.DOC { color: var(--accent2); }
+  .ev-type.IMG { color: var(--purple); }
+  .ev-type.AUDIO { color: var(--amber); }
+  .ev-type.FORENSIC { color: var(--green); }
+  .ev-name { color: var(--text2); font-size: 10px; line-height: 1.4; flex: 1; }
+  .lock-icon { color: var(--text3); font-size: 10px; }
 
-    .player-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-    .vol-icon { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 16px; transition: color var(--transition); padding: 4px; }
-    .vol-icon:hover { color: var(--text-primary); }
-    .vol-slider { width: 88px; }
-    .quality-badge { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--gold); border: 1px solid var(--gold-dim); border-radius: 3px; padding: 2px 5px; }
+  .ev-viewer { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .ev-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 10px; letter-spacing: 3px; }
 
-    /* EQ bars */
-    .eq-bars { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
-    .eq-bar { width: 3px; background: var(--gold); border-radius: 1px; animation: eqAnim 0.8s ease-in-out infinite alternate; }
-    .eq-bar:nth-child(1){animation-delay:0s}
-    .eq-bar:nth-child(2){animation-delay:.2s}
-    .eq-bar:nth-child(3){animation-delay:.4s}
-    @keyframes eqAnim { from{height:4px} to{height:14px} }
-    .eq-bars.paused .eq-bar { animation-play-state: paused; }
+  /* Document viewer */
+  .doc-viewer { display: flex; flex-direction: column; height: 100%; }
+  .doc-hdr {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+  .doc-title { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; margin-bottom: 4px; }
+  .doc-meta { display: flex; gap: 16px; }
+  .doc-meta span { color: var(--text3); font-size: 9px; letter-spacing: 1px; }
+  .doc-meta span b { color: var(--accent2); }
+  .doc-body {
+    flex: 1; padding: 20px;
+    overflow: auto;
+    color: var(--text2);
+    font-size: 12px;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc-watermark {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%) rotate(-30deg);
+    font-family: var(--sans);
+    font-size: 48px;
+    font-weight: 700;
+    color: rgba(58,123,213,.04);
+    pointer-events: none;
+    letter-spacing: 8px;
+  }
+  .doc-footer {
+    padding: 8px 20px;
+    background: var(--bg2);
+    display: flex; justify-content: space-between;
+    font-size: 9px; color: var(--text3); letter-spacing: 1px;
+  }
+  .classified-stamp {
+    background: rgba(224,80,80,.1);
+    border: 1px solid rgba(224,80,80,.3);
+    color: var(--red);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 2px 8px;
+    display: inline-block;
+    margin-top: 6px;
+  }
 
-    /* Loading spinner for audio */
-    .loading-ring {
-      display: inline-block; width: 18px; height: 18px;
-      border: 2px solid var(--border); border-top-color: var(--gold);
-      border-radius: 50%; animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  /* Image evidence */
+  .img-evidence { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .img-desc { color: var(--text2); font-size: 12px; line-height: 1.7; }
+  .img-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .img-thumb {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 10px;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+  }
+  .img-thumb::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: 6px; left: 6px;
+    font-size: 8px;
+    color: var(--accent2);
+    background: rgba(0,0,0,.6);
+    padding: 2px 6px;
+    letter-spacing: 1px;
+  }
 
-    /* Toast */
-    .toast-container { position: fixed; bottom: calc(var(--player-h) + 14px); right: 18px; z-index: 999; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-    .toast { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 9px 14px; font-size: 13px; font-weight: 500; color: var(--text-primary); display: flex; align-items: center; gap: 8px; animation: toastIn .28s ease forwards; box-shadow: var(--shadow-card); }
-    .toast.out { animation: toastOut .28s ease forwards; }
-    @keyframes toastIn  { from{transform:translateX(16px);opacity:0} to{transform:translateX(0);opacity:1} }
-    @keyframes toastOut { from{transform:translateX(0);opacity:1} to{transform:translateX(16px);opacity:0} }
+  /* Audio transcript */
+  .audio-transcript { padding: 20px; }
+  .audio-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .audio-wave { display: flex; gap: 2px; align-items: center; height: 24px; }
+  .audio-wave span { width: 3px; background: var(--accent2); animation: audioWave 1.2s ease infinite; }
+  .audio-wave span:nth-child(2) { animation-delay: .2s; }
+  .audio-wave span:nth-child(3) { animation-delay: .4s; }
+  .audio-wave span:nth-child(4) { animation-delay: .6s; }
+  .audio-wave span:nth-child(5) { animation-delay: .8s; }
+  @keyframes audioWave {
+    0%,100%{height:6px} 50%{height:20px}
+  }
+  .transcript-line { margin-bottom: 12px; }
+  .transcript-speaker { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 3px; }
+  .transcript-speaker.subject { color: var(--red2); }
+  .transcript-text { color: var(--text2); font-size: 12px; line-height: 1.7; }
 
-    /* Responsive */
-    @media(max-width:1200px){
-      .card-grid-5{grid-template-columns:repeat(4,1fr)}
-      .card-grid-6{grid-template-columns:repeat(4,1fr)}
-      .genre-grid{grid-template-columns:repeat(4,1fr)}
-    }
-    @media(max-width:1024px){
-      body{grid-template-columns:72px 1fr}
-      #sidebar{width:72px}
-      .logo-text,.logo-tagline,.nav-item span,.library-section{display:none}
-      .logo{padding:18px 14px;justify-content:center}
-      .nav-item{justify-content:center;padding:12px}
-      .nav-item::before{display:none}
-      .card-grid-4{grid-template-columns:repeat(3,1fr)}
-      .mini-banners{grid-template-columns:repeat(2,1fr)}
-    }
-    @media(max-width:768px){
-      body{grid-template-columns:1fr;grid-template-areas:"main" "player"}
-      #sidebar{display:none}
-      .page{padding:16px}
-      .card-grid-4,.card-grid-3{grid-template-columns:repeat(2,1fr)}
-      .genre-grid{grid-template-columns:repeat(3,1fr)}
-      #player{grid-template-columns:1fr;padding:10px 14px}
-      .player-right{display:none}
-    }
-    @media(max-width:480px){
-      .card-grid-4{grid-template-columns:repeat(2,1fr)}
-      .genre-grid{grid-template-columns:repeat(2,1fr)}
-      .mini-banners{grid-template-columns:1fr}
-      .search-results-grid{grid-template-columns:1fr}
-    }
+  /* ─── SUSPECTS TAB ─── */
+  .sus-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; height: calc(100vh - 200px); }
+  .sus-list { background: var(--bg3); border: 1px solid var(--border); overflow: auto; }
+  .sus-list-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .15s;
+  }
+  .sus-list-item:hover { background: var(--bg4); }
+  .sus-list-item.active { background: var(--bg4); border-left: 2px solid var(--red2); }
+  .sus-interrogated { margin-left: auto; color: var(--green); font-size: 8px; letter-spacing: 1px; }
 
-    /* Color utils */
-    .c1{background:linear-gradient(135deg,#1a3a5c,#0d2040)}
-    .c2{background:linear-gradient(135deg,#3a1a1a,#200d0d)}
-    .c3{background:linear-gradient(135deg,#1a3a1a,#0d2010)}
-    .c4{background:linear-gradient(135deg,#3a2a0a,#20180d)}
-    .c5{background:linear-gradient(135deg,#2a1a3a,#180d20)}
-    .c6{background:linear-gradient(135deg,#1a2a3a,#0d1820)}
-    .c7{background:linear-gradient(135deg,#3a1a2a,#200d18)}
-    .c8{background:linear-gradient(135deg,#1a3a3a,#0d2020)}
-    .c9{background:linear-gradient(135deg,#2a2a1a,#181808)}
-    .c10{background:linear-gradient(135deg,#2a1a1a,#180808)}
-    .gc-pop{background:linear-gradient(135deg,#3a1a4a,#1a0a2a)}
-    .gc-hiphop{background:linear-gradient(135deg,#1a1a1a,#2a0a0a)}
-    .gc-elec{background:linear-gradient(135deg,#0a1a3a,#0a2a2a)}
-    .gc-rock{background:linear-gradient(135deg,#2a0a0a,#0a0a0a)}
-    .gc-folk{background:linear-gradient(135deg,#2a1a0a,#1a1a0a)}
-    .gc-jazz{background:linear-gradient(135deg,#0a1a1a,#0a0a2a)}
-    .gc-indie{background:linear-gradient(135deg,#1a1a2a,#2a1a1a)}
-  </style>
+  .sus-detail { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .sus-detail-hdr {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex; gap: 14px; align-items: center;
+  }
+  .sus-big-avatar {
+    width: 56px; height: 56px;
+    background: var(--bg3);
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-size: 18px; font-weight: 700;
+    color: var(--accent2);
+  }
+  .sus-detail-body { padding: 16px 20px; overflow: auto; flex: 1; }
+  .sus-field { margin-bottom: 16px; }
+  .sus-field-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .sus-field-val { color: var(--text2); font-size: 11px; line-height: 1.7; }
+  .threat-full { display: flex; align-items: center; gap: 10px; }
+  .threat-track-full { flex: 1; height: 6px; background: var(--bg); }
+  .btn-interrogate {
+    background: rgba(58,123,213,.1);
+    border: 1px solid rgba(58,123,213,.4);
+    color: var(--accent2);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    transition: all .2s;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .btn-interrogate:hover { background: rgba(58,123,213,.2); }
+
+  /* ─── BOARD ─── */
+  .board-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+  .board-canvas {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    min-height: 420px;
+    padding: 16px;
+    position: relative;
+  }
+  .board-grid-bg {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: .5;
+  }
+  .board-items { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px; }
+  .board-card {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    padding: 10px 12px;
+    font-size: 10px;
+    color: var(--text2);
+    max-width: 160px;
+    transition: border-color .2s;
+  }
+  .board-card.suspect { border-color: rgba(224,80,80,.4); }
+  .board-card.evidence { border-color: rgba(58,123,213,.3); }
+  .board-card-type { font-size: 8px; letter-spacing: 2px; margin-bottom: 4px; }
+  .board-card.suspect .board-card-type { color: var(--red2); }
+  .board-card.evidence .board-card-type { color: var(--accent2); }
+  .board-card-name { color: var(--text); font-size: 11px; line-height: 1.4; }
+
+  .notes-panel { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; }
+  .notes-list { flex: 1; padding: 12px; overflow: auto; max-height: 300px; }
+  .note-entry { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .note-time { color: var(--text3); font-size: 8px; letter-spacing: 1px; margin-bottom: 3px; }
+  .note-text { color: var(--text2); font-size: 11px; line-height: 1.6; }
+  .note-input-area { padding: 12px; border-top: 1px solid var(--border); }
+  .note-textarea {
+    width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 10px; font-family: var(--mono);
+    font-size: 11px; resize: none; margin-bottom: 8px;
+    outline: none;
+  }
+  .note-textarea:focus { border-color: var(--border2); }
+  .btn-note {
+    background: var(--bg2); border: 1px solid var(--border2);
+    color: var(--text2); padding: 6px 12px; cursor: pointer;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    width: 100%; transition: all .2s;
+  }
+  .btn-note:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* ─── INTERROGATION ─── */
+  .int-layout { display: grid; grid-template-columns: 280px 1fr; gap: 14px; }
+  .int-sidebar { background: var(--bg3); border: 1px solid var(--border); }
+  .int-sidebar-hdr {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 14px 16px; display: flex; gap: 12px; align-items: center;
+  }
+  .int-subject-label { color: var(--red2); font-size: 8px; letter-spacing: 3px; margin-bottom: 3px; }
+  .int-subject-name { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; }
+  .int-subject-rel { color: var(--text3); font-size: 10px; }
+  .int-meta { padding: 14px 16px; }
+  .int-field { margin-bottom: 14px; }
+  .int-field-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 5px; }
+  .int-field-val { color: var(--text2); font-size: 10px; line-height: 1.7; }
+  .int-recording {
+    margin: 12px 16px;
+    background: rgba(224,80,80,.06);
+    border: 1px solid rgba(224,80,80,.3);
+    padding: 6px 10px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 9px; color: var(--red2); letter-spacing: 2px;
+  }
+  .rec-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red2); animation: pulse 1s infinite; }
+
+  .int-main { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; }
+  .int-transcript { flex: 1; padding: 16px; overflow: auto; max-height: 60vh; display: flex; flex-direction: column; gap: 12px; }
+  .exchange {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    animation: slideIn .3s ease both;
+  }
+  .exchange-q { margin-bottom: 10px; }
+  .exchange-q-label { color: var(--accent2); font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
+  .exchange-q-text { color: var(--text); font-size: 11px; line-height: 1.6; }
+  .exchange-a { border-left: 2px solid var(--red); padding-left: 12px; }
+  .exchange-a-label { color: var(--red2); font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
+  .exchange-a-text { color: var(--text2); font-size: 11px; line-height: 1.7; font-style: italic; }
+  .exchange-unlock { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--green); font-size: 9px; letter-spacing: 1px; }
+
+  .int-questions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .int-q-btn {
+    background: var(--bg2);
+    border: 1px dashed var(--border2);
+    color: var(--text2);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-align: left;
+    transition: all .2s;
+  }
+  .int-q-btn:hover { border-color: var(--accent); color: var(--text); background: var(--bg4); }
+  .int-q-btn.asked { display: none; }
+  .int-select-wrap { padding: 20px; }
+  .int-select-title { color: var(--text3); font-size: 9px; letter-spacing: 3px; margin-bottom: 16px; }
+  .int-sus-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+  .int-sus-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); padding: 10px 14px; cursor: pointer;
+    font-family: var(--mono); font-size: 11px;
+    transition: all .2s;
+  }
+  .int-sus-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ─── ACCUSATION MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 5000;
+    backdrop-filter: blur(2px);
+  }
+  .modal {
+    background: var(--bg3);
+    border: 1px solid rgba(224,80,80,.4);
+    padding: 32px;
+    max-width: 480px;
+    width: 100%;
+    animation: fadeIn .3s ease;
+  }
+  .modal-title { color: var(--red2); font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; }
+  .modal-subtitle { color: var(--text3); font-size: 11px; line-height: 1.7; margin-bottom: 20px; }
+  .accuse-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border: 1px solid var(--border);
+    cursor: pointer; margin-bottom: 6px; background: var(--bg2);
+    transition: all .2s;
+  }
+  .accuse-option:hover { border-color: var(--border2); }
+  .accuse-option.selected { border-color: rgba(224,80,80,.6); background: rgba(224,80,80,.06); }
+  .accuse-name { color: var(--text); font-family: var(--sans); font-size: 13px; font-weight: 600; }
+  .accuse-rel { color: var(--text3); font-size: 10px; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border);
+    color: var(--text3); padding: 8px 16px; cursor: pointer;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    transition: all .2s;
+  }
+  .btn-cancel:hover { border-color: var(--border2); color: var(--text2); }
+  .btn-confirm {
+    background: rgba(224,80,80,.15);
+    border: 1px solid rgba(224,80,80,.5);
+    color: var(--red2); padding: 8px 20px; cursor: pointer;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    transition: all .2s; flex: 1;
+  }
+  .btn-confirm:hover:not(:disabled) { background: rgba(224,80,80,.25); }
+  .btn-confirm:disabled { opacity: .3; cursor: not-allowed; }
+
+  /* ─── OUTCOME ─── */
+  .outcome-page {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 40px;
+  }
+  .outcome-card {
+    background: var(--bg3);
+    border: 2px solid;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    animation: fadeIn .6s ease;
+  }
+  .outcome-card.solved { border-color: var(--green); }
+  .outcome-card.wrong { border-color: var(--red); }
+  .outcome-pre { color: var(--text3); font-size: 9px; letter-spacing: 3px; margin-bottom: 8px; }
+  .outcome-verdict {
+    font-family: var(--sans); font-size: 32px; font-weight: 700; margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .outcome-card.solved .outcome-verdict { color: var(--green); }
+  .outcome-card.wrong .outcome-verdict { color: var(--red2); }
+  .outcome-desc { color: var(--text2); font-size: 12px; line-height: 1.8; margin-bottom: 24px; }
+  .outcome-block {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .outcome-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 6px; }
+  .outcome-name { font-family: var(--sans); font-size: 18px; font-weight: 600; color: #d8e4f8; }
+  .outcome-detail { color: var(--text2); font-size: 11px; line-height: 1.7; margin-top: 6px; }
+  .outcome-correct-name { font-family: var(--sans); font-size: 18px; font-weight: 600; color: var(--green); }
+
+  /* ─── RADIO LOG ─── */
+  .radio-log {
+    position: fixed; bottom: 14px; right: 14px;
+    width: 280px;
+    background: rgba(6,8,15,.95);
+    border: 1px solid var(--border);
+    font-size: 10px;
+    z-index: 7000;
+  }
+  .radio-log-hdr {
+    padding: 6px 10px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text3); font-size: 9px; letter-spacing: 2px;
+  }
+  .radio-log-entries { padding: 6px 10px; max-height: 120px; overflow: auto; }
+  .radio-entry { color: var(--text3); font-size: 9px; line-height: 1.7; padding: 2px 0; }
+  .radio-entry.new { color: var(--text2); animation: fadeIn .5s ease; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .overview-grid, .ev-layout, .sus-layout, .board-layout, .int-layout { grid-template-columns: 1fr; }
+    .dash-grid { grid-template-columns: repeat(2,1fr); }
+    .case-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
-<nav id="sidebar">
-  <div class="logo" onclick="navigate('home')">
-    <div class="logo-icon">🎵</div>
-    <div>
-      <div class="logo-text">Music<span>.UA</span></div>
-      <div class="logo-tagline">Музика без меж</div>
+<!-- TOP BAR (always visible on case pages) -->
+<div id="global-topbar" class="topbar" style="display:none">
+  <div class="topbar-logo">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
+      <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
+    </svg>
+    NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE</div>
+  <div class="topbar-right">
+    <div class="status-dot"></div>
+    <div class="clock-display" id="clock">--:--:--</div>
+    <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div id="notification"></div>
+
+<!-- RADIO LOG -->
+<div class="radio-log" id="radioLog" style="display:none">
+  <div class="radio-log-hdr">
+    <div class="rec-dot"></div>
+    DISPATCH COMMS
+  </div>
+  <div class="radio-log-entries" id="radioEntries"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="accusationModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">⚖ FORMAL ACCUSATION</div>
+    <div class="modal-subtitle">Select the primary suspect. This action will close the active investigation file. Ensure all available evidence has been reviewed before proceeding.</div>
+    <div id="accuseOptions"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+      <button class="btn-confirm" id="confirmAccuseBtn" disabled onclick="confirmAccuse()">CONFIRM ACCUSATION</button>
     </div>
   </div>
+</div>
 
-  <div class="nav-section">
-    <div class="nav-item active" id="nav-home" onclick="navigate('home')"><div class="nav-icon">⌂</div><span>Головна</span></div>
-    <div class="nav-item" id="nav-search" onclick="navigate('search')"><div class="nav-icon">⊙</div><span>Пошук</span></div>
-  </div>
-  <div class="nav-section" style="margin-top:6px;">
-    <div class="nav-label">Бібліотека</div>
-    <div class="nav-item" id="nav-library" onclick="navigate('library')"><div class="nav-icon">▤</div><span>Ваша бібліотека</span></div>
-    <div class="nav-item" id="nav-liked" onclick="navigate('liked')"><div class="nav-icon" style="color:var(--gold)">♥</div><span>Улюблені</span></div>
-  </div>
-
-  <div class="library-section">
-    <div class="library-header"><span>Плейлисти</span><button class="btn-add">+</button></div>
-    <div class="playlist-item" onclick="playSongById(0)"><div class="playlist-thumb c1">🌙</div><div class="playlist-info"><div class="playlist-name">Вечірній настрій</div><div class="playlist-meta">12 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(3)"><div class="playlist-thumb c4">☀️</div><div class="playlist-info"><div class="playlist-name">Ранковий кайф</div><div class="playlist-meta">8 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(6)"><div class="playlist-thumb c9">🌻</div><div class="playlist-info"><div class="playlist-name">Українська душа</div><div class="playlist-meta">15 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(1)"><div class="playlist-thumb c2">⚡</div><div class="playlist-info"><div class="playlist-name">Workout Beats</div><div class="playlist-meta">20 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(4)"><div class="playlist-thumb c5">🌊</div><div class="playlist-info"><div class="playlist-name">Chill Vibes</div><div class="playlist-meta">11 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(8)"><div class="playlist-thumb c7">🔥</div><div class="playlist-info"><div class="playlist-name">Хіти 2024</div><div class="playlist-meta">25 пісень</div></div></div>
-    <div class="playlist-item" onclick="playSongById(9)"><div class="playlist-thumb c8">🎷</div><div class="playlist-info"><div class="playlist-name">Jazz Nights</div><div class="playlist-meta">9 пісень</div></div></div>
-  </div>
-</nav>
-
-<!-- ═══ MAIN ═══ -->
-<main id="main">
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: DASHBOARD -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
   <div class="topbar">
-    <div class="nav-arrows">
-      <button class="nav-arrow">←</button>
-      <button class="nav-arrow">→</button>
+    <div class="topbar-logo">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
+        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
+      </svg>
+      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
     </div>
-    <div class="topbar-tabs">
-      <button class="tab-btn active" onclick="navigate('home');setTab(this)">Головна</button>
-      <button class="tab-btn" onclick="navigate('search');setTab(this)">Пошук</button>
-      <button class="tab-btn" onclick="navigate('library');setTab(this)">Бібліотека</button>
+    <div class="topbar-divider"></div>
+    <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE — MAJOR CRIMES UNIT</div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <div class="clock-display" id="clock2">--:--:--</div>
+      <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
+    </div>
+  </div>
+
+  <div class="dashboard-body">
+    <div class="dash-grid">
+      <div class="stat-card red">
+        <div class="stat-num" id="stat-open">2</div>
+        <div class="stat-label">ACTIVE CASES</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-num" id="stat-closed">0</div>
+        <div class="stat-label">CASES CLOSED</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-num">6</div>
+        <div class="stat-label">SUSPECTS LOGGED</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-num">18</div>
+        <div class="stat-label">EVIDENCE FILES</div>
+      </div>
+    </div>
+
+    <div class="section-hdr">CASE REGISTRY — OPEN FILES</div>
+    <div class="case-grid" id="caseGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: CASE VIEW -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-case">
+  <div id="global-topbar2" class="topbar">
+    <div class="topbar-logo">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
+        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
+      </svg>
+      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE — MAJOR CRIMES UNIT</div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <div class="clock-display" id="clock3">--:--:--</div>
+      <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
+    </div>
+  </div>
+
+  <div class="case-topbar">
+    <button class="btn-back" onclick="goToDashboard()">← ALL CASES</button>
+    <div class="case-id-title">
+      <span class="case-id" id="caseHeaderCode"></span>
+      <span class="case-view-title" id="caseHeaderTitle"></span>
+      <span class="status-tag OPEN" id="caseHeaderStatus">OPEN</span>
+    </div>
+    <button class="btn-accuse" id="accuseBtn" onclick="openModal()">⚖ MAKE ACCUSATION</button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('overview')">OVERVIEW</button>
+    <button class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
+    <button class="tab-btn" onclick="switchTab('evidence')">EVIDENCE</button>
+    <button class="tab-btn" onclick="switchTab('suspects')">SUSPECTS</button>
+    <button class="tab-btn" onclick="switchTab('board')">CASE BOARD</button>
+    <button class="tab-btn" onclick="switchTab('interrogation')">INTERROGATION</button>
+  </div>
+
+  <div class="tab-body" id="tabBody"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: OUTCOME -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-outcome">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
+        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
+      </svg>
+      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
     </div>
     <div class="topbar-right">
-      <div class="topbar-search">
-        <span style="color:var(--text-muted);font-size:14px">⊙</span>
-        <input type="text" placeholder="Пісні, артисти…" oninput="quickSearch(this.value)"/>
-      </div>
-      <div class="user-badge"><div class="user-avatar">МА</div><span class="user-name">Мій акаунт</span></div>
+      <div class="clock-display" id="clock4">--:--:--</div>
     </div>
   </div>
-
-  <!-- HOME PAGE -->
-  <section id="page-home" class="page active">
-    <div class="featured-banner" onclick="playSongById(0)">
-      <div class="featured-pattern">🇺🇦</div>
-      <div class="featured-content">
-        <div class="featured-label"><div class="live-dot"></div> Топ тижня</div>
-        <div class="featured-title">Серце б'є<br><em>в такт мелодії</em></div>
-        <div class="featured-subtitle">Найкраща музика тижня — від українського фолку до світових хітів</div>
-        <div class="featured-actions">
-          <button class="btn-play-featured" onclick="event.stopPropagation();playSongById(0)">▶ Слухати</button>
-          <button class="btn-secondary" onclick="event.stopPropagation()">☆ Зберегти</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="mini-banners">
-      <div class="mini-banner c1" onclick="playSongById(7)" style="color:#a0c4ff">
-        <div class="mini-banner-label">Настрій</div><div class="mini-banner-title">Нічний Київ</div>
-        <div class="mini-banner-count">18 треків</div><div class="mini-banner-icon">🌃</div>
-      </div>
-      <div class="mini-banner" style="background:linear-gradient(135deg,#3a1a0a,#1a0a00);color:#ffd599" onclick="playSongById(10)">
-        <div class="mini-banner-label">Збірка</div><div class="mini-banner-title">Українські хіти</div>
-        <div class="mini-banner-count">42 треки</div><div class="mini-banner-icon">🌻</div>
-      </div>
-      <div class="mini-banner" style="background:linear-gradient(135deg,#0a1a3a,#050d20);color:#9fb4ff" onclick="playSongById(4)">
-        <div class="mini-banner-label">Electronic</div><div class="mini-banner-title">Deep in the Night</div>
-        <div class="mini-banner-count">24 треки</div><div class="mini-banner-icon">🎛️</div>
-      </div>
-    </div>
-
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">🔥 Тренди <span>зараз</span></div><div class="see-all" onclick="navigate('search')">Всі →</div></div>
-      <div class="song-list" id="trending-list"></div>
-    </div>
-
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">Жанри</div></div>
-      <div class="genre-grid">
-        <div class="genre-card gc-pop" onclick="filterGenre('Pop')"><div class="genre-icon">🎤</div><div class="genre-name">Pop</div></div>
-        <div class="genre-card gc-hiphop" onclick="filterGenre('Hip-Hop')"><div class="genre-icon">🎧</div><div class="genre-name">Hip-Hop</div></div>
-        <div class="genre-card gc-elec" onclick="filterGenre('Electronic')"><div class="genre-icon">🎛️</div><div class="genre-name">Electronic</div></div>
-        <div class="genre-card gc-rock" onclick="filterGenre('Rock')"><div class="genre-icon">🎸</div><div class="genre-name">Rock</div></div>
-        <div class="genre-card gc-folk" onclick="filterGenre('Ukrainian Folk')"><div class="genre-icon">🌻</div><div class="genre-name">Укр. Фолк</div></div>
-        <div class="genre-card gc-jazz" onclick="filterGenre('Jazz')"><div class="genre-icon">🎷</div><div class="genre-name">Jazz</div></div>
-        <div class="genre-card gc-indie" onclick="filterGenre('Indie')"><div class="genre-icon">🎹</div><div class="genre-name">Indie</div></div>
-      </div>
-    </div>
-
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">🆕 Нові <span>релізи</span></div><div class="see-all">Дивитись →</div></div>
-      <div class="card-grid card-grid-5" id="new-releases"></div>
-    </div>
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">✨ Рекомендовані <span>артисти</span></div><div class="see-all">Більше →</div></div>
-      <div class="card-grid card-grid-6" id="artists-grid"></div>
-    </div>
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">💿 Популярні <span>альбоми</span></div><div class="see-all">Всі →</div></div>
-      <div class="card-grid card-grid-4" id="albums-grid"></div>
-    </div>
-  </section>
-
-  <!-- SEARCH PAGE -->
-  <section id="page-search" class="page">
-    <div class="search-hero">
-      <h1>Знайди <em style="color:var(--gold);font-style:normal">будь-що</em></h1>
-      <p>Пісні, артисти, альбоми, плейлисти — все тут</p>
-    </div>
-    <div class="search-bar-large">
-      <span style="font-size:20px;color:var(--text-muted)">⊙</span>
-      <input type="text" id="main-search" placeholder="Почни вводити…" oninput="doSearch(this.value)"/>
-      <span style="color:var(--text-muted);cursor:pointer;font-size:17px" onclick="clearSearch()">✕</span>
-    </div>
-    <div class="filter-row" id="genre-filters">
-      <button class="filter-chip active" onclick="filterGenre('All',this)">Всі</button>
-      <button class="filter-chip" onclick="filterGenre('Pop',this)">Pop</button>
-      <button class="filter-chip" onclick="filterGenre('Hip-Hop',this)">Hip-Hop</button>
-      <button class="filter-chip" onclick="filterGenre('Electronic',this)">Electronic</button>
-      <button class="filter-chip" onclick="filterGenre('Rock',this)">Rock</button>
-      <button class="filter-chip" onclick="filterGenre('Ukrainian Folk',this)">Укр. Фолк</button>
-      <button class="filter-chip" onclick="filterGenre('Jazz',this)">Jazz</button>
-      <button class="filter-chip" onclick="filterGenre('Indie',this)">Indie</button>
-    </div>
-    <div class="filter-row">
-      <span style="font-size:12px;color:var(--text-muted);align-self:center;margin-right:4px">Настрій:</span>
-      <button class="filter-chip" onclick="filterMood('energetic',this)">⚡ Енергія</button>
-      <button class="filter-chip" onclick="filterMood('chill',this)">🧊 Чіл</button>
-      <button class="filter-chip" onclick="filterMood('romantic',this)">🌹 Романтика</button>
-      <button class="filter-chip" onclick="filterMood('melancholy',this)">🌧️ Меланхолія</button>
-      <button class="filter-chip" onclick="filterMood('upbeat',this)">🎉 Весело</button>
-    </div>
-    <div class="search-results-grid">
-      <div><div class="results-col-title">Пісні</div><div class="song-list" id="search-results"></div></div>
-      <div><div class="results-col-title">Артисти</div><div class="card-grid card-grid-3" id="search-artists"></div></div>
-    </div>
-  </section>
-
-  <!-- LIBRARY PAGE -->
-  <section id="page-library" class="page">
-    <div class="section-header" style="margin-bottom:24px"><div class="section-title">📚 Ваша <span>бібліотека</span></div></div>
-    <div class="mini-banners">
-      <div class="mini-banner c5" onclick="navigate('liked')" style="cursor:pointer">
-        <div class="mini-banner-label">Спеціальний</div><div class="mini-banner-title">Улюблені пісні</div>
-        <div class="mini-banner-count" id="liked-count-lib">0 пісень</div><div class="mini-banner-icon">♥</div>
-      </div>
-      <div class="mini-banner c4"><div class="mini-banner-label">Нещодавно</div><div class="mini-banner-title">Нещодавно прослухані</div><div class="mini-banner-count">Останні 50</div><div class="mini-banner-icon">🕐</div></div>
-      <div class="mini-banner c1"><div class="mini-banner-label">Завантажені</div><div class="mini-banner-title">Офлайн треки</div><div class="mini-banner-count">0 треків</div><div class="mini-banner-icon">⬇️</div></div>
-    </div>
-    <div class="content-section">
-      <div class="section-header"><div class="section-title">Ваші <span>плейлисти</span></div></div>
-      <div class="card-grid card-grid-4">
-        <div class="album-card" onclick="playSongById(0)"><div class="album-art-wrap"><div class="album-art c1">🌙<button class="card-play-btn" onclick="event.stopPropagation();playSongById(0)">▶</button></div></div><div class="album-name">Вечірній настрій</div><div class="album-sub">12 пісень</div></div>
-        <div class="album-card" onclick="playSongById(3)"><div class="album-art-wrap"><div class="album-art c4">☀️<button class="card-play-btn" onclick="event.stopPropagation();playSongById(3)">▶</button></div></div><div class="album-name">Ранковий кайф</div><div class="album-sub">8 пісень</div></div>
-        <div class="album-card" onclick="playSongById(6)"><div class="album-art-wrap"><div class="album-art c9">🌻<button class="card-play-btn" onclick="event.stopPropagation();playSongById(6)">▶</button></div></div><div class="album-name">Українська душа</div><div class="album-sub">15 пісень</div></div>
-        <div class="album-card" onclick="playSongById(1)"><div class="album-art-wrap"><div class="album-art c2">⚡<button class="card-play-btn" onclick="event.stopPropagation();playSongById(1)">▶</button></div></div><div class="album-name">Workout Beats</div><div class="album-sub">20 пісень</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- LIKED PAGE -->
-  <section id="page-liked" class="page">
-    <div class="liked-hero">
-      <div class="liked-thumb">♥</div>
-      <div class="liked-info">
-        <div class="liked-type">Плейлист</div>
-        <div class="liked-title">Улюблені</div>
-        <div class="liked-meta"><span id="liked-count">0</span> пісень</div>
-        <div style="margin-top:14px;display:flex;gap:10px">
-          <button class="btn-play-featured" onclick="playLiked()">▶ Слухати</button>
-          <button class="btn-secondary">⇄ Перемішати</button>
-        </div>
-      </div>
-    </div>
-    <div class="song-list" id="liked-list"></div>
-    <div id="liked-empty" style="text-align:center;padding:50px 20px;color:var(--text-muted)">
-      <div style="font-size:56px;margin-bottom:14px">♥</div>
-      <div style="font-size:17px;font-weight:600;margin-bottom:6px">Ще немає улюблених</div>
-      <div>Натискай ♥ поряд із піснею</div>
-    </div>
-  </section>
-</main>
-
-<!-- ═══ PLAYER ═══ -->
-<footer id="player">
-  <div class="now-playing">
-    <div class="np-thumb" id="np-thumb">🎵</div>
-    <div class="np-info">
-      <div class="np-title" id="np-title">Оберіть пісню</div>
-      <div class="np-artist" id="np-artist">Music.UA</div>
-    </div>
-    <button class="np-like" id="np-like-btn" onclick="toggleLikeCurrentSong()">♡</button>
+  <div class="outcome-page">
+    <div id="outcomeCard" class="outcome-card solved"></div>
   </div>
+</div>
 
-  <div class="player-controls">
-    <div class="control-btns">
-      <button class="ctrl-btn" id="btn-shuffle" onclick="toggleShuffle()" title="Перемішати">⇄</button>
-      <button class="ctrl-btn" onclick="prevSong()" title="Попередня">⏮</button>
-      <button class="play-btn-main" id="btn-play" onclick="togglePlay()">▶</button>
-      <button class="ctrl-btn" onclick="nextSong()" title="Наступна">⏭</button>
-      <button class="ctrl-btn" id="btn-repeat" onclick="toggleRepeat()" title="Повтор">↻</button>
-    </div>
-    <div class="progress-row">
-      <span class="time-label" id="current-time">0:00</span>
-      <div class="slider-track" id="progress-track" onclick="seekTo(event)">
-        <div class="slider-fill" id="progress-fill" style="width:0%"></div>
-        <div class="slider-handle" id="progress-handle" style="left:0%"></div>
-      </div>
-      <span class="time-label" id="total-time">0:00</span>
-    </div>
-  </div>
-
-  <div class="player-right">
-    <div class="eq-bars paused" id="eq-bars"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>
-    <div class="quality-badge">HQ</div>
-    <button class="vol-icon" id="vol-icon" onclick="toggleMute()">🔊</button>
-    <div class="slider-track vol-slider" onclick="setVolume(event)">
-      <div class="slider-fill" id="vol-fill" style="width:80%"></div>
-      <div class="slider-handle" id="vol-handle" style="left:80%"></div>
-    </div>
-  </div>
-</footer>
-
-<div class="toast-container" id="toasts"></div>
-
-<!-- ═══════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════ -->
 <script>
-'use strict';
-
-/* ─────────────────────────────────────────────────────
-   SONG DATA
-   All audio_url values point to real, free, public MP3s.
-   Sources: SoundHelix (CC0), BBC Sound Effects (free),
-   Free Music Archive tracks (CC licensed), etc.
-───────────────────────────────────────────────────── */
-const SONGS = [
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+var CASES = [
   {
-    id:0, title:"Cinematic Flow", artist:"SoundHelix", album:"Ambient Series",
-    genre:"Electronic", mood:"chill", emoji:"🌙", color:"c1",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+    id: "case-001",
+    code: "HOM-2024-0117",
+    title: "The Whitmore Affair",
+    status: "OPEN",
+    priority: "CRITICAL",
+    date: "17 JAN 2024",
+    type: "Homicide",
+    location: "Whitmore Estate, 14 Ashford Lane, Northbridge",
+    synopsis: "Victor Whitmore, 64, CEO of Whitmore Pharmaceuticals, was found dead in his locked private study at 23:40 by his housekeeper. Cause of death: blunt force trauma. The study windows were locked from inside. No forced entry detected. Three individuals were present in the estate that evening.",
+    timeline: [
+      { time: "18:00", event: "Victor Whitmore hosts dinner with his son Daniel and business partner Elena Marsh.", locked: false },
+      { time: "19:45", event: "Dinner concludes. Elena Marsh seen leaving the dining room.", locked: false },
+      { time: "20:30", event: "Victor retreats to private study. Last seen alive by Mrs. Colton.", locked: false },
+      { time: "21:15", event: "Raised voices heard from the study — witness: Mrs. Colton. Second voice described as 'calm, measured, almost cold.'", locked: true, req: "ev-003" },
+      { time: "22:00", event: "Daniel Whitmore makes a 47-minute phone call to Calder & Voss — legal counsel for Elena Marsh's private holdings.", locked: true, req: "ev-007" },
+      { time: "23:40", event: "Mrs. Colton discovers the body. Study door locked from inside. Emergency services called at 23:44.", locked: false },
+      { time: "00:15", event: "Police arrive. No forced entry. Whiskey glass shattered near desk. Estimated time of death: 21:00–22:30.", locked: false }
+    ],
+    suspects: [
+      {
+        id: "s1", initials: "DW", name: "Daniel Whitmore", age: 32, relation: "Son / Heir",
+        motive: "Stands to inherit $40M estate. Recent bitter dispute over a pharmaceutical merger deal that Victor had rejected.",
+        alibi: "Claims he was in his bedroom all evening with a headache. Phone records contradict this entirely.",
+        threat: 78, interrogated: false,
+        notes: "Gambling debts estimated at $2.1M. Visited father's personal solicitor two days prior to the incident. Known associate of offshore accounting firm Calder & Voss.",
+        dob: "14 MAR 1992", nationality: "British", priors: "None on record",
+        questions: [
+          { id: "q1", text: "Where were you between 21:00 and 23:00 on the evening of the 17th?", answered: false,
+            answer: "I was in my room. I had a migraine. I didn't leave, didn't see anyone. I went to sleep early.", unlocks: null },
+          { id: "q2", text: "Phone records show a 47-minute call at 22:00 to Calder & Voss. Why were you calling Elena's law firm?", answered: false,
+            answer: "...I was — it was a personal matter. I didn't think it was relevant to any of this.", unlocks: "ev-007" },
+          { id: "q3", text: "We have a witness who heard raised voices from your father's study at 21:15. A voice that wasn't yours.", answered: false,
+            answer: "Mrs. Colton is elderly and she was upset. She must be mistaken. I didn't hear anything.", unlocks: "ev-003" }
+        ]
+      },
+      {
+        id: "s2", initials: "EM", name: "Elena Marsh", age: 47, relation: "Business Partner / CFO",
+        motive: "Victor had discovered financial irregularities in company accounts — $6.2M in unaccounted transfers over 18 months.",
+        alibi: "Claims to have driven home at 19:45. No witnesses can confirm arrival time at her residence.",
+        threat: 88, interrogated: false,
+        notes: "Wiped laptop hard drive with DoD-grade overwrite two days after the incident. Car GPS data places her returning to Ashford Lane at 21:03. She omitted this from her initial statement.",
+        dob: "02 SEP 1976", nationality: "British", priors: "Civil proceedings (dismissed), 2019",
+        questions: [
+          { id: "q1", text: "Did Victor raise any concerns about company finances at dinner?", answered: false,
+            answer: "Victor was always meticulous about money. Nothing unusual was discussed. We had a pleasant dinner.", unlocks: null },
+          { id: "q2", text: "Your vehicle GPS shows you returned to Ashford Lane at 21:03. Why did you go back?", answered: false,
+            answer: "(long pause) I forgot my scarf. I went back for it. It was brief. I didn't go inside — I knocked, no answer, I left.", unlocks: "ev-009" },
+          { id: "q3", text: "Your laptop hard drive was wiped with a seven-pass overwrite on January 19th at 02:14 AM. What were you deleting?", answered: false,
+            answer: "It was scheduled maintenance. I do it every quarter. My IT firm can confirm.", unlocks: "ev-008" }
+        ]
+      },
+      {
+        id: "s3", initials: "MC", name: "Margaret Colton", age: 58, relation: "Housekeeper / Discovery Witness",
+        motive: "No established motive. Victor was revising his will — she may have been removed as a beneficiary.",
+        alibi: "Present throughout the estate all evening. Discovered the body at 23:40.",
+        threat: 18, interrogated: false,
+        notes: "26-year loyal employee. Visibly distressed during all interviews. Has not retained legal counsel. Voluntary cooperation with police.",
+        dob: "11 JUN 1965", nationality: "British", priors: "None",
+        questions: [
+          { id: "q1", text: "Describe exactly what you heard at 21:15.", answered: false,
+            answer: "Victor's voice, loud and upset. And another voice — low, controlled. Almost cold. It wasn't Daniel. The tone was different. Sharper.", unlocks: "ev-003" },
+          { id: "q2", text: "Did you see any vehicles in the driveway after 20:00?", answered: false,
+            answer: "Around nine o'clock I was in the kitchen. I saw headlights in the driveway through the window. A dark car. I assumed someone had returned.", unlocks: "ev-009" },
+          { id: "q3", text: "Did Victor say anything to you in the days before his death that seemed unusual?", answered: false,
+            answer: "Last week. He said to me, very quietly: 'Margaret, if anything happens to me — look at the accounts.' I didn't know what to make of it. I wish I had.", unlocks: "ev-010" }
+        ]
+      }
+    ],
+    evidence: [
+      { id: "ev-001", name: "Forensic Post-Mortem Report", type: "FORENSIC", locked: false,
+        content: "CASE: HOM-2024-0117\nPATIENT: Victor Whitmore, M, 64\nFORENSIC PATHOLOGIST: Dr. R. Okafor\n\nCAUSE OF DEATH\nSingle blunt force trauma to posterior cranium. Impact consistent with a heavy cylindrical object approximately 4–6cm in diameter. No weapon recovered at scene.\n\nTIME OF DEATH\nEstimated 21:00–22:30 based on liver temperature and rigor mortis staging.\n\nADDITIONAL FINDINGS\n— No defensive wounds present\n— BAC: 0.08% (2–3 glasses whiskey, consistent with toxicology)\n— No sedatives, narcotics, or poisons detected\n— Single impact, high force, targeted — suggests intentional act by a familiar party\n— Victim did not anticipate the blow\n\nCONCLUSION: Homicide." },
+      { id: "ev-002", name: "Crime Scene Photographs — Study", type: "IMG", locked: false,
+        content: "SCENE: Ground floor study, Whitmore Estate\nPHOTOGRAPHER: DC Reeves, Scene of Crime\n\nFRAME 001: Overview of study. Victim found face-down, left of mahogany desk. Significant blood pooling.\n\nFRAME 002: Shattered whiskey glass, 1.2m from body. Contents scattered west — suggests glass knocked or thrown before fatal blow.\n\nFRAME 003: Study door, internal latch engaged from inside. No signs of picking or forced entry.\n\nFRAME 004: North-east window — sash lock engaged. Latch shows prior damage (see maintenance log, Dec 2023) but was locked at time of examination.\n\nFRAME 005: Victim's desk — papers disturbed. Handwritten note in margin of appointment calendar: 'EM — confirm figures. Cannot wait.'" },
+      { id: "ev-003", name: "Witness Audio Transcript — Mrs. Colton", type: "AUDIO", locked: true,
+        content: "TRANSCRIPT — RECORDED INTERVIEW\nSUBJECT: Margaret Colton\nOFFICER: DS Paulsen\nDATE: 18 JAN 2024, 09:22\n\nPAULSEN: Can you describe what you heard at approximately 21:15?\n\nCOLTON: I was in the kitchen making tea. I heard voices from the study — raised voices. Victor's, I knew it immediately. He sounded angry. Frightened, even.\n\nPAULSEN: And the second voice?\n\nCOLTON: That's what troubled me. It wasn't Daniel. It was... lower. Very controlled. Almost calm, which was more frightening, I think. I couldn't make out words. I thought about going to check. I didn't. I wish I had.\n\nPAULSEN: You're certain it wasn't Daniel Whitmore?\n\nCOLTON: Certain. I've known that boy since he was eight years old. It wasn't his voice." },
+      { id: "ev-004", name: "Toxicology Screen", type: "FORENSIC", locked: false,
+        content: "CASE: HOM-2024-0117\nLAB: Northbridge Forensic Sciences Unit\n\nRESULTS:\n— Ethanol: 0.08% (consistent with social consumption)\n— Benzodiazepines: NOT DETECTED\n— Opiates: NOT DETECTED\n— Barbiturates: NOT DETECTED\n— Heavy metals: NOT DETECTED\n— All other scheduled substances: NEGATIVE\n\nCONCLUSION: No evidence of chemical incapacitation or poisoning. Victim was conscious and alert at time of attack." },
+      { id: "ev-005", name: "Estate Floor Plan + Entry Analysis", type: "IMG", locked: false,
+        content: "ESTATE: 14 Ashford Lane, Northbridge\nSURVEY: Metropolitan Police Technical Unit\n\nSTUDY LAYOUT:\n— Ground floor, north-east corner\n— Single internal door: found locked from inside\n— Two sash windows: Window A (north) — locked. Window B (east) — locked but LATCH DEFECTIVE (maintenance log Dec 2023, repair not completed)\n\nKEY FINDING: Window B latch defect. When tested by forensic unit, window can be drawn shut from outside using a thin implement through the frame gap, allowing a person to exit and give the appearance of locking the window from inside.\n\nCONCLUSION: Locked-room scenario is achievable by someone with knowledge of the defective latch." },
+      { id: "ev-006", name: "Victor's Appointment Calendar", type: "DOC", locked: false,
+        content: "ITEM: Personal desk calendar, January 2024\nPHYSICAL EVIDENCE REF: WHM-006\n\nJAN 15 — 10:00  MEETING: Internal audit team present [E. Marsh noted]\nJAN 16 — 14:30  PERSONAL: Redmond & Holt Solicitors — will revision\nJAN 17 — 19:00  DINNER: Daniel, Elena\n\nMARGIN NOTE (handwritten, blue ink):\n'EM — confirm figures. Cannot wait. Referral to board if no response by end of week.'\n\nADDITIONAL NOTE (same hand, underlined):\n'R&H — remove EM clause. Add charity trust as primary.'\n\nANALYSIS: Victor was actively moving to remove Elena Marsh from estate considerations and escalate the financial discrepancy to board level. Timeline suggests Elena was aware, or about to become aware." },
+      { id: "ev-007", name: "Phone Records — Daniel Whitmore", type: "DOC", locked: true,
+        content: "SUBJECT: Daniel Whitmore\nPROVIDER: Vodafone UK\nDATE: 17 JAN 2024\nISSUED UNDER: Production Order, HOM-2024-0117\n\nOUTGOING CALL LOG:\n22:01 — 22:48  Duration: 47 min\nNumber: +44 1534 [REDACTED] — Isle of Man\nRegistered Entity: CALDER & VOSS LLP — Offshore legal & financial counsel\n\nINTELLIGENCE NOTE:\nCalder & Voss provides private legal services to Elena Marsh (personal holdings). Their Isle of Man office handles offshore corporate structures.\n\nSignificance: Daniel Whitmore was in contact with Elena Marsh's personal legal counsel within the estimated window of his father's death." },
+      { id: "ev-008", name: "Digital Forensics — Laptop Wipe Log", type: "FORENSIC", locked: true,
+        content: "DEVICE: ThinkPad X1 Carbon\nUSER: Marsh, Elena — CFO, Whitmore Pharmaceuticals\nFORENSICS: DCI Forensic Computing, Ref: WHM-DFCU-008\n\nWIPE EVENT:\nDate: 19 JAN 2024, 02:14 AM\nMethod: DoD 5220.22-M (7-pass overwrite)\nNote: 2:14 AM initiation is anomalous — not consistent with 'scheduled maintenance' claim\n\nPARTIAL RECOVERY (fragmented sectors):\n— Spreadsheet fragments: parallel ledger columns, amounts range £180K–£900K\n— Filename remnants: 'WP_PARALLEL_Q3', 'TRANSFER_LOG', 'EM_PRIVATE'\n— Amounts correspond to known $6.2M discrepancy in Whitmore Pharma accounts\n\nCONCLUSION: Evidence strongly suggests intentional destruction of financial records in the days following Victor Whitmore's death." },
+      { id: "ev-009", name: "GPS Vehicle Data — Marsh (17 Jan)", type: "DOC", locked: true,
+        content: "VEHICLE: Audi A6, Reg. [REDACTED]\nOWNER: Elena Marsh\nDATA SOURCE: Manufacturer GPS log (court-ordered)\nDATE: 17 JAN 2024\n\nLOG:\n19:52  — DEPARTS: Ashford Lane, Northbridge\n21:03  — ARRIVES: Ashford Lane, Northbridge [SECOND VISIT — NOT DECLARED IN STATEMENT]\n21:41  — DEPARTS: Ashford Lane, Northbridge (final)\n\nELENA MARSH'S INITIAL STATEMENT: 'I left at approximately 19:45 and drove directly home.'\n\nDISCREPANCY: Second visit to Ashford Lane at 21:03 falls within the estimated time of death window (21:00–22:30). This was omitted from her initial statement. Duration of second visit: approx. 38 minutes." },
+      { id: "ev-010", name: "Amended Will — Draft Copy", type: "DOC", locked: true,
+        content: "DOCUMENT: Last Will and Testament — Draft\nTESTATOR: Victor Whitmore\nSOLICITOR: Redmond & Holt\nDATED: 15 JAN 2024 (unsigned — draft only)\n\nMATERIAL AMENDMENTS vs. PRIOR WILL (2019):\n\n1. ELENA MARSH — REMOVED from all estate provisions. No consideration, no bequest.\n\n2. DANIEL WHITMORE — Conditional bequest only. Inheritance of real property and liquid assets contingent on completion of a certified addiction treatment programme and 12-month sobriety verification. Estimated value: £8.2M (conditional).\n\n3. WHITMORE CHARITABLE TRUST — Named as PRIMARY BENEFICIARY. Estimated allocation: £31.8M.\n\nNOTE FROM SOLICITOR (attached): 'Victor was insistent this be finalised by end of January. He mentioned concerns about a person with access to company finances. He did not name them directly in my presence.'" }
+    ],
+    correctSuspect: "s2"
   },
   {
-    id:1, title:"Electric Drive", artist:"SoundHelix", album:"Beat Pack",
-    genre:"Rock", mood:"energetic", emoji:"⚡", color:"c2",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  },
-  {
-    id:2, title:"Morning Groove", artist:"SoundHelix", album:"Chill Out",
-    genre:"Pop", mood:"upbeat", emoji:"🌸", color:"c3",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-  },
-  {
-    id:3, title:"Sunset Memories", artist:"SoundHelix", album:"Golden Hour",
-    genre:"Indie", mood:"romantic", emoji:"🍯", color:"c4",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-  },
-  {
-    id:4, title:"Deep Space", artist:"SoundHelix", album:"Neon Nights",
-    genre:"Electronic", mood:"chill", emoji:"🎛️", color:"c5",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
-  },
-  {
-    id:5, title:"Highland Walk", artist:"SoundHelix", album:"Folk Tales",
-    genre:"Ukrainian Folk", mood:"melancholy", emoji:"🌄", color:"c6",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
-  },
-  {
-    id:6, title:"Urban Rush", artist:"SoundHelix", album:"Street Beats",
-    genre:"Hip-Hop", mood:"energetic", emoji:"⛈️", color:"c7",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3"
-  },
-  {
-    id:7, title:"Blue Sky Dream", artist:"SoundHelix", album:"Summer",
-    genre:"Pop", mood:"upbeat", emoji:"🌻", color:"c8",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
-  },
-  {
-    id:8, title:"Midnight Train", artist:"SoundHelix", album:"Journeys",
-    genre:"Jazz", mood:"melancholy", emoji:"🎤", color:"c9",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3"
-  },
-  {
-    id:9, title:"Jazz Cafe", artist:"SoundHelix", album:"After Midnight",
-    genre:"Jazz", mood:"chill", emoji:"🎷", color:"c10",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"
-  },
-  {
-    id:10, title:"Folk Dance", artist:"SoundHelix", album:"Village Sounds",
-    genre:"Ukrainian Folk", mood:"upbeat", emoji:"💫", color:"c1",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3"
-  },
-  {
-    id:11, title:"Hip Hop Night", artist:"SoundHelix", album:"Street Level",
-    genre:"Hip-Hop", mood:"energetic", emoji:"🎧", color:"c2",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3"
-  },
-  {
-    id:12, title:"Violet Evening", artist:"SoundHelix", album:"Electronica",
-    genre:"Electronic", mood:"chill", emoji:"🟣", color:"c3",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3"
-  },
-  {
-    id:13, title:"Circles", artist:"SoundHelix", album:"Loops",
-    genre:"Electronic", mood:"melancholy", emoji:"⭕", color:"c4",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3"
-  },
-  {
-    id:14, title:"Stardust", artist:"SoundHelix", album:"Cosmos",
-    genre:"Indie", mood:"romantic", emoji:"⭐", color:"c5",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3"
-  },
-  {
-    id:15, title:"Gold Rush", artist:"SoundHelix", album:"Treasure",
-    genre:"Pop", mood:"upbeat", emoji:"🏆", color:"c6",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3"
-  },
-  {
-    id:16, title:"Late Night Sax", artist:"SoundHelix", album:"Jazz Club",
-    genre:"Jazz", mood:"chill", emoji:"🎷", color:"c7",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-  },
-  {
-    id:17, title:"Breath of Wind", artist:"SoundHelix", album:"Nature",
-    genre:"Ukrainian Folk", mood:"melancholy", emoji:"🌬️", color:"c8",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  },
-  {
-    id:18, title:"Wave Rider", artist:"SoundHelix", album:"Ocean",
-    genre:"Pop", mood:"upbeat", emoji:"🌊", color:"c9",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-  },
-  {
-    id:19, title:"Mountain Echo", artist:"SoundHelix", album:"Carpathians",
-    genre:"Ukrainian Folk", mood:"chill", emoji:"🏔️", color:"c10",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-  },
-  {
-    id:20, title:"Digital Sunset", artist:"SoundHelix", album:"Neuro City",
-    genre:"Electronic", mood:"chill", emoji:"🌆", color:"c1",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3"
-  },
-  {
-    id:21, title:"Rebel Heart", artist:"SoundHelix", album:"Freaks",
-    genre:"Rock", mood:"energetic", emoji:"💙", color:"c2",
-    url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
-  },
+    id: "case-002",
+    code: "HOM-2024-0203",
+    title: "Station 9",
+    status: "OPEN",
+    priority: "HIGH",
+    date: "03 FEB 2024",
+    type: "Suspicious Death",
+    location: "Northbridge Central Station, Platform 9",
+    synopsis: "Dr. Priya Anand, 38, lead researcher at BioNova Labs, was found on the tracks of Platform 9 at 06:12. Initial assessment: fell from platform. CCTV footage for Platform 9 is missing — corrupted between 05:50 and 06:15. Three individuals have been placed at the station during this window. The post-mortem identified grip bruising on both arms.",
+    timeline: [
+      { time: "05:45", event: "Dr. Anand arrives at Northbridge Central. Observed on entrance CCTV. She appears anxious — checks over shoulder twice.", locked: false },
+      { time: "05:50", event: "Platform 9 CCTV feed goes dark. Signal corruption event begins. Analysis confirms deliberate RF interference.", locked: false },
+      { time: "06:12", event: "Body discovered on the tracks by platform attendant Roy Simms. He radios control immediately.", locked: false },
+      { time: "06:15", event: "CCTV feed restores automatically.", locked: false },
+      { time: "07:45", event: "Station Wi-Fi logs: device 'BIONOVA-TABLET-07' connected near Platform 9 at 05:55. Last authenticated user: M. Webb.", locked: true, req: "ev-b005" },
+      { time: "22:14", event: "(Previous evening, Jan 17) Dr. Anand sends encrypted submission to MHRA Whistleblower Portal regarding BioNova clinical trial fraud. She expressed fear for her safety.", locked: true, req: "ev-b007" }
+    ],
+    suspects: [
+      {
+        id: "s4", initials: "MW", name: "Marcus Webb", age: 44, relation: "BioNova — Director of Operations",
+        motive: "Dr. Anand was preparing to expose fraudulent clinical trial data that would implicate Webb directly and destroy the company.",
+        alibi: "Claims to have been home. No corroboration. Location data conflicts.",
+        threat: 86, interrogated: false,
+        notes: "History of aggressive NDAs. Terminated three senior researchers in 2023 citing 'performance'. Company tablet authenticated at station during critical window. Legal team contacted within 2 hours of Dr. Anand's death.",
+        dob: "07 MAY 1979", nationality: "British", priors: "None on record",
+        questions: [
+          { id: "q1", text: "Were you aware Dr. Anand planned to report clinical trial irregularities to the MHRA?", answered: false,
+            answer: "Priya was meticulous and passionate about her work. If she had concerns she would have raised them through proper internal channels. She never came to me.", unlocks: null },
+          { id: "q2", text: "A BioNova company tablet registered to your account was connected to station Wi-Fi at 05:55 — near Platform 9.", answered: false,
+            answer: "That's... not possible. Those tablets don't leave the lab. Access is key-card controlled. There must be an error in your data.", unlocks: "ev-b005" },
+          { id: "q3", text: "Dr. Anand submitted a whistleblower report to the MHRA the evening before she died, referencing you by name. Did you know about this?", answered: false,
+            answer: "(long pause, jaw tightens) I think I should speak to my solicitor before continuing.", unlocks: "ev-b007" }
+        ]
+      },
+      {
+        id: "s5", initials: "YT", name: "Yuki Tanaka", age: 31, relation: "BioNova Research Colleague",
+        motive: "Dr. Anand's upcoming paper would invalidate Yuki's doctoral thesis, effectively ending her academic and research career.",
+        alibi: "Admits to being at the station. Claims she was catching the 06:05 on Platform 4. Ticket purchased but not boarded.",
+        threat: 52, interrogated: false,
+        notes: "Distressed and tearful during initial interview. Unboarded ticket raises questions. Text message on phone: 'She's here. Platform 9.' — sent to unregistered number at 05:47.",
+        dob: "23 NOV 1992", nationality: "Japanese / British", priors: "None",
+        questions: [
+          { id: "q1", text: "You were at the station. Your ticket was for Platform 4. Did you at any point go to Platform 9?", answered: false,
+            answer: "No. I was on Platform 4. I didn't even know Priya took this route. We didn't speak about commuting.", unlocks: null },
+          { id: "q2", text: "At 05:47 you sent a text: 'She's here. Platform 9.' To an unregistered number. Who did you send that to?", answered: false,
+            answer: "(visibly shaken) That... I can explain that. I thought I saw her and I was texting a colleague. It sounds worse than it was.", unlocks: "ev-b004" },
+          { id: "q3", text: "Your ticket was purchased the night before but you never boarded the train. Why were you really at the station?", answered: false,
+            answer: "I was going to travel. I changed my mind. I wasn't feeling well. I walked home.", unlocks: null }
+        ]
+      },
+      {
+        id: "s6", initials: "RS", name: "Roy Simms", age: 52, relation: "Station Platform Attendant",
+        motive: "Unexplained financial deposits totalling £12,000 in the 30 days prior to the incident.",
+        alibi: "On duty. His assigned area was Platform 9. Discovered the body.",
+        threat: 38, interrogated: false,
+        notes: "Six-year employee with clean record. Three deposits of exactly £4,000 from an offshore shell company — Hadleigh Consult Ltd — which shares a registered address with a BioNova subsidiary.",
+        dob: "15 FEB 1971", nationality: "British", priors: "None",
+        questions: [
+          { id: "q1", text: "Take me through exactly what happened between 05:45 and 06:15.", answered: false,
+            answer: "I was doing my routine check. Platform 9. I walked to the far end, turned back. I saw something on the track near the gap. I radioed control right away.", unlocks: null },
+          { id: "q2", text: "Three deposits of £4,000 each, all from Hadleigh Consult Ltd. That's a BioNova-linked shell company. What were you paid for?", answered: false,
+            answer: "My brother. He lent me money for roof repairs. I can show you the messages. I didn't know anything about BioNova.", unlocks: "ev-b008" },
+          { id: "q3", text: "Several weeks ago, did anyone ask you about the CCTV coverage on Platform 9?", answered: false,
+            answer: "...There was a man. Said he was from maintenance. Asked which cameras covered which angles and blind spots. I showed him on the map. I thought nothing of it.", unlocks: "ev-b005" }
+        ]
+      }
+    ],
+    evidence: [
+      { id: "ev-b001", name: "Post-Mortem Report — Dr. Anand", type: "FORENSIC", locked: false,
+        content: "CASE: HOM-2024-0203\nPATIENT: Dr. Priya Anand, F, 38\nFORENSIC PATHOLOGIST: Dr. R. Okafor\n\nCAUSE OF DEATH\nBlunt force trauma consistent with train impact. Fatal injuries: skull fracture, spinal transection.\n\nCRITICAL ADDITIONAL FINDING:\nPre-existing bruising on both upper arms — posterior grip pattern. Bruising is bilateral, suggesting both arms were gripped simultaneously from behind by a single person. Contusions are recent: within 1 hour of death.\n\nINTERPRETATION: Dr. Anand was physically restrained prior to her death. Grip force indicates a person of above-average strength.\n\nMANNER OF DEATH: UNDETERMINED (consistent with homicide)\n\nNOTE: Initial first-response classification as 'accidental fall' should be revised pending further investigation." },
+      { id: "ev-b002", name: "CCTV Corruption Analysis", type: "FORENSIC", locked: false,
+        content: "CASE: HOM-2024-0203\nTECHNICAL UNIT: DC Marsh (Digital), Northbridge MPD\n\nFINDINGS:\nPlatform 9 CCTV disruption period: 05:50:11 — 06:15:03\n\nNATURE OF CORRUPTION:\nNot mechanical failure. Signal analysis confirms targeted radiofrequency interference consistent with a commercial-grade RF jammer (range: approx. 15m, cost: £200–800, freely available online).\n\nSOURCE:\nJammer device not recovered. Signal origin triangulated to Platform 9 access corridor, north end.\n\nMEANING:\nSomeone deliberately disabled the camera system before the victim arrived on the platform. This required advance knowledge of camera positions, signal frequencies, and the victim's route." },
+      { id: "ev-b003", name: "Entrance CCTV Stills — 05:45–05:52", type: "IMG", locked: false,
+        content: "STATION: Northbridge Central\nCAMERA: Entrance A (south), Entrance B (north)\nREFERENCE: WHM2-0203-CCTV\n\nFRAME 001 — 05:45:12  [Entrance A]\nDr. Priya Anand enters. Carries laptop bag and briefcase. Posture tense. Looks back twice at entrance before proceeding.\n\nFRAME 002 — 05:48:31  [Entrance A]\nUnidentified male figure, dark coat, hat obscuring face, enters 3 minutes after victim. Moves purposefully. Does not check displays.\n\nFRAME 003 — 05:51:44  [Entrance B — north]\nSecond individual, female, enters via north entrance. Partial view only. Carries tote bag. Moves toward inner concourse.\n\nNOTE: Both figures disappear from entrance coverage. No footage of Platform 9 due to RF disruption." },
+      { id: "ev-b004", name: "Text Message Record — Yuki Tanaka", type: "DOC", locked: true,
+        content: "SUBJECT: Tanaka, Yuki — mobile device extraction\nISSUED UNDER: Production Order, HOM-2024-0203\n\nMESSAGE LOG (relevant extract):\n05:47:09 — OUTGOING\nTO: +44 7[UNREGISTERED]\nTEXT: 'She's here. Platform 9.'\n\nCONTEXT:\nTicket purchased previous evening for 06:05 train, Platform 4. Ticket not scanned at barriers — Tanaka never boarded.\n\nPRIOR MESSAGE (05:31):\nINCOMING from same unregistered number:\n'Confirm when you see her. Do not approach.'\n\nANALYSIS: Tanaka was being used as a spotter. She identified the victim's location and relayed it to an unknown party. Whether she understood the implications is unclear." },
+      { id: "ev-b005", name: "Station Wi-Fi Device Log", type: "DOC", locked: true,
+        content: "STATION: Northbridge Central\nLOG TYPE: Wi-Fi authentication records\nISSUED UNDER: Production Order, HOM-2024-0203\n\nENTRY:\n05:55:12  DEVICE: 'BIONOVA-TABLET-07'\nNETWORK: NorthbridgeStation-Public\nACCESS POINT: Platform 9 corridor, north (within 15m)\n\nBIONOVA INTERNAL RECORDS:\nTablet last assigned to: WEBB, MARCUS — Director of Operations\nLast BioNova server authentication: 05:22 same morning (from BioNova HQ IP)\n\nCONCLUSION:\nMarcus Webb authenticated this tablet at BioNova HQ at 05:22, then the same tablet appeared at the station at 05:55 — 33 minutes later. This contradicts Webb's alibi of being at home.\n\nHousing to BioNova HQ: 12 minutes. HQ to station: 18 minutes. Timeline is consistent with Webb's movement." },
+      { id: "ev-b006", name: "Dr. Anand — Laptop: Recovered Draft", type: "DOC", locked: false,
+        content: "DEVICE: MacBook Pro, Dr. Priya Anand\nFORENSICS: DCI Digital, Ref: WHM2-DFCU-006\n\nRECOVERED DRAFT EMAIL (unsent, saved locally):\n\nTO: [left blank]\nSUBJECT: I don't know who to trust\n\n'I have the files. All of it. The suppressed data, the altered mortality records, the proof that patients were left on a placebo when we knew the compound worked. Forty-three people. I have names.\n\nI've already sent the formal report. But I'm scared. They know I have the backup files. I've seen a car outside my flat twice this week. I don't know if I'm being paranoid.\n\nIf something happens to me, the encrypted archive is in the cloud. Password is my mother's name and the year of her death.'\n\nNOTE: Email was never sent. The encrypted archive referenced has been located and is pending legal decryption." },
+      { id: "ev-b007", name: "MHRA Whistleblower Submission", type: "DOC", locked: true,
+        content: "AGENCY: Medicines & Healthcare Products Regulatory Agency\nCHANNEL: Whistleblower Portal — Confidential Submission\nRECEIPT DATE: 17 JAN 2024, 22:14\nARCHIVE ID: WHB-2024-0117\n\nSUBMITTED BY: Dr. Priya Anand, BioNova Labs (Researcher ID: BN-2041)\n\nSUMMARY OF ALLEGATIONS:\n— BioNova Phase III trial data was systematically manipulated between Q2 2022 and Q4 2023\n— Mortality rates in control group suppressed. Efficacy rates in treatment group inflated.\n— Estimated 40–50 patients received ineffective treatment during the manipulation period.\n— Primary beneficiary of data manipulation: accelerated regulatory approval pathway\n— Individuals named: WEBB, Marcus (Director of Operations); two unnamed data analysts\n\nDr. Anand expressed concern for her personal safety in an attached note. The submission was acknowledged. Dr. Anand was found dead 17 days later." },
+      { id: "ev-b008", name: "Bank Records — Roy Simms", type: "DOC", locked: true,
+        content: "SUBJECT: Simms, Roy — personal banking records\nISSUED UNDER: Production Order, HOM-2024-0203\n\nDEPOSIT LOG:\nJAN 05  — £4,000.00  [CREDIT]\nJAN 19  — £4,000.00  [CREDIT]\nFEB 01  — £4,000.00  [CREDIT]\n\nSOURCE ACCOUNT: Hadleigh Consult Ltd — Cayman Islands\n\nINTELLIGENCE:\nHadleigh Consult Ltd shares a registered address with NovaCare Holdings — a BioNova subsidiary used for contractor payments.\n\nPATTERN: Three equal payments, regular intervals, in the 30 days before Dr. Anand's death.\n\nSPECULATION (unconfirmed): Simms may have been paid to provide information about Platform 9 CCTV coverage and camera blind spots — consistent with his statement about the 'maintenance man' who questioned him weeks earlier." }
+    ],
+    correctSuspect: "s4"
+  }
 ];
 
-const ARTISTS = [
-  {name:"Kalush Orchestra",genre:"Ukrainian Folk",followers:"1.2M",emoji:"🌻",color:"c9"},
-  {name:"ONUKA",genre:"Electronic",followers:"890K",emoji:"⭕",color:"c4"},
-  {name:"Океан Ельзи",genre:"Rock",followers:"2.1M",emoji:"🎸",color:"c2"},
-  {name:"Alyona Alyona",genre:"Hip-Hop",followers:"650K",emoji:"🎤",color:"c7"},
-  {name:"Go-A",genre:"Electronic",followers:"480K",emoji:"🟣",color:"c3"},
-  {name:"Ivan Dorn",genre:"Pop",followers:"1.4M",emoji:"🎶",color:"c6"},
-];
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+var state = {
+  activeCaseId: null,
+  activeTab: "overview",
+  selectedEvidence: null,
+  selectedSuspect: null,
+  interroSuspect: null,
+  boardNotes: {},
+  accusedSuspect: null,
+  caseStatuses: {}
+};
 
-const ALBUMS = [
-  {title:"Тіні",artist:"Kalush Orchestra",year:2023,emoji:"🌙",color:"c1",sid:0},
-  {title:"VIDLIK",artist:"ONUKA",year:2024,emoji:"⭕",color:"c5",sid:4},
-  {title:"Neon Nights",artist:"SoundHelix",year:2024,emoji:"🌆",color:"c6",sid:12},
-  {title:"Drama",artist:"SoundHelix",year:2023,emoji:"⛈️",color:"c7",sid:6},
-  {title:"Горизонт",artist:"SoundHelix",year:2024,emoji:"🌄",color:"c9",sid:5},
-  {title:"Randorn",artist:"Ivan Dorn",year:2023,emoji:"🎤",color:"c4",sid:2},
-  {title:"After Midnight",artist:"Lviv Jazz Trio",year:2024,emoji:"🎷",color:"c8",sid:9},
-  {title:"Freaks",artist:"SoundHelix",year:2024,emoji:"💙",color:"c2",sid:21},
-];
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function getCase(id) {
+  return CASES.find(function(c){ return c.id === (id || state.activeCaseId); });
+}
 
-/* ─────────────────────────────────────────────────────
-   AUDIO ENGINE — uses native HTML5 Audio
-───────────────────────────────────────────────────── */
-const audio = new Audio();
-audio.crossOrigin = "anonymous";
+function notify(msg, type) {
+  var el = document.getElementById("notification");
+  el.textContent = msg;
+  el.className = type || "";
+  el.style.display = "block";
+  setTimeout(function(){ el.style.display = "none"; }, 3200);
+}
 
-let currentIdx  = -1;
-let isPlaying   = false;
-let isShuffle   = false;
-let repeatMode  = 0;    // 0=off 1=all 2=one
-let volume      = 0.8;
-let isMuted     = false;
-let likedSongs  = new Set();
-let isLoading   = false;
+function addRadioEntry(msg) {
+  var log = document.getElementById("radioLog");
+  var entries = document.getElementById("radioEntries");
+  log.style.display = "block";
+  var el = document.createElement("div");
+  el.className = "radio-entry new";
+  var now = new Date();
+  var t = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+  el.textContent = "[" + t + "] " + msg;
+  entries.insertBefore(el, entries.firstChild);
+  if (entries.children.length > 8) entries.removeChild(entries.lastChild);
+}
 
-// Volume init
-audio.volume = volume;
+function unlockEvidence(caseId, evId) {
+  var c = getCase(caseId);
+  var ev = c.evidence.find(function(e){ return e.id === evId; });
+  if (ev && ev.locked) {
+    ev.locked = false;
+    // unlock timeline items
+    c.timeline.forEach(function(t){
+      if (t.req === evId) t.locked = false;
+    });
+    notify("⚑ NEW EVIDENCE UNLOCKED: " + ev.name, "");
+    addRadioEntry("Evidence file unlocked: " + evId.toUpperCase());
+    return true;
+  }
+  return false;
+}
 
-/* ── Audio events ── */
-audio.addEventListener('timeupdate', () => {
-  if (!audio.duration) return;
-  const pct = (audio.currentTime / audio.duration) * 100;
-  document.getElementById('progress-fill').style.width   = pct + '%';
-  document.getElementById('progress-handle').style.left  = pct + '%';
-  document.getElementById('current-time').textContent    = fmtTime(audio.currentTime);
-});
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.getElementById("page-" + pageId).classList.add("active");
+}
 
-audio.addEventListener('loadedmetadata', () => {
-  document.getElementById('total-time').textContent = fmtTime(audio.duration);
-  isLoading = false;
-  updatePlayBtn();
-});
+// ═══════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════
+function updateClocks() {
+  var now = new Date();
+  var t = now.toLocaleTimeString("en-GB", { hour12: false });
+  ["clock","clock2","clock3","clock4"].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = t;
+  });
+}
+setInterval(updateClocks, 1000);
+updateClocks();
 
-audio.addEventListener('ended', () => {
-  if (repeatMode === 2) { audio.currentTime = 0; audio.play(); return; }
-  nextSong();
-});
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard() {
+  var grid = document.getElementById("caseGrid");
+  grid.innerHTML = "";
 
-audio.addEventListener('play',  () => { isPlaying = true;  renderEQ(); updatePlayBtn(); });
-audio.addEventListener('pause', () => { isPlaying = false; renderEQ(); updatePlayBtn(); });
+  var open = CASES.filter(function(c){ return c.status === "OPEN"; }).length;
+  var closed = CASES.filter(function(c){ return c.status === "CLOSED"; }).length;
+  document.getElementById("stat-open").textContent = open;
+  document.getElementById("stat-closed").textContent = closed;
 
-audio.addEventListener('waiting', () => {
-  isLoading = true; updatePlayBtn();
-});
-audio.addEventListener('canplay', () => {
-  isLoading = false; updatePlayBtn();
-});
-
-audio.addEventListener('error', (e) => {
-  isLoading = false;
-  toast('⚠️ Не вдалося завантажити аудіо. Перевір підключення.');
-  updatePlayBtn();
-});
-
-/* ── Core playback ── */
-function playSongById(idx) {
-  if (idx < 0 || idx >= SONGS.length) return;
-  currentIdx = idx;
-  const s = SONGS[idx];
-
-  // Reset
-  audio.pause();
-  audio.src    = '';
-  audio.src    = s.url;
-  audio.volume = isMuted ? 0 : volume;
-  isLoading    = true;
-  isPlaying    = false;
-  updatePlayBtn();
-
-  audio.load();
-  audio.play().then(() => {
-    isPlaying = true;
-    renderPlayer();
-    renderHighlight();
-    toast('▶ ' + s.title + ' — ' + s.artist);
-  }).catch(err => {
-    // Autoplay policy — user needs to interact first
-    isPlaying = false;
-    isLoading = false;
-    renderPlayer();
-    renderHighlight();
-    updatePlayBtn();
-    toast('▶ Натисни ▶ у плеєрі для відтворення');
+  CASES.forEach(function(c){
+    var card = document.createElement("div");
+    card.className = "case-card " + c.status;
+    var susHtml = c.suspects.map(function(s){
+      return '<div class="sus-dot">' + s.initials + '</div>';
+    }).join("");
+    card.innerHTML =
+      '<div class="case-card-top">' +
+        '<span class="case-code">' + c.code + '</span>' +
+        '<span class="status-tag ' + c.status + '">' + c.status + '</span>' +
+      '</div>' +
+      '<div class="case-title">' + c.title + '</div>' +
+      '<div class="case-type-loc">' +
+        '<span class="case-type">' + c.type.toUpperCase() + '</span>' +
+        '<span class="case-loc">// ' + c.location.split(",")[0] + '</span>' +
+      '</div>' +
+      '<div class="case-synopsis">' + c.synopsis.substring(0,140) + '…</div>' +
+      '<div class="case-footer">' +
+        '<div class="suspect-mini-row">' + susHtml + '</div>' +
+        '<span class="priority-tag ' + c.priority + '">▲ ' + c.priority + '</span>' +
+      '</div>';
+    card.addEventListener("click", function(){ openCase(c.id); });
+    grid.appendChild(card);
   });
 }
 
-function togglePlay() {
-  if (currentIdx < 0) { playSongById(0); return; }
-  if (isLoading) return;
+// ═══════════════════════════════════════════
+// OPEN CASE
+// ═══════════════════════════════════════════
+function openCase(caseId) {
+  state.activeCaseId = caseId;
+  state.activeTab = "overview";
+  state.selectedEvidence = null;
+  state.selectedSuspect = null;
+  state.interroSuspect = null;
 
-  if (audio.paused) {
-    audio.play().catch(() => toast('⚠️ Не вдалося відтворити'));
+  var c = getCase(caseId);
+  document.getElementById("caseHeaderCode").textContent = c.code;
+  document.getElementById("caseHeaderTitle").textContent = c.title;
+  document.getElementById("caseHeaderStatus").textContent = c.status;
+  document.getElementById("caseHeaderStatus").className = "status-tag " + c.status;
+
+  var accuseBtn = document.getElementById("accuseBtn");
+  accuseBtn.style.display = c.status !== "OPEN" ? "none" : "";
+
+  showPage("case");
+  renderTab("overview");
+  addRadioEntry("Case file opened: " + c.code);
+
+  // Random radio comms
+  var msgs = [
+    "Unit 7 responding to separate incident, Eastside.",
+    "Forensics confirm secondary analysis complete.",
+    "Dispatch: all units maintain radio silence on encrypted.",
+    "Background check results incoming on primary subject.",
+    "Lab processing expedited — priority flag on this file."
+  ];
+  setTimeout(function(){
+    addRadioEntry(msgs[Math.floor(Math.random()*msgs.length)]);
+  }, 4000);
+}
+
+function goToDashboard() {
+  state.activeCaseId = null;
+  renderDashboard();
+  showPage("dashboard");
+}
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function switchTab(tabName) {
+  state.activeTab = tabName;
+  document.querySelectorAll(".tab-btn").forEach(function(b){
+    b.classList.remove("active");
+  });
+  document.querySelectorAll(".tab-btn").forEach(function(b){
+    if (b.textContent.toLowerCase().replace(" ","") === tabName.toLowerCase().replace(" ","") ||
+        b.getAttribute("onclick") === "switchTab('" + tabName + "')") {
+      b.classList.add("active");
+    }
+  });
+  renderTab(tabName);
+}
+
+function renderTab(tabName) {
+  var body = document.getElementById("tabBody");
+  body.innerHTML = "";
+  var c = getCase();
+  if (!c) return;
+
+  switch(tabName) {
+    case "overview": renderOverview(c, body); break;
+    case "timeline": renderTimeline(c, body); break;
+    case "evidence": renderEvidence(c, body); break;
+    case "suspects": renderSuspects(c, body); break;
+    case "board": renderBoard(c, body); break;
+    case "interrogation": renderInterrogation(c, body); break;
+  }
+}
+
+// ═══════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════
+function renderOverview(c, body) {
+  var unlockedEv = c.evidence.filter(function(e){ return !e.locked; }).length;
+  var interrogated = c.suspects.filter(function(s){ return s.interrogated; }).length;
+
+  var html =
+    '<div class="overview-grid">' +
+      '<div>' +
+        '<div class="panel">' +
+          '<div class="panel-hdr"><div class="dot" style="background:var(--accent)"></div>CASE OVERVIEW</div>' +
+          '<div class="panel-body">' +
+            '<p class="synopsis-text">' + c.synopsis + '</p>' +
+            '<div class="detail-grid">' +
+              mkDetail("CASE CODE", c.code) +
+              mkDetail("TYPE", c.type) +
+              mkDetail("DATE", c.date) +
+              mkDetail("PRIORITY", '<span style="color:var(--' + (c.priority==="CRITICAL"?"red":"amber") + ')">' + c.priority + '</span>') +
+              mkDetail("LOCATION", c.location) +
+              mkDetail("STATUS", '<span style="color:var(--' + (c.status==="OPEN"?"red":"green") + ')">' + c.status + '</span>') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="panel">' +
+          '<div class="panel-hdr"><div class="dot" style="background:var(--amber)"></div>PROGRESS METRICS</div>' +
+          '<div class="panel-body">' +
+            '<div class="detail-grid">' +
+              mkDetail("EVIDENCE UNLOCKED", unlockedEv + " / " + c.evidence.length) +
+              mkDetail("SUSPECTS INTERROGATED", interrogated + " / " + c.suspects.length) +
+              mkDetail("TIMELINE EVENTS", c.timeline.filter(function(t){return !t.locked;}).length + " / " + c.timeline.length + " VISIBLE") +
+              mkDetail("CASE FILE STATUS", c.status) +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="panel">' +
+          '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>SUSPECTS — THREAT ASSESSMENT</div>' +
+          '<div class="panel-body">' +
+            c.suspects.map(function(s){
+              var col = s.threat > 70 ? "var(--red)" : s.threat > 40 ? "var(--amber)" : "var(--green)";
+              return '<div class="suspect-profile-row">' +
+                '<div class="sus-avatar">' + s.initials + '</div>' +
+                '<div>' +
+                  '<div class="sus-name">' + s.name + '</div>' +
+                  '<div class="sus-rel">' + s.relation + '</div>' +
+                '</div>' +
+                '<div class="threat-bar">' +
+                  '<div style="font-size:8px;color:var(--text3);margin-bottom:3px">THREAT</div>' +
+                  '<div class="threat-track">' +
+                    '<div class="threat-fill" style="width:' + s.threat + '%;background:' + col + '"></div>' +
+                  '</div>' +
+                  '<div class="threat-num" style="color:' + col + '">' + s.threat + '%</div>' +
+                '</div>' +
+              '</div>';
+            }).join("") +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  body.innerHTML = html;
+}
+
+function mkDetail(k, v) {
+  return '<div class="detail-item"><div class="detail-key">' + k + '</div><div class="detail-val">' + v + '</div></div>';
+}
+
+// ═══════════════════════════════════════════
+// TIMELINE
+// ═══════════════════════════════════════════
+function renderTimeline(c, body) {
+  var html =
+    '<div class="panel">' +
+      '<div class="panel-hdr"><div class="dot" style="background:var(--accent)"></div>INCIDENT TIMELINE — ' + c.timeline.filter(function(t){return !t.locked;}).length + '/' + c.timeline.length + ' EVENTS UNLOCKED</div>' +
+      '<div class="panel-body">' +
+        '<div class="timeline-wrap">' +
+          c.timeline.map(function(t, i){
+            return '<div class="tl-item' + (t.locked?" locked":"") + '" style="animation-delay:' + (i*0.05) + 's">' +
+              '<div class="tl-time">' + t.time + '</div>' +
+              '<div class="tl-event">' +
+                (t.locked
+                  ? '<span class="tl-lock">🔒 LOCKED — Requires evidence: ' + (t.req||"") + '</span>'
+                  : t.event) +
+              '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  body.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// EVIDENCE
+// ═══════════════════════════════════════════
+function renderEvidence(c, body) {
+  body.innerHTML = '<div class="ev-layout"><div class="ev-list" id="evList"></div><div class="ev-viewer" id="evViewer"><div class="ev-empty">SELECT AN EVIDENCE FILE</div></div></div>';
+
+  var listEl = document.getElementById("evList");
+  var unlockedCount = c.evidence.filter(function(e){ return !e.locked; }).length;
+
+  var hdr = document.createElement("div");
+  hdr.className = "panel-hdr";
+  hdr.innerHTML = '<div class="dot" style="background:var(--accent)"></div>FILES — ' + unlockedCount + '/' + c.evidence.length + ' UNLOCKED';
+  listEl.appendChild(hdr);
+
+  c.evidence.forEach(function(ev){
+    var item = document.createElement("div");
+    item.className = "ev-item" + (ev.locked ? " locked" : "") + (state.selectedEvidence === ev.id ? " active" : "");
+    item.innerHTML =
+      '<span class="ev-type ' + ev.type + '">' + ev.type + '</span>' +
+      '<span class="ev-name">' + ev.name + '</span>' +
+      (ev.locked ? '<span class="lock-icon">🔒</span>' : '');
+    if (!ev.locked) {
+      item.addEventListener("click", function(){
+        state.selectedEvidence = ev.id;
+        renderEvidence(c, body);
+      });
+    }
+    listEl.appendChild(item);
+  });
+
+  if (state.selectedEvidence) {
+    var ev = c.evidence.find(function(e){ return e.id === state.selectedEvidence; });
+    if (ev) renderEvidenceViewer(ev, document.getElementById("evViewer"));
+  }
+}
+
+function renderEvidenceViewer(ev, container) {
+  var fileId = ev.id.toUpperCase();
+  var dateStr = new Date().toLocaleDateString("en-GB");
+
+  var inner = '';
+  if (ev.type === "AUDIO") {
+    // Parse transcript lines
+    var lines = ev.content.split("\n").filter(function(l){ return l.trim(); });
+    var inTranscript = false;
+    var transcriptHtml = "";
+    var metaHtml = "";
+    lines.forEach(function(line){
+      if (line.startsWith("TRANSCRIPT") || line.startsWith("SUBJECT:") || line.startsWith("OFFICER:") || line.startsWith("DATE:")) {
+        if (!inTranscript) metaHtml += '<div style="color:var(--text3);font-size:9px;letter-spacing:1px;margin-bottom:3px">' + line + '</div>';
+      } else if (line.includes(":") && (line.indexOf(":") < 20)) {
+        inTranscript = true;
+        var colon = line.indexOf(":");
+        var speaker = line.substring(0, colon).trim();
+        var text = line.substring(colon+1).trim();
+        var isSubject = (speaker !== "PAULSEN" && speaker !== "OFFICER" && speaker !== "DS PAULSEN");
+        transcriptHtml +=
+          '<div class="transcript-line">' +
+            '<div class="transcript-speaker' + (isSubject?" subject":"") + '">' + speaker + '</div>' +
+            '<div class="transcript-text">' + text + '</div>' +
+          '</div>';
+      }
+    });
+
+    inner =
+      '<div class="doc-hdr">' +
+        '<div class="doc-title">' + ev.name + '</div>' +
+        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>AUDIO TRANSCRIPT</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
+      '</div>' +
+      '<div class="audio-transcript" style="flex:1;overflow:auto">' +
+        '<div class="audio-hdr">' +
+          '<div class="audio-wave"><span></span><span></span><span></span><span></span><span></span></div>' +
+          '<span style="color:var(--amber);font-size:10px;letter-spacing:2px">AUDIO TRANSCRIPT — VERIFIED</span>' +
+        '</div>' +
+        '<div style="margin-bottom:12px">' + metaHtml + '</div>' +
+        transcriptHtml +
+      '</div>' +
+      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
+
+  } else if (ev.type === "IMG") {
+    var lines2 = ev.content.split("\n").filter(function(l){ return l.trim(); });
+    var frames = lines2.filter(function(l){ return l.match(/^FRAME/); });
+    var other = lines2.filter(function(l){ return !l.match(/^FRAME/) && l.trim(); });
+    var frameHtml = frames.map(function(f, i){
+      var parts = f.split("]");
+      var label = parts[0] ? parts[0].replace("[","").trim() : "FRAME " + (i+1);
+      return '<div class="img-thumb" data-label="' + label + '" style="height:90px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border2);padding:8px;font-size:9px;color:var(--text3);text-align:center">' +
+        '<span style="color:var(--text3)">[PHOTOGRAPH — ' + label + ']</span>' +
+      '</div>';
+    }).join("");
+
+    inner =
+      '<div class="doc-hdr">' +
+        '<div class="doc-title">' + ev.name + '</div>' +
+        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>PHOTOGRAPHIC EVIDENCE</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
+      '</div>' +
+      '<div class="img-evidence" style="flex:1;overflow:auto;padding:16px">' +
+        '<div style="color:var(--text2);font-size:11px;line-height:1.8;margin-bottom:14px">' +
+          other.map(function(l){ return l + '<br>'; }).join("") +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">' + frameHtml + '</div>' +
+      '</div>' +
+      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
+
   } else {
-    audio.pause();
+    inner =
+      '<div class="doc-hdr">' +
+        '<div class="doc-title">' + ev.name + '</div>' +
+        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>' + ev.type + '</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
+        (ev.type === "FORENSIC" ? '<div class="classified-stamp">FORENSIC — RESTRICTED</div>' : '') +
+      '</div>' +
+      '<div class="doc-body" style="position:relative">' +
+        '<div class="doc-watermark">EVIDENCE</div>' +
+        escHtml(ev.content) +
+      '</div>' +
+      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
+  }
+
+  container.innerHTML = '<div class="doc-viewer">' + inner + '</div>';
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ═══════════════════════════════════════════
+// SUSPECTS
+// ═══════════════════════════════════════════
+function renderSuspects(c, body) {
+  body.innerHTML = '<div class="sus-layout"><div class="sus-list" id="susList"></div><div class="sus-detail" id="susDetail"><div class="ev-empty">SELECT A SUSPECT</div></div></div>';
+
+  var listEl = document.getElementById("susList");
+  var hdr = document.createElement("div");
+  hdr.className = "panel-hdr";
+  hdr.innerHTML = '<div class="dot" style="background:var(--red)"></div>SUSPECT PROFILES — ' + c.suspects.length + ' LOGGED';
+  listEl.appendChild(hdr);
+
+  c.suspects.forEach(function(s){
+    var item = document.createElement("div");
+    item.className = "sus-list-item" + (state.selectedSuspect === s.id ? " active" : "");
+    item.innerHTML =
+      '<div class="sus-avatar">' + s.initials + '</div>' +
+      '<div>' +
+        '<div class="sus-name" style="font-size:12px">' + s.name + '</div>' +
+        '<div class="sus-rel">' + s.relation + '</div>' +
+      '</div>' +
+      (s.interrogated ? '<div class="sus-interrogated">INTERROGATED</div>' : '');
+    item.addEventListener("click", function(){
+      state.selectedSuspect = s.id;
+      renderSuspects(c, body);
+    });
+    listEl.appendChild(item);
+  });
+
+  if (state.selectedSuspect) {
+    var s = c.suspects.find(function(x){ return x.id === state.selectedSuspect; });
+    if (s) renderSuspectDetail(s, c, document.getElementById("susDetail"), body);
   }
 }
 
-function nextSong() {
-  let next;
-  if (currentIdx < 0) { next = 0; }
-  else if (isShuffle) {
-    do { next = Math.floor(Math.random() * SONGS.length); } while (next === currentIdx && SONGS.length > 1);
+function renderSuspectDetail(s, c, container, body) {
+  var col = s.threat > 70 ? "var(--red)" : s.threat > 40 ? "var(--amber)" : "var(--green)";
+  container.innerHTML =
+    '<div class="sus-detail-hdr">' +
+      '<div class="sus-big-avatar">' + s.initials + '</div>' +
+      '<div>' +
+        '<div style="color:var(--text3);font-size:8px;letter-spacing:3px;margin-bottom:2px">SUSPECT FILE</div>' +
+        '<div class="sus-name" style="font-family:var(--sans);font-size:17px">' + s.name + '</div>' +
+        '<div class="sus-rel">' + s.relation + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sus-detail-body">' +
+      mkSusField("DATE OF BIRTH", s.dob) +
+      mkSusField("NATIONALITY", s.nationality) +
+      mkSusField("PRIOR RECORD", s.priors) +
+      mkSusField("KNOWN MOTIVE", s.motive) +
+      mkSusField("STATED ALIBI", s.alibi) +
+      mkSusField("INVESTIGATOR NOTES", s.notes) +
+      '<div class="sus-field">' +
+        '<div class="sus-field-label">THREAT ASSESSMENT</div>' +
+        '<div class="threat-full">' +
+          '<div class="threat-track-full">' +
+            '<div class="threat-fill" style="width:' + s.threat + '%;background:' + col + '"></div>' +
+          '</div>' +
+          '<span style="color:' + col + ';font-size:12px;min-width:36px;text-align:right">' + s.threat + '%</span>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn-interrogate" onclick="goToInterrogation(\'' + s.id + '\')">→ OPEN INTERROGATION ROOM</button>' +
+    '</div>';
+}
+
+function mkSusField(label, val) {
+  return '<div class="sus-field"><div class="sus-field-label">' + label + '</div><div class="sus-field-val">' + val + '</div></div>';
+}
+
+function goToInterrogation(suspectId) {
+  state.interroSuspect = suspectId;
+  switchTab("interrogation");
+}
+
+// ═══════════════════════════════════════════
+// BOARD
+// ═══════════════════════════════════════════
+function renderBoard(c, body) {
+  var notes = state.boardNotes[c.id] || [];
+  var unlockedEv = c.evidence.filter(function(e){ return !e.locked; });
+
+  var boardCards = unlockedEv.map(function(ev){
+    return '<div class="board-card evidence">' +
+      '<div class="board-card-type">' + ev.type + '</div>' +
+      '<div class="board-card-name">' + ev.name + '</div>' +
+    '</div>';
+  }).join("") + c.suspects.map(function(s){
+    return '<div class="board-card suspect">' +
+      '<div class="board-card-type">SUSPECT</div>' +
+      '<div class="board-card-name">' + s.name + '</div>' +
+    '</div>';
+  }).join("");
+
+  var notesHtml = notes.length === 0
+    ? '<div style="color:var(--text3);font-size:10px;font-style:italic;padding:8px">No notes yet.</div>'
+    : notes.map(function(n){
+        return '<div class="note-entry">' +
+          '<div class="note-time">' + n.time + '</div>' +
+          '<div class="note-text">' + escHtml(n.text) + '</div>' +
+        '</div>';
+      }).join("");
+
+  body.innerHTML =
+    '<div class="board-layout">' +
+      '<div>' +
+        '<div class="panel-hdr" style="margin-bottom:10px"><div class="dot" style="background:var(--accent)"></div>INVESTIGATION BOARD — ' + unlockedEv.length + ' EVIDENCE FILES + ' + c.suspects.length + ' SUSPECTS</div>' +
+        '<div class="board-canvas">' +
+          '<div class="board-grid-bg"></div>' +
+          '<div class="board-items">' + boardCards + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="notes-panel">' +
+        '<div class="panel-hdr"><div class="dot" style="background:var(--amber)"></div>INVESTIGATOR NOTES</div>' +
+        '<div class="notes-list" id="notesList">' + notesHtml + '</div>' +
+        '<div class="note-input-area">' +
+          '<textarea class="note-textarea" id="noteText" rows="3" placeholder="Add note…"></textarea>' +
+          '<button class="btn-note" id="noteAddBtn">+ ADD NOTE</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById("noteAddBtn").addEventListener("click", function(){
+    var txt = document.getElementById("noteText").value.trim();
+    if (!txt) return;
+    if (!state.boardNotes[c.id]) state.boardNotes[c.id] = [];
+    var now = new Date();
+    state.boardNotes[c.id].push({
+      text: txt,
+      time: now.toLocaleTimeString("en-GB",{hour12:false}) + " — " + now.toLocaleDateString("en-GB")
+    });
+    document.getElementById("noteText").value = "";
+    renderBoard(c, body);
+  });
+}
+
+// ═══════════════════════════════════════════
+// INTERROGATION
+// ═══════════════════════════════════════════
+function renderInterrogation(c, body) {
+  if (!state.interroSuspect) {
+    body.innerHTML =
+      '<div class="panel">' +
+        '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>INTERROGATION ROOM — SELECT SUBJECT</div>' +
+        '<div class="panel-body">' +
+          '<div class="int-select-title">SELECT SUBJECT TO INTERROGATE</div>' +
+          '<div class="int-sus-btns">' +
+            c.suspects.map(function(s){
+              return '<button class="int-sus-btn" onclick="startInterrogation(\'' + s.id + '\')">' +
+                '<span class="sus-avatar" style="width:32px;height:32px;font-size:11px">' + s.initials + '</span>' +
+                s.name +
+                (s.interrogated ? ' <span style="color:var(--green);font-size:9px">✓</span>' : '') +
+              '</button>';
+            }).join("") +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+
+  var s = c.suspects.find(function(x){ return x.id === state.interroSuspect; });
+  if (!s) return;
+
+  var exchangesHtml = s.questions.filter(function(q){ return q.answered; }).map(function(q){
+    return '<div class="exchange">' +
+      '<div class="exchange-q">' +
+        '<div class="exchange-q-label">INVESTIGATOR</div>' +
+        '<div class="exchange-q-text">' + q.text + '</div>' +
+      '</div>' +
+      '<div class="exchange-a">' +
+        '<div class="exchange-a-label">' + s.name.toUpperCase() + '</div>' +
+        '<div class="exchange-a-text">' + q.answer + '</div>' +
+        (q.unlocks ? '<div class="exchange-unlock">⚑ Evidence unlocked: ' + q.unlocks + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join("");
+
+  var pendingBtns = s.questions.filter(function(q){ return !q.answered; }).map(function(q){
+    return '<button class="int-q-btn" onclick="askQuestion(\'' + q.id + '\')">' +
+      '<span style="color:var(--text3)">Q:</span> ' + q.text +
+    '</button>';
+  }).join("");
+
+  body.innerHTML =
+    '<div class="int-layout">' +
+      '<div class="int-sidebar">' +
+        '<div class="int-sidebar-hdr">' +
+          '<div class="sus-big-avatar">' + s.initials + '</div>' +
+          '<div>' +
+            '<div class="int-subject-label">SUBJECT</div>' +
+            '<div class="int-subject-name">' + s.name + '</div>' +
+            '<div class="int-subject-rel">' + s.relation + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="int-recording">' +
+          '<div class="rec-dot"></div>' +
+          'REC — SESSION ACTIVE' +
+        '</div>' +
+        '<div class="int-meta">' +
+          '<div class="int-field"><div class="int-field-label">AGE</div><div class="int-field-val">' + s.age + '</div></div>' +
+          '<div class="int-field"><div class="int-field-label">ALIBI</div><div class="int-field-val">' + s.alibi + '</div></div>' +
+          '<div class="int-field"><div class="int-field-label">STATUS</div><div class="int-field-val">' + (s.interrogated ? '<span style="color:var(--green)">IN PROGRESS</span>' : 'NOT YET INTERROGATED') + '</div></div>' +
+        '</div>' +
+        '<button class="int-sus-btn" style="margin:12px 16px;width:calc(100% - 32px)" onclick="state.interroSuspect=null;renderTab(\'interrogation\')">← CHANGE SUBJECT</button>' +
+      '</div>' +
+      '<div class="int-main">' +
+        '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>INTERROGATION TRANSCRIPT — ' + c.code + '</div>' +
+        '<div class="int-transcript" id="intTranscript">' +
+          (exchangesHtml || '<div style="color:var(--text3);font-size:10px;padding:8px">No questions asked yet. Select from below.</div>') +
+        '</div>' +
+        '<div class="int-questions" id="intQuestions">' +
+          (pendingBtns || '<div style="color:var(--text3);font-size:10px">All questions asked.</div>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function startInterrogation(suspectId) {
+  var c = getCase();
+  var s = c.suspects.find(function(x){ return x.id === suspectId; });
+  s.interrogated = true;
+  state.interroSuspect = suspectId;
+  addRadioEntry("Interrogation initiated: " + s.name);
+  renderTab("interrogation");
+}
+
+function askQuestion(qId) {
+  var c = getCase();
+  var s = c.suspects.find(function(x){ return x.id === state.interroSuspect; });
+  var q = s.questions.find(function(x){ return x.id === qId; });
+  if (!q) return;
+  q.answered = true;
+  if (q.unlocks) {
+    unlockEvidence(c.id, q.unlocks);
+  }
+  addRadioEntry("Subject responded to question. Review transcript.");
+  renderTab("interrogation");
+  // scroll transcript to bottom
+  setTimeout(function(){
+    var t = document.getElementById("intTranscript");
+    if (t) t.scrollTop = t.scrollHeight;
+  }, 100);
+}
+
+// ═══════════════════════════════════════════
+// ACCUSATION
+// ═══════════════════════════════════════════
+var selectedAccuseSuspect = null;
+
+function openModal() {
+  var c = getCase();
+  selectedAccuseSuspect = null;
+  document.getElementById("confirmAccuseBtn").disabled = true;
+
+  var opts = document.getElementById("accuseOptions");
+  opts.innerHTML = c.suspects.map(function(s){
+    return '<div class="accuse-option" onclick="selectAccuse(\'' + s.id + '\')" id="ao-' + s.id + '">' +
+      '<div class="sus-avatar">' + s.initials + '</div>' +
+      '<div>' +
+        '<div class="accuse-name">' + s.name + '</div>' +
+        '<div class="accuse-rel">' + s.relation + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+
+  document.getElementById("accusationModal").style.display = "flex";
+}
+
+function selectAccuse(id) {
+  selectedAccuseSuspect = id;
+  document.querySelectorAll(".accuse-option").forEach(function(o){ o.classList.remove("selected"); });
+  var el = document.getElementById("ao-" + id);
+  if (el) el.classList.add("selected");
+  document.getElementById("confirmAccuseBtn").disabled = false;
+}
+
+function closeModal() {
+  document.getElementById("accusationModal").style.display = "none";
+  selectedAccuseSuspect = null;
+}
+
+function confirmAccuse() {
+  if (!selectedAccuseSuspect) return;
+  closeModal();
+  var c = getCase();
+  var accused = c.suspects.find(function(s){ return s.id === selectedAccuseSuspect; });
+  var isCorrect = selectedAccuseSuspect === c.correctSuspect;
+
+  c.status = isCorrect ? "CLOSED" : "COLD";
+  c.accusedSuspect = selectedAccuseSuspect;
+
+  addRadioEntry("FORMAL ACCUSATION FILED — CASE: " + c.code);
+  addRadioEntry(isCorrect ? "CASE CLOSED — SUSPECT IN CUSTODY" : "ACCUSATION REJECTED — INSUFFICIENT EVIDENCE");
+
+  renderOutcome(c, accused, isCorrect);
+  renderDashboard();
+  showPage("outcome");
+}
+
+// ═══════════════════════════════════════════
+// OUTCOME
+// ═══════════════════════════════════════════
+function renderOutcome(c, accused, isCorrect) {
+  var correct = c.suspects.find(function(s){ return s.id === c.correctSuspect; });
+  var card = document.getElementById("outcomeCard");
+  card.className = "outcome-card " + (isCorrect ? "solved" : "wrong");
+
+  var html =
+    '<div class="outcome-pre">CASE ' + c.code + ' — FINAL VERDICT</div>' +
+    '<div class="outcome-verdict">' + (isCorrect ? "CASE CLOSED" : "ACCUSATION REJECTED") + '</div>' +
+    '<div class="outcome-desc">' +
+      (isCorrect
+        ? 'Your investigation was thorough and your accusation correct. The Crown Prosecution Service has accepted the evidence file. The accused has been taken into custody pending trial.'
+        : 'Your accusation lacked sufficient grounding in the evidence. The suspect has been released without charge. The real perpetrator remains at large. The case has been marked cold.') +
+    '</div>' +
+    '<div class="outcome-block">' +
+      '<div class="outcome-label">YOUR ACCUSATION</div>' +
+      '<div class="outcome-name">' + accused.name + '</div>' +
+      '<div class="outcome-detail">' + accused.relation + '</div>' +
+    '</div>';
+
+  if (!isCorrect) {
+    html +=
+      '<div class="outcome-block">' +
+        '<div class="outcome-label">CORRECT ANSWER</div>' +
+        '<div class="outcome-correct-name">' + correct.name + '</div>' +
+        '<div class="outcome-detail">' + correct.motive + '</div>' +
+      '</div>';
   } else {
-    next = (currentIdx + 1) % SONGS.length;
+    html +=
+      '<div class="outcome-block">' +
+        '<div class="outcome-label">CASE SUMMARY</div>' +
+        '<div class="outcome-detail">' +
+          accused.name + ' was arrested and charged with ' + c.type.toLowerCase() + '. ' +
+          'Key evidence including ' + (c.id === "case-001" ? "the GPS vehicle data, financial forensics, and the amended will draft" : "the Wi-Fi device log, MHRA submission, and financial deposits") +
+          ' proved decisive. The case has been forwarded to the Crown Prosecution Service.' +
+        '</div>' +
+      '</div>';
   }
-  playSongById(next);
+
+  html += '<button class="btn-back" style="margin-top:20px;padding:10px 20px" onclick="goToDashboard(); document.getElementById(\'radioLog\').style.display=\'none\'">← RETURN TO CASES</button>';
+
+  card.innerHTML = html;
 }
 
-function prevSong() {
-  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
-  const prev = currentIdx <= 0 ? SONGS.length - 1 : currentIdx - 1;
-  playSongById(prev);
-}
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderDashboard();
+showPage("dashboard");
 
-function toggleShuffle() {
-  isShuffle = !isShuffle;
-  document.getElementById('btn-shuffle').classList.toggle('active', isShuffle);
-  toast(isShuffle ? '⇄ Перемішування увімк.' : '⇄ Перемішування вимк.');
-}
-
-function toggleRepeat() {
-  repeatMode = (repeatMode + 1) % 3;
-  const btn = document.getElementById('btn-repeat');
-  btn.classList.toggle('active', repeatMode > 0);
-  btn.textContent = repeatMode === 2 ? '↻¹' : '↻';
-  const msgs = ['Повтор вимкнено','Повтор усіх','Повтор однієї'];
-  toast('↻ ' + msgs[repeatMode]);
-}
-
-/* ── Seek ── */
-function seekTo(e) {
-  if (!audio.duration) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  audio.currentTime = pct * audio.duration;
-}
-
-/* ── Volume ── */
-function setVolume(e) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  volume = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  isMuted = false;
-  audio.volume = volume;
-  renderVol();
-}
-
-function toggleMute() {
-  isMuted = !isMuted;
-  audio.volume = isMuted ? 0 : volume;
-  renderVol();
-}
-
-/* ── Likes ── */
-function toggleLike(id) {
-  if (likedSongs.has(id)) { likedSongs.delete(id); toast('✕ Видалено з улюблених'); }
-  else                     { likedSongs.add(id);    toast('♥ Додано до улюблених'); }
-  renderLikeBtns();
-  renderLikedPage();
-}
-
-function toggleLikeCurrentSong() {
-  if (currentIdx < 0) return;
-  toggleLike(currentIdx);
-}
-
-function playLiked() {
-  if (likedSongs.size === 0) { toast('♥ Немає улюблених'); return; }
-  playSongById([...likedSongs][0]);
-}
-
-/* ── Render helpers ── */
-function renderPlayer() {
-  if (currentIdx < 0) return;
-  const s = SONGS[currentIdx];
-  const th = document.getElementById('np-thumb');
-  th.textContent  = s.emoji;
-  th.className    = 'np-thumb ' + s.color + ' pulse';
-  document.getElementById('np-title').textContent  = s.title;
-  document.getElementById('np-artist').textContent = s.artist;
-  renderLikeBtns();
-}
-
-function updatePlayBtn() {
-  const btn = document.getElementById('btn-play');
-  if (isLoading) { btn.innerHTML = '<div class="loading-ring"></div>'; }
-  else           { btn.textContent = (isPlaying && !audio.paused) ? '⏸' : '▶'; }
-}
-
-function renderEQ() {
-  document.getElementById('eq-bars').classList.toggle('paused', !isPlaying || audio.paused);
-}
-
-function renderVol() {
-  const v   = isMuted ? 0 : volume;
-  const pct = (v * 100).toFixed(1) + '%';
-  document.getElementById('vol-fill').style.width  = pct;
-  document.getElementById('vol-handle').style.left = pct;
-  document.getElementById('vol-icon').textContent  = v === 0 ? '🔇' : v < 0.4 ? '🔉' : '🔊';
-}
-
-function renderLikeBtns() {
-  // Player like button
-  const liked = likedSongs.has(currentIdx);
-  const npBtn = document.getElementById('np-like-btn');
-  npBtn.textContent = liked ? '♥' : '♡';
-  npBtn.classList.toggle('liked', liked);
-
-  // Inline row like buttons
-  document.querySelectorAll('.like-btn').forEach(b => {
-    const id    = parseInt(b.dataset.id);
-    const isLiked = likedSongs.has(id);
-    b.textContent = isLiked ? '♥' : '♡';
-    b.classList.toggle('liked', isLiked);
-  });
-
-  // Counts
-  const cnt  = likedSongs.size;
-  const el   = document.getElementById('liked-count');
-  if (el)  el.textContent = cnt;
-  const lib = document.getElementById('liked-count-lib');
-  if (lib) lib.textContent = cnt + ' пісень';
-}
-
-function renderHighlight() {
-  document.querySelectorAll('.song-row').forEach(r => {
-    const active = parseInt(r.dataset.id) === currentIdx;
-    r.classList.toggle('playing', active);
-    // Update play icon
-    const pi = r.querySelector('.song-play-icon');
-    if (pi) pi.textContent = (active && isPlaying) ? '🔊' : '▶';
-  });
-}
-
-/* ── Song row HTML ── */
-function songRowHTML(s, num) {
-  return `
-    <div class="song-row" data-id="${s.id}" onclick="playSongById(${s.id})">
-      <div style="position:relative;width:24px;text-align:center">
-        <span class="song-num">${num}</span>
-        <span class="song-play-icon">▶</span>
-      </div>
-      <div class="song-info">
-        <div class="song-thumb ${s.color}">${s.emoji}</div>
-        <div>
-          <div class="song-title">${s.title}</div>
-          <div class="song-artist">${s.artist} · ${s.album}</div>
-        </div>
-      </div>
-      <div class="song-actions">
-        <button class="like-btn ${likedSongs.has(s.id)?'liked':''}" data-id="${s.id}"
-          onclick="event.stopPropagation();toggleLike(${s.id})">
-          ${likedSongs.has(s.id)?'♥':'♡'}
-        </button>
-      </div>
-    </div>`;
-}
-
-/* ── Page renders ── */
-function renderTrending() {
-  const el = document.getElementById('trending-list');
-  if (!el) return;
-  el.innerHTML = SONGS.slice(0, 10).map((s, i) => songRowHTML(s, i + 1)).join('');
-}
-
-function renderNewReleases() {
-  const el = document.getElementById('new-releases');
-  if (!el) return;
-  el.innerHTML = SONGS.slice(8, 13).map(s => `
-    <div class="album-card" onclick="playSongById(${s.id})">
-      <div class="album-art-wrap">
-        <div class="album-art ${s.color}">${s.emoji}
-          <button class="card-play-btn" onclick="event.stopPropagation();playSongById(${s.id})">▶</button>
-        </div>
-      </div>
-      <div class="album-name">${s.title}</div>
-      <div class="album-sub">${s.artist} · 2024</div>
-    </div>`).join('');
-}
-
-function renderArtists() {
-  const el = document.getElementById('artists-grid');
-  if (!el) return;
-  el.innerHTML = ARTISTS.map(a => `
-    <div class="artist-card" onclick="toast('🎤 ${a.name}')">
-      <div class="artist-avatar ${a.color}">${a.emoji}</div>
-      <div class="artist-name">${a.name}</div>
-      <div class="artist-genre">${a.genre}</div>
-      <div class="artist-followers">${a.followers} слухачів</div>
-    </div>`).join('');
-}
-
-function renderAlbums() {
-  const el = document.getElementById('albums-grid');
-  if (!el) return;
-  el.innerHTML = ALBUMS.map(a => `
-    <div class="album-card" onclick="playSongById(${a.sid})">
-      <div class="album-art-wrap">
-        <div class="album-art ${a.color}">${a.emoji}
-          <button class="card-play-btn" onclick="event.stopPropagation();playSongById(${a.sid})">▶</button>
-        </div>
-      </div>
-      <div class="album-name">${a.title}</div>
-      <div class="album-sub">${a.artist} · ${a.year}</div>
-    </div>`).join('');
-}
-
-/* ── Search ── */
-let activeGenre = 'All';
-let activeMood  = null;
-
-function renderSearch(q) {
-  q = (q || '').toLowerCase().trim();
-  const results = SONGS.filter(s => {
-    const gOk = activeGenre === 'All' || s.genre === activeGenre;
-    const mOk = !activeMood || s.mood === activeMood;
-    const qOk = !q || s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q) || s.album.toLowerCase().includes(q);
-    return gOk && mOk && qOk;
-  });
-
-  const songEl = document.getElementById('search-results');
-  songEl.innerHTML = results.length
-    ? results.map((s, i) => songRowHTML(s, i + 1)).join('')
-    : '<div style="padding:36px;text-align:center;color:var(--text-muted)">Нічого не знайдено 🔍</div>';
-
-  // Artist cards (deduplicated by artist name)
-  const seen = new Set();
-  const uniq = results.filter(s => { if (seen.has(s.artist)) return false; seen.add(s.artist); return true; }).slice(0, 6);
-  document.getElementById('search-artists').innerHTML = uniq.map(s => `
-    <div class="album-card" onclick="playSongById(${s.id})">
-      <div class="album-art-wrap">
-        <div class="album-art ${s.color}">${s.emoji}
-          <button class="card-play-btn" onclick="event.stopPropagation();playSongById(${s.id})">▶</button>
-        </div>
-      </div>
-      <div class="album-name">${s.artist}</div>
-      <div class="album-sub">${s.genre}</div>
-    </div>`).join('');
-}
-
-function doSearch(v) { renderSearch(v); }
-function clearSearch() {
-  const inp = document.getElementById('main-search');
-  if (inp) inp.value = '';
-  renderSearch('');
-}
-
-function filterGenre(g, el) {
-  activeGenre = g;
-  if (el) {
-    document.querySelectorAll('#genre-filters .filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+// Random ambient dispatch messages
+var ambientMsgs = [
+  "Unit 4 confirms perimeter secure.",
+  "Lab results expedited — 48hr turnaround authorised.",
+  "Warrant approved by duty magistrate.",
+  "Comms check — all units respond.",
+  "DCI requests daily briefing 08:00.",
+  "Forensic team available from 14:00.",
+  "Background checks processing — ETA 2 hours.",
+  "Intel has flagged two related names for review.",
+  "ANPR hit on registered vehicle — coordinates logged.",
+  "Encrypted comms channel verified."
+];
+var ambientIdx = 0;
+setInterval(function(){
+  if (document.getElementById("radioLog").style.display !== "none") {
+    addRadioEntry(ambientMsgs[ambientIdx % ambientMsgs.length]);
+    ambientIdx++;
   }
-  renderSearch(document.getElementById('main-search')?.value || '');
-  navigate('search');
-}
-
-function filterMood(m, el) {
-  activeMood = (activeMood === m) ? null : m;
-  document.querySelectorAll('.filter-row:last-of-type .filter-chip').forEach(c => c.classList.remove('active'));
-  if (activeMood && el) el.classList.add('active');
-  renderSearch(document.getElementById('main-search')?.value || '');
-}
-
-function quickSearch(v) {
-  if (!v) return;
-  navigate('search');
-  setTab(document.querySelectorAll('.tab-btn')[1]);
-  const inp = document.getElementById('main-search');
-  if (inp) { inp.value = v; renderSearch(v); }
-}
-
-/* ── Liked page ── */
-function renderLikedPage() {
-  const list  = document.getElementById('liked-list');
-  const empty = document.getElementById('liked-empty');
-  if (!list) return;
-  const songs = SONGS.filter(s => likedSongs.has(s.id));
-  list.innerHTML = songs.map((s, i) => songRowHTML(s, i + 1)).join('');
-  empty.style.display = songs.length ? 'none' : 'block';
-}
-
-/* ── Navigation ── */
-function navigate(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page)?.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('nav-' + page)?.classList.add('active');
-  if (page === 'liked')  renderLikedPage();
-  if (page === 'search') renderSearch('');
-}
-
-function setTab(el) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-
-/* ── Toast ── */
-function toast(msg, ms = 2600) {
-  const c  = document.getElementById('toasts');
-  const el = Object.assign(document.createElement('div'), { className: 'toast', innerHTML: msg });
-  c.appendChild(el);
-  setTimeout(() => {
-    el.classList.add('out');
-    el.addEventListener('animationend', () => el.remove());
-  }, ms);
-}
-
-/* ── Keyboard shortcuts ── */
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
-  if (e.code === 'Space')       { e.preventDefault(); togglePlay(); }
-  if (e.code === 'ArrowRight')  nextSong();
-  if (e.code === 'ArrowLeft')   prevSong();
-  if (e.code === 'KeyM')        toggleMute();
-});
-
-/* ── Format time ── */
-function fmtTime(s) {
-  s = Math.floor(s || 0);
-  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
-}
-
-/* ── INIT ── */
-function init() {
-  renderTrending();
-  renderNewReleases();
-  renderArtists();
-  renderAlbums();
-  renderSearch('');
-  renderVol();
-}
-init();
+}, 18000);
 </script>
 </body>
 </html>
