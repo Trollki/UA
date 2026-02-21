@@ -1,1841 +1,1341 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS — Major Crimes Investigation System</title>
+<title>Немецкий с нуля 🌟 Урок 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
-
   :root {
-    --bg: #06080f;
-    --bg2: #0a0d16;
-    --bg3: #0d1120;
-    --bg4: #111828;
-    --border: #1a2235;
-    --border2: #243050;
-    --text: #c8d4e8;
-    --text2: #7a8aaa;
-    --text3: #3a4a6a;
-    --accent: #3a7bd5;
-    --accent2: #5a9bf5;
-    --red: #e05050;
-    --red2: #ff6060;
-    --green: #3ac87a;
-    --amber: #e0a040;
-    --purple: #9a70d5;
-    --mono: 'Share Tech Mono', monospace;
-    --sans: 'Rajdhani', sans-serif;
+    --yellow: #FFD93D;
+    --orange: #FF6B35;
+    --blue: #4ECDC4;
+    --purple: #A29BFE;
+    --pink: #FD79A8;
+    --green: #55EFC4;
+    --dark: #2D3436;
+    --light: #F8F9FA;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
+    font-family: 'Nunito', sans-serif;
+    background: #FFF9F0;
+    color: var(--dark);
     min-height: 100vh;
-    overflow-x: hidden;
   }
 
-  /* Scanlines */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* CRT flicker */
-  @keyframes flicker { 0%,100%{opacity:1} 92%{opacity:.98} 94%{opacity:.94} 96%{opacity:.99} }
-  body { animation: flicker 8s infinite; }
-
-  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  @keyframes scanDown { from{top:-100px} to{top:100%} }
-  @keyframes blink { 0%,100%{opacity:1} 49%{opacity:1} 50%{opacity:0} }
-
-  .page { display: none; }
-  .page.active { display: flex; flex-direction: column; min-height: 100vh; animation: fadeIn .3s ease; }
-
-  /* ─── TOP BAR ─── */
-  .topbar {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    height: 52px;
-    flex-shrink: 0;
-  }
-  .topbar-logo {
-    font-family: var(--sans);
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    color: var(--accent2);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .topbar-logo span { color: var(--text3); font-size: 10px; letter-spacing: 2px; margin-left: 4px; }
-  .topbar-divider { width: 1px; height: 28px; background: var(--border); }
-  .topbar-info { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-  .clock-display { color: var(--accent2); font-size: 14px; letter-spacing: 3px; }
-  .det-badge {
-    background: rgba(58,123,213,.1);
-    border: 1px solid rgba(58,123,213,.3);
-    color: var(--accent2);
-    font-size: 9px;
-    letter-spacing: 2px;
-    padding: 3px 10px;
-  }
-
-  /* ─── NOTIFICATION ─── */
-  #notification {
-    position: fixed;
-    top: 60px; right: 20px;
-    background: var(--bg3);
-    border: 1px solid var(--green);
-    color: var(--green);
-    padding: 10px 16px;
-    font-size: 11px;
-    letter-spacing: 1px;
-    z-index: 8888;
-    display: none;
-    animation: fadeIn .3s ease;
-  }
-  #notification.warn { border-color: var(--amber); color: var(--amber); }
-  #notification.error { border-color: var(--red); color: var(--red); }
-
-  /* ─── DASHBOARD ─── */
-  .dashboard-body { padding: 24px 28px; flex: 1; max-width: 1280px; width: 100%; margin: 0 auto; }
-
-  .dash-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
-  .stat-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 16px 20px;
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #FFD93D 0%, #FF6B35 50%, #A29BFE 100%);
+    padding: 30px 40px;
+    text-align: center;
     position: relative;
     overflow: hidden;
   }
-  .stat-card::after {
-    content: '';
+  .header::before {
+    content: '🇩🇪';
     position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
+    font-size: 120px;
+    opacity: 0.15;
+    top: -20px;
+    left: 20px;
+    animation: float 4s ease-in-out infinite;
   }
-  .stat-card.red::after { background: var(--red); }
-  .stat-card.blue::after { background: var(--accent); }
-  .stat-card.green::after { background: var(--green); }
-  .stat-card.amber::after { background: var(--amber); }
-  .stat-num { font-family: var(--sans); font-size: 36px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
-  .stat-label { color: var(--text3); font-size: 9px; letter-spacing: 2px; }
-  .stat-card.red .stat-num { color: var(--red); }
-  .stat-card.blue .stat-num { color: var(--accent2); }
-  .stat-card.green .stat-num { color: var(--green); }
-  .stat-card.amber .stat-num { color: var(--amber); }
-
-  .section-hdr {
-    display: flex; align-items: center; gap: 12px;
-    color: var(--text3); font-size: 9px; letter-spacing: 3px;
-    margin-bottom: 14px;
-  }
-  .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  .case-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(380px,1fr)); gap: 14px; }
-  .case-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 20px;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .case-card:hover { border-color: var(--border2); background: var(--bg4); }
-  .case-card::before {
-    content: '';
+  .header::after {
+    content: '⭐';
     position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
+    font-size: 80px;
+    opacity: 0.2;
+    bottom: -10px;
+    right: 30px;
+    animation: float 3s ease-in-out infinite reverse;
   }
-  .case-card.OPEN::before { background: linear-gradient(90deg, var(--red), transparent); }
-  .case-card.CLOSED::before { background: linear-gradient(90deg, var(--green), transparent); }
-  .case-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .case-code { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
-  .status-tag {
-    font-size: 9px; letter-spacing: 2px; padding: 2px 8px;
-    border: 1px solid; font-family: var(--sans); font-weight: 600;
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
   }
-  .status-tag.OPEN { color: var(--red); border-color: rgba(224,80,80,.4); background: rgba(224,80,80,.08); }
-  .status-tag.CLOSED { color: var(--green); border-color: rgba(58,200,122,.4); background: rgba(58,200,122,.08); }
-  .status-tag.COLD { color: var(--text3); border-color: var(--border); }
-  .case-title { font-family: var(--sans); font-size: 18px; font-weight: 600; color: #d8e4f8; margin-bottom: 6px; letter-spacing: 1px; }
-  .case-type-loc { display: flex; gap: 10px; margin-bottom: 10px; }
-  .case-type { color: var(--accent2); font-size: 10px; }
-  .case-loc { color: var(--text3); font-size: 10px; }
-  .case-synopsis { color: var(--text2); font-size: 11px; line-height: 1.7; margin-bottom: 12px; }
-  .case-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); }
-  .priority-tag { font-size: 9px; letter-spacing: 1px; }
-  .priority-tag.CRITICAL { color: var(--red2); }
-  .priority-tag.HIGH { color: var(--amber); }
-  .suspect-mini-row { display: flex; gap: 4px; }
-  .sus-dot { width: 24px; height: 24px; background: var(--bg4); border: 1px solid var(--border2); font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--accent2); font-weight: 700; }
-
-  /* ─── CASE VIEW ─── */
-  .case-view { flex: 1; display: flex; flex-direction: column; }
-
-  .case-topbar {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    height: 48px;
-    flex-shrink: 0;
-  }
-  .btn-back {
-    background: none; border: 1px solid var(--border);
-    color: var(--text3); padding: 5px 12px; cursor: pointer;
-    font-size: 10px; letter-spacing: 1px; font-family: var(--mono);
-    transition: all .2s;
-  }
-  .btn-back:hover { border-color: var(--border2); color: var(--text2); }
-  .case-id-title { display: flex; align-items: center; gap: 10px; flex: 1; }
-  .case-id { color: var(--text3); font-size: 10px; letter-spacing: 2px; }
-  .case-view-title { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; letter-spacing: 1px; }
-
-  .btn-accuse {
-    background: rgba(224,80,80,.1);
-    border: 1px solid rgba(224,80,80,.5);
-    color: var(--red2);
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 10px;
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.8rem;
+    color: white;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
     letter-spacing: 1px;
-    font-family: var(--mono);
-    transition: all .2s;
-    margin-left: auto;
   }
-  .btn-accuse:hover { background: rgba(224,80,80,.2); }
-
-  /* ─── TABS ─── */
-  .tab-bar {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    gap: 0;
-    flex-shrink: 0;
-  }
-  .tab-btn {
-    background: none; border: none; border-bottom: 2px solid transparent;
-    color: var(--text3); padding: 12px 16px; cursor: pointer;
-    font-size: 10px; letter-spacing: 2px; font-family: var(--mono);
-    transition: all .2s;
-  }
-  .tab-btn:hover { color: var(--text2); }
-  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
-
-  .tab-body { flex: 1; overflow: auto; padding: 20px 24px; }
-
-  /* ─── PANELS ─── */
-  .panel {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    margin-bottom: 14px;
-  }
-  .panel-hdr {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text3);
-  }
-  .panel-hdr .dot { width: 6px; height: 6px; border-radius: 50%; }
-  .panel-body { padding: 16px; }
-
-  /* ─── OVERVIEW ─── */
-  .overview-grid { display: grid; grid-template-columns: 1fr 360px; gap: 14px; }
-  .synopsis-text { color: var(--text2); font-size: 12px; line-height: 1.9; margin-bottom: 16px; }
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .detail-item { background: var(--bg2); padding: 10px 12px; border: 1px solid var(--border); }
-  .detail-key { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 4px; }
-  .detail-val { color: var(--text); font-size: 11px; }
-  .suspect-profile-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0; border-bottom: 1px solid var(--border);
-  }
-  .sus-avatar {
-    width: 42px; height: 42px;
-    background: var(--bg2); border: 1px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--sans); font-size: 12px; font-weight: 700;
-    color: var(--accent2); flex-shrink: 0;
-  }
-  .sus-name { font-family: var(--sans); font-size: 13px; font-weight: 600; color: #d8e4f8; }
-  .sus-rel { color: var(--text3); font-size: 10px; }
-  .threat-bar { margin-left: auto; text-align: right; }
-  .threat-track { width: 80px; height: 4px; background: var(--bg); margin: 3px 0; }
-  .threat-fill { height: 100%; transition: width 1s; }
-  .threat-num { font-size: 10px; }
-
-  /* ─── TIMELINE ─── */
-  .timeline-wrap { padding: 8px 0; }
-  .tl-item {
-    display: flex; gap: 16px; padding: 12px 0;
-    position: relative; padding-left: 30px;
-    border-left: 1px solid var(--border);
-    margin-left: 20px;
-    animation: slideIn .4s ease both;
-  }
-  .tl-item::before {
-    content: '';
-    position: absolute;
-    left: -5px; top: 16px;
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: 2px solid var(--bg3);
-  }
-  .tl-item.locked { opacity: .3; }
-  .tl-item.locked::before { background: var(--text3); }
-  .tl-time { color: var(--accent2); font-size: 11px; letter-spacing: 1px; min-width: 48px; padding-top: 1px; }
-  .tl-event { color: var(--text2); font-size: 11px; line-height: 1.7; flex: 1; }
-  .tl-lock { color: var(--text3); font-size: 10px; font-style: italic; }
-
-  /* ─── EVIDENCE ─── */
-  .ev-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; height: calc(100vh - 200px); }
-  .ev-list { background: var(--bg3); border: 1px solid var(--border); overflow: auto; }
-  .ev-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; border-bottom: 1px solid var(--border);
-    cursor: pointer; transition: background .15s;
-  }
-  .ev-item:hover { background: var(--bg4); }
-  .ev-item.active { background: var(--bg4); border-left: 2px solid var(--accent2); }
-  .ev-item.locked { opacity: .35; cursor: not-allowed; }
-  .ev-type { font-size: 8px; letter-spacing: 2px; font-weight: 700; min-width: 32px; }
-  .ev-type.DOC { color: var(--accent2); }
-  .ev-type.IMG { color: var(--purple); }
-  .ev-type.AUDIO { color: var(--amber); }
-  .ev-type.FORENSIC { color: var(--green); }
-  .ev-name { color: var(--text2); font-size: 10px; line-height: 1.4; flex: 1; }
-  .lock-icon { color: var(--text3); font-size: 10px; }
-
-  .ev-viewer { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .ev-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 10px; letter-spacing: 3px; }
-
-  /* Document viewer */
-  .doc-viewer { display: flex; flex-direction: column; height: 100%; }
-  .doc-hdr {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
-  }
-  .doc-title { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; margin-bottom: 4px; }
-  .doc-meta { display: flex; gap: 16px; }
-  .doc-meta span { color: var(--text3); font-size: 9px; letter-spacing: 1px; }
-  .doc-meta span b { color: var(--accent2); }
-  .doc-body {
-    flex: 1; padding: 20px;
-    overflow: auto;
-    color: var(--text2);
-    font-size: 12px;
-    line-height: 1.9;
-    white-space: pre-wrap;
-    border-bottom: 1px solid var(--border);
-  }
-  .doc-watermark {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%) rotate(-30deg);
-    font-family: var(--sans);
-    font-size: 48px;
-    font-weight: 700;
-    color: rgba(58,123,213,.04);
-    pointer-events: none;
-    letter-spacing: 8px;
-  }
-  .doc-footer {
-    padding: 8px 20px;
-    background: var(--bg2);
-    display: flex; justify-content: space-between;
-    font-size: 9px; color: var(--text3); letter-spacing: 1px;
-  }
-  .classified-stamp {
-    background: rgba(224,80,80,.1);
-    border: 1px solid rgba(224,80,80,.3);
-    color: var(--red);
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 10px;
-    letter-spacing: 3px;
-    padding: 2px 8px;
-    display: inline-block;
+  .header .subtitle {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    font-weight: 600;
     margin-top: 6px;
   }
+  .timer-bar {
+    background: rgba(255,255,255,0.3);
+    border-radius: 30px;
+    padding: 8px 20px;
+    display: inline-block;
+    margin-top: 14px;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    backdrop-filter: blur(5px);
+  }
 
-  /* Image evidence */
-  .img-evidence { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
-  .img-desc { color: var(--text2); font-size: 12px; line-height: 1.7; }
-  .img-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
-  .img-thumb {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    height: 100px;
+  /* PROGRESS */
+  .progress-container {
+    background: white;
+    padding: 16px 40px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .progress-step {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--text3);
-    font-size: 10px;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    font-weight: 700;
+    font-size: 0.82rem;
+    background: #F0F0F0;
+    color: #999;
+    white-space: nowrap;
   }
-  .img-thumb::after {
-    content: attr(data-label);
-    position: absolute;
-    bottom: 6px; left: 6px;
-    font-size: 8px;
-    color: var(--accent2);
-    background: rgba(0,0,0,.6);
-    padding: 2px 6px;
-    letter-spacing: 1px;
+  .progress-step.active {
+    background: var(--yellow);
+    color: var(--dark);
+    transform: scale(1.05);
+    box-shadow: 0 3px 12px rgba(255,217,61,0.4);
+  }
+  .progress-step.done {
+    background: var(--green);
+    color: var(--dark);
+  }
+  .progress-step .num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
   }
 
-  /* Audio transcript */
-  .audio-transcript { padding: 20px; }
-  .audio-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .audio-wave { display: flex; gap: 2px; align-items: center; height: 24px; }
-  .audio-wave span { width: 3px; background: var(--accent2); animation: audioWave 1.2s ease infinite; }
-  .audio-wave span:nth-child(2) { animation-delay: .2s; }
-  .audio-wave span:nth-child(3) { animation-delay: .4s; }
-  .audio-wave span:nth-child(4) { animation-delay: .6s; }
-  .audio-wave span:nth-child(5) { animation-delay: .8s; }
-  @keyframes audioWave {
-    0%,100%{height:6px} 50%{height:20px}
+  /* MAIN */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
   }
-  .transcript-line { margin-bottom: 12px; }
-  .transcript-speaker { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 3px; }
-  .transcript-speaker.subject { color: var(--red2); }
-  .transcript-text { color: var(--text2); font-size: 12px; line-height: 1.7; }
 
-  /* ─── SUSPECTS TAB ─── */
-  .sus-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; height: calc(100vh - 200px); }
-  .sus-list { background: var(--bg3); border: 1px solid var(--border); overflow: auto; }
-  .sus-list-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px; border-bottom: 1px solid var(--border);
-    cursor: pointer; transition: background .15s;
+  /* SECTIONS */
+  .section {
+    display: none;
+    animation: fadeIn 0.5s ease;
   }
-  .sus-list-item:hover { background: var(--bg4); }
-  .sus-list-item.active { background: var(--bg4); border-left: 2px solid var(--red2); }
-  .sus-interrogated { margin-left: auto; color: var(--green); font-size: 8px; letter-spacing: 1px; }
+  .section.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  .sus-detail { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .sus-detail-hdr {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+  /* CARD */
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+    border: 3px solid transparent;
+  }
+  .card.yellow { border-color: var(--yellow); }
+  .card.blue { border-color: var(--blue); }
+  .card.purple { border-color: var(--purple); }
+  .card.orange { border-color: var(--orange); }
+  .card.pink { border-color: var(--pink); }
+  .card.green { border-color: var(--green); }
+
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.9rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-meta {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #F0F0F0;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .badge.time { background: #FFE4CC; color: #D65A00; }
+  .badge.tip  { background: #E8F4FF; color: #0066CC; }
+
+  /* TEACHER BOX */
+  .teacher-box {
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    border-left: 5px solid var(--purple);
+    border-radius: 0 16px 16px 0;
     padding: 16px 20px;
-    display: flex; gap: 14px; align-items: center;
+    margin: 16px 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
   }
-  .sus-big-avatar {
-    width: 56px; height: 56px;
-    background: var(--bg3);
-    border: 2px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--sans); font-size: 18px; font-weight: 700;
-    color: var(--accent2);
+  .teacher-box .label {
+    font-weight: 900;
+    color: var(--purple);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
   }
-  .sus-detail-body { padding: 16px 20px; overflow: auto; flex: 1; }
-  .sus-field { margin-bottom: 16px; }
-  .sus-field-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 5px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-  .sus-field-val { color: var(--text2); font-size: 11px; line-height: 1.7; }
-  .threat-full { display: flex; align-items: center; gap: 10px; }
-  .threat-track-full { flex: 1; height: 6px; background: var(--bg); }
-  .btn-interrogate {
-    background: rgba(58,123,213,.1);
-    border: 1px solid rgba(58,123,213,.4);
-    color: var(--accent2);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 2px;
-    transition: all .2s;
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-top: 4px;
-  }
-  .btn-interrogate:hover { background: rgba(58,123,213,.2); }
 
-  /* ─── BOARD ─── */
-  .board-layout { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
-  .board-canvas {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    min-height: 420px;
-    padding: 16px;
+  /* VOCAB GRID */
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .vocab-card {
+    background: linear-gradient(135deg, var(--yellow), #FFF0A0);
+    border-radius: 18px;
+    padding: 18px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 3px solid transparent;
     position: relative;
   }
-  .board-grid-bg {
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-    background-size: 28px 28px;
-    opacity: .5;
+  .vocab-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    border-color: var(--orange);
+    box-shadow: 0 8px 20px rgba(255,107,53,0.2);
   }
-  .board-items { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 10px; }
-  .board-card {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    padding: 10px 12px;
-    font-size: 10px;
-    color: var(--text2);
-    max-width: 160px;
-    transition: border-color .2s;
-  }
-  .board-card.suspect { border-color: rgba(224,80,80,.4); }
-  .board-card.evidence { border-color: rgba(58,123,213,.3); }
-  .board-card-type { font-size: 8px; letter-spacing: 2px; margin-bottom: 4px; }
-  .board-card.suspect .board-card-type { color: var(--red2); }
-  .board-card.evidence .board-card-type { color: var(--accent2); }
-  .board-card-name { color: var(--text); font-size: 11px; line-height: 1.4; }
+  .vocab-card .emoji { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+  .vocab-card .german { font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--dark); }
+  .vocab-card .article { font-size: 0.75rem; font-weight: 700; color: var(--orange); }
+  .vocab-card .russian { font-size: 0.78rem; color: #666; margin-top: 4px; }
+  .vocab-card .phonetic { font-size: 0.7rem; color: #AAA; font-style: italic; margin-top: 2px; }
 
-  .notes-panel { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; }
-  .notes-list { flex: 1; padding: 12px; overflow: auto; max-height: 300px; }
-  .note-entry { padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .note-time { color: var(--text3); font-size: 8px; letter-spacing: 1px; margin-bottom: 3px; }
-  .note-text { color: var(--text2); font-size: 11px; line-height: 1.6; }
-  .note-input-area { padding: 12px; border-top: 1px solid var(--border); }
-  .note-textarea {
-    width: 100%; background: var(--bg2); border: 1px solid var(--border);
-    color: var(--text); padding: 8px 10px; font-family: var(--mono);
-    font-size: 11px; resize: none; margin-bottom: 8px;
-    outline: none;
+  /* COLORS */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
   }
-  .note-textarea:focus { border-color: var(--border2); }
-  .btn-note {
-    background: var(--bg2); border: 1px solid var(--border2);
-    color: var(--text2); padding: 6px 12px; cursor: pointer;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    width: 100%; transition: all .2s;
-  }
-  .btn-note:hover { border-color: var(--accent); color: var(--accent2); }
-
-  /* ─── INTERROGATION ─── */
-  .int-layout { display: grid; grid-template-columns: 280px 1fr; gap: 14px; }
-  .int-sidebar { background: var(--bg3); border: 1px solid var(--border); }
-  .int-sidebar-hdr {
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 14px 16px; display: flex; gap: 12px; align-items: center;
-  }
-  .int-subject-label { color: var(--red2); font-size: 8px; letter-spacing: 3px; margin-bottom: 3px; }
-  .int-subject-name { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #d8e4f8; }
-  .int-subject-rel { color: var(--text3); font-size: 10px; }
-  .int-meta { padding: 14px 16px; }
-  .int-field { margin-bottom: 14px; }
-  .int-field-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 5px; }
-  .int-field-val { color: var(--text2); font-size: 10px; line-height: 1.7; }
-  .int-recording {
-    margin: 12px 16px;
-    background: rgba(224,80,80,.06);
-    border: 1px solid rgba(224,80,80,.3);
-    padding: 6px 10px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 9px; color: var(--red2); letter-spacing: 2px;
-  }
-  .rec-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red2); animation: pulse 1s infinite; }
-
-  .int-main { background: var(--bg3); border: 1px solid var(--border); display: flex; flex-direction: column; }
-  .int-transcript { flex: 1; padding: 16px; overflow: auto; max-height: 60vh; display: flex; flex-direction: column; gap: 12px; }
-  .exchange {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 14px 16px;
-    animation: slideIn .3s ease both;
-  }
-  .exchange-q { margin-bottom: 10px; }
-  .exchange-q-label { color: var(--accent2); font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
-  .exchange-q-text { color: var(--text); font-size: 11px; line-height: 1.6; }
-  .exchange-a { border-left: 2px solid var(--red); padding-left: 12px; }
-  .exchange-a-label { color: var(--red2); font-size: 9px; letter-spacing: 2px; margin-bottom: 4px; }
-  .exchange-a-text { color: var(--text2); font-size: 11px; line-height: 1.7; font-style: italic; }
-  .exchange-unlock { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); color: var(--green); font-size: 9px; letter-spacing: 1px; }
-
-  .int-questions { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
-  .int-q-btn {
-    background: var(--bg2);
-    border: 1px dashed var(--border2);
-    color: var(--text2);
-    padding: 10px 14px;
+  .color-box {
+    border-radius: 18px;
+    padding: 20px 12px;
+    text-align: center;
     cursor: pointer;
-    font-family: var(--mono);
-    font-size: 10px;
+    transition: all 0.3s;
+  }
+  .color-box:hover { transform: scale(1.06); }
+  .color-box .german { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+  .color-box .russian { font-size: 0.8rem; margin-top: 4px; opacity: 0.8; }
+
+  /* NUMBERS */
+  .numbers-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .num-pill {
+    background: linear-gradient(135deg, var(--blue), #81ECEC);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .num-pill span { font-size: 0.75rem; display: block; font-family: 'Nunito', sans-serif; font-weight: 600; color: #2D3436; opacity: 0.7; }
+  .num-pill:hover { transform: scale(1.08); box-shadow: 0 5px 15px rgba(78,205,196,0.35); }
+
+  /* DIALOGUE */
+  .dialogue {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bubble {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 20px;
+    line-height: 1.6;
+    position: relative;
+  }
+  .bubble.left {
+    background: #F0F0F0;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+  }
+  .bubble.right {
+    background: linear-gradient(135deg, var(--blue), #81ECEC);
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+  }
+  .bubble .who {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .bubble .de { font-family: 'Fredoka One', cursive; font-size: 1.05rem; }
+  .bubble .ru { font-size: 0.8rem; color: #666; margin-top: 3px; }
+  .bubble .ph { font-size: 0.72rem; color: #AAA; font-style: italic; }
+
+  /* GAME */
+  .quiz-box {
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+    border-radius: 20px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .quiz-question {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .quiz-btn {
+    background: white;
+    border: 3px solid #E0E0E0;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .quiz-btn:hover { border-color: var(--yellow); background: #FFF9E0; transform: scale(1.02); }
+  .quiz-btn.correct { border-color: var(--green); background: #E0FFF5; animation: bounce 0.4s; }
+  .quiz-btn.wrong { border-color: var(--pink); background: #FFE5EE; }
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .quiz-feedback {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 12px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ALPHABET */
+  .alpha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .alpha-letter {
+    background: white;
+    border: 2.5px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .alpha-letter:hover { border-color: var(--purple); background: #F5F0FF; transform: scale(1.05); }
+  .alpha-letter .letter { font-family: 'Fredoka One', cursive; font-size: 1.3rem; }
+  .alpha-letter .sound { font-size: 0.65rem; color: #999; }
+
+  /* SONG */
+  .song-card {
+    background: linear-gradient(135deg, #fd79a820, #fdcb6e20);
+    border-radius: 20px;
+    padding: 24px;
+    border: 3px solid var(--pink);
+    text-align: center;
+  }
+  .song-card h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; margin-bottom: 4px; }
+  .song-lyrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
     text-align: left;
-    transition: all .2s;
   }
-  .int-q-btn:hover { border-color: var(--accent); color: var(--text); background: var(--bg4); }
-  .int-q-btn.asked { display: none; }
-  .int-select-wrap { padding: 20px; }
-  .int-select-title { color: var(--text3); font-size: 9px; letter-spacing: 3px; margin-bottom: 16px; }
-  .int-sus-btns { display: flex; flex-wrap: wrap; gap: 10px; }
-  .int-sus-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text2); padding: 10px 14px; cursor: pointer;
-    font-family: var(--mono); font-size: 11px;
-    transition: all .2s;
+  .lyrics-de, .lyrics-ru {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
   }
-  .int-sus-btn:hover { border-color: var(--border2); color: var(--text); }
+  .lyrics-de h4 { color: var(--orange); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; font-weight: 900; letter-spacing: 1px; }
+  .lyrics-ru h4 { color: var(--purple); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; font-weight: 900; letter-spacing: 1px; }
+  .lyrics-de p, .lyrics-ru p { font-size: 0.9rem; line-height: 1.9; }
 
-  /* ─── ACCUSATION MODAL ─── */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.85);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 5000;
-    backdrop-filter: blur(2px);
+  /* WORKSHEET */
+  .worksheet-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    font-size: 0.95rem;
   }
-  .modal {
-    background: var(--bg3);
-    border: 1px solid rgba(224,80,80,.4);
-    padding: 32px;
-    max-width: 480px;
-    width: 100%;
-    animation: fadeIn .3s ease;
+  .blank {
+    display: inline-block;
+    border-bottom: 2.5px solid var(--dark);
+    width: 80px;
+    margin: 0 6px;
   }
-  .modal-title { color: var(--red2); font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; }
-  .modal-subtitle { color: var(--text3); font-size: 11px; line-height: 1.7; margin-bottom: 20px; }
-  .accuse-option {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px; border: 1px solid var(--border);
-    cursor: pointer; margin-bottom: 6px; background: var(--bg2);
-    transition: all .2s;
-  }
-  .accuse-option:hover { border-color: var(--border2); }
-  .accuse-option.selected { border-color: rgba(224,80,80,.6); background: rgba(224,80,80,.06); }
-  .accuse-name { color: var(--text); font-family: var(--sans); font-size: 13px; font-weight: 600; }
-  .accuse-rel { color: var(--text3); font-size: 10px; }
-  .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
-  .btn-cancel {
-    background: none; border: 1px solid var(--border);
-    color: var(--text3); padding: 8px 16px; cursor: pointer;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    transition: all .2s;
-  }
-  .btn-cancel:hover { border-color: var(--border2); color: var(--text2); }
-  .btn-confirm {
-    background: rgba(224,80,80,.15);
-    border: 1px solid rgba(224,80,80,.5);
-    color: var(--red2); padding: 8px 20px; cursor: pointer;
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    transition: all .2s; flex: 1;
-  }
-  .btn-confirm:hover:not(:disabled) { background: rgba(224,80,80,.25); }
-  .btn-confirm:disabled { opacity: .3; cursor: not-allowed; }
 
-  /* ─── OUTCOME ─── */
-  .outcome-page {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; padding: 40px;
+  /* NAV BUTTONS */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 28px;
+    flex-wrap: wrap;
   }
-  .outcome-card {
-    background: var(--bg3);
-    border: 2px solid;
-    padding: 40px;
-    max-width: 600px;
-    width: 100%;
-    animation: fadeIn .6s ease;
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .outcome-card.solved { border-color: var(--green); }
-  .outcome-card.wrong { border-color: var(--red); }
-  .outcome-pre { color: var(--text3); font-size: 9px; letter-spacing: 3px; margin-bottom: 8px; }
-  .outcome-verdict {
-    font-family: var(--sans); font-size: 32px; font-weight: 700; margin-bottom: 6px;
-    letter-spacing: 2px;
+  .btn-next {
+    background: linear-gradient(135deg, var(--orange), var(--yellow));
+    color: white;
+    box-shadow: 0 5px 15px rgba(255,107,53,0.3);
+    flex: 1;
   }
-  .outcome-card.solved .outcome-verdict { color: var(--green); }
-  .outcome-card.wrong .outcome-verdict { color: var(--red2); }
-  .outcome-desc { color: var(--text2); font-size: 12px; line-height: 1.8; margin-bottom: 24px; }
-  .outcome-block {
-    background: var(--bg2); border: 1px solid var(--border);
-    padding: 16px; margin-bottom: 12px;
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,107,53,0.4); }
+  .btn-prev {
+    background: #F0F0F0;
+    color: var(--dark);
   }
-  .outcome-label { color: var(--text3); font-size: 8px; letter-spacing: 2px; margin-bottom: 6px; }
-  .outcome-name { font-family: var(--sans); font-size: 18px; font-weight: 600; color: #d8e4f8; }
-  .outcome-detail { color: var(--text2); font-size: 11px; line-height: 1.7; margin-top: 6px; }
-  .outcome-correct-name { font-family: var(--sans); font-size: 18px; font-weight: 600; color: var(--green); }
+  .btn-prev:hover { background: #E0E0E0; }
 
-  /* ─── RADIO LOG ─── */
-  .radio-log {
-    position: fixed; bottom: 14px; right: 14px;
-    width: 280px;
-    background: rgba(6,8,15,.95);
-    border: 1px solid var(--border);
-    font-size: 10px;
-    z-index: 7000;
+  /* STARS */
+  .stars {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 2rem;
+    letter-spacing: 8px;
   }
-  .radio-log-hdr {
-    padding: 6px 10px;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 8px;
-    color: var(--text3); font-size: 9px; letter-spacing: 2px;
+
+  /* SUMMARY */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
   }
-  .radio-log-entries { padding: 6px 10px; max-height: 120px; overflow: auto; }
-  .radio-entry { color: var(--text3); font-size: 9px; line-height: 1.7; padding: 2px 0; }
-  .radio-entry.new { color: var(--text2); animation: fadeIn .5s ease; }
+  .summary-item {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    text-align: center;
+    border: 3px solid;
+  }
+  .summary-item h3 { font-family: 'Fredoka One', cursive; font-size: 2rem; }
+  .summary-item p { font-size: 0.8rem; color: #888; font-weight: 700; margin-top: 4px; }
 
-  /* ─── SCROLLBAR ─── */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); }
+  /* TIP BOXES */
+  .tip {
+    background: #FFFBE6;
+    border: 2px dashed var(--yellow);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  .tip strong { color: var(--orange); }
 
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 768px) {
-    .overview-grid, .ev-layout, .sus-layout, .board-layout, .int-layout { grid-template-columns: 1fr; }
-    .dash-grid { grid-template-columns: repeat(2,1fr); }
-    .case-grid { grid-template-columns: 1fr; }
+  /* GAME MATCH */
+  .match-game {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .match-col { display: flex; flex-direction: column; gap: 8px; }
+  .match-item {
+    background: white;
+    border: 3px solid #E0E0E0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .match-item:hover { border-color: var(--blue); background: #E8FFFE; }
+  .match-item.selected { border-color: var(--orange); background: #FFF3E0; }
+  .match-item.matched { border-color: var(--green); background: #E0FFF5; cursor: default; }
+  .match-item.wrong { border-color: var(--pink); animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.8rem; }
+    .song-lyrics { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .quiz-options { grid-template-columns: 1fr; }
+    .match-game { grid-template-columns: 1fr; }
+    .main { padding: 16px 12px 40px; }
   }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR (always visible on case pages) -->
-<div id="global-topbar" class="topbar" style="display:none">
-  <div class="topbar-logo">
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
-      <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
-    </svg>
-    NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
-  </div>
-  <div class="topbar-divider"></div>
-  <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE</div>
-  <div class="topbar-right">
-    <div class="status-dot"></div>
-    <div class="clock-display" id="clock">--:--:--</div>
-    <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
-  </div>
+<!-- HEADER -->
+<div class="header">
+  <h1>🇩🇪 Немецкий с нуля!</h1>
+  <div class="subtitle">Урок 1 · Уровень А0 · 10 лет</div>
+  <div class="timer-bar">⏱ 60 минут · 7 частей урока</div>
 </div>
 
-<!-- NOTIFICATION -->
-<div id="notification"></div>
-
-<!-- RADIO LOG -->
-<div class="radio-log" id="radioLog" style="display:none">
-  <div class="radio-log-hdr">
-    <div class="rec-dot"></div>
-    DISPATCH COMMS
-  </div>
-  <div class="radio-log-entries" id="radioEntries"></div>
+<!-- PROGRESS -->
+<div class="progress-container" id="progressBar">
+  <div class="progress-step active" onclick="goTo(0)"><span class="num">1</span>Знакомство</div>
+  <div class="progress-step" onclick="goTo(1)"><span class="num">2</span>Алфавит</div>
+  <div class="progress-step" onclick="goTo(2)"><span class="num">3</span>Числа</div>
+  <div class="progress-step" onclick="goTo(3)"><span class="num">4</span>Цвета</div>
+  <div class="progress-step" onclick="goTo(4)"><span class="num">5</span>Диалог</div>
+  <div class="progress-step" onclick="goTo(5)"><span class="num">6</span>Игра</div>
+  <div class="progress-step" onclick="goTo(6)"><span class="num">7</span>Итог</div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="accusationModal" style="display:none">
-  <div class="modal">
-    <div class="modal-title">⚖ FORMAL ACCUSATION</div>
-    <div class="modal-subtitle">Select the primary suspect. This action will close the active investigation file. Ensure all available evidence has been reviewed before proceeding.</div>
-    <div id="accuseOptions"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-      <button class="btn-confirm" id="confirmAccuseBtn" disabled onclick="confirmAccuse()">CONFIRM ACCUSATION</button>
-    </div>
-  </div>
-</div>
+<div class="main">
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- PAGE: DASHBOARD -->
-<!-- ══════════════════════════════════════════════════════ -->
-<div class="page active" id="page-dashboard">
-  <div class="topbar">
-    <div class="topbar-logo">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
-        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
-      </svg>
-      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
-    </div>
-    <div class="topbar-divider"></div>
-    <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE — MAJOR CRIMES UNIT</div>
-    <div class="topbar-right">
-      <div class="status-dot"></div>
-      <div class="clock-display" id="clock2">--:--:--</div>
-      <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
-    </div>
+<!-- ===================== SECTION 1: ЗНАКОМСТВО ===================== -->
+<div class="section active" id="sec0">
+  <div class="section-title">👋 Знакомство с немецким</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 10 мин</span>
+    <span class="badge tip">💡 Разогрев</span>
   </div>
 
-  <div class="dashboard-body">
-    <div class="dash-grid">
-      <div class="stat-card red">
-        <div class="stat-num" id="stat-open">2</div>
-        <div class="stat-label">ACTIVE CASES</div>
+  <div class="card yellow">
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя — что говорить</div>
+      «Привет! Сегодня мы начнём учить немецкий язык. На нём говорят в Германии, Австрии и Швейцарии — почти 100 миллионов людей! А ты знаешь, откуда родом LEGO? Это немецкое слово! Давай я покажу тебе несколько слов, которые ты уже знаешь по-немецки!»
+    </div>
+
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:14px; font-size:1.3rem;">🤩 Слова, которые ты уже знаешь!</h3>
+    <div class="vocab-grid">
+      <div class="vocab-card" style="background:linear-gradient(135deg,#A29BFE,#D3CCF0)">
+        <span class="emoji">🍫</span>
+        <div class="german">Schokolade</div>
+        <div class="phonetic">[шоко-ла-дэ]</div>
+        <div class="russian">шоколад</div>
       </div>
-      <div class="stat-card green">
-        <div class="stat-num" id="stat-closed">0</div>
-        <div class="stat-label">CASES CLOSED</div>
+      <div class="vocab-card" style="background:linear-gradient(135deg,#74B9FF,#BFD9FF)">
+        <span class="emoji">🎸</span>
+        <div class="german">Musik</div>
+        <div class="phonetic">[му-зик]</div>
+        <div class="russian">музыка</div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-num">6</div>
-        <div class="stat-label">SUSPECTS LOGGED</div>
+      <div class="vocab-card" style="background:linear-gradient(135deg,#55EFC4,#B2F5E4)">
+        <span class="emoji">🐊</span>
+        <div class="german">Krokodil</div>
+        <div class="phonetic">[кроко-диль]</div>
+        <div class="russian">крокодил</div>
       </div>
-      <div class="stat-card amber">
-        <div class="stat-num">18</div>
-        <div class="stat-label">EVIDENCE FILES</div>
+      <div class="vocab-card" style="background:linear-gradient(135deg,#FD79A8,#FFB8D1)">
+        <span class="emoji">🏥</span>
+        <div class="german">Krankenhaus</div>
+        <div class="phonetic">[кранкен-хаус]</div>
+        <div class="russian">больница</div>
+      </div>
+      <div class="vocab-card" style="background:linear-gradient(135deg,#FDCB6E,#FFE4A8)">
+        <span class="emoji">🎮</span>
+        <div class="german">Computer</div>
+        <div class="phonetic">[ком-пью-тэр]</div>
+        <div class="russian">компьютер</div>
+      </div>
+      <div class="vocab-card" style="background:linear-gradient(135deg,#E17055,#FFAB94)">
+        <span class="emoji">🍕</span>
+        <div class="german">Pizza</div>
+        <div class="phonetic">[пит-са]</div>
+        <div class="russian">пицца</div>
       </div>
     </div>
+    <div class="tip">
+      <strong>🎯 Задание:</strong> Попроси ученика назвать ещё слова, которые звучат похоже на русские/английские. Пусть сам угадывает перевод!
+    </div>
+  </div>
 
-    <div class="section-hdr">CASE REGISTRY — OPEN FILES</div>
-    <div class="case-grid" id="caseGrid"></div>
+  <div class="card blue">
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:12px; font-size:1.3rem;">🎵 Первые слова — Приветствия</h3>
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя</div>
+      Покажи карточки и произноси чётко. Пусть ребёнок повторяет 2-3 раза. Можно помахать рукой при «Hallo!» и поклониться при «Tschüss!»
+    </div>
+    <div class="vocab-grid">
+      <div class="vocab-card">
+        <span class="emoji">👋</span>
+        <div class="german">Hallo!</div>
+        <div class="phonetic">[Хало]</div>
+        <div class="russian">Привет!</div>
+      </div>
+      <div class="vocab-card">
+        <span class="emoji">🌅</span>
+        <div class="german">Guten Morgen!</div>
+        <div class="phonetic">[Гутэн Морген]</div>
+        <div class="russian">Доброе утро!</div>
+      </div>
+      <div class="vocab-card">
+        <span class="emoji">🌇</span>
+        <div class="german">Guten Tag!</div>
+        <div class="phonetic">[Гутэн Таг]</div>
+        <div class="russian">Добрый день!</div>
+      </div>
+      <div class="vocab-card">
+        <span class="emoji">🌙</span>
+        <div class="german">Gute Nacht!</div>
+        <div class="phonetic">[Гутэ Нахт]</div>
+        <div class="russian">Спокойной ночи!</div>
+      </div>
+      <div class="vocab-card">
+        <span class="emoji">👋🏻</span>
+        <div class="german">Tschüss!</div>
+        <div class="phonetic">[Чюс]</div>
+        <div class="russian">Пока!</div>
+      </div>
+      <div class="vocab-card">
+        <span class="emoji">🙏</span>
+        <div class="german">Danke!</div>
+        <div class="phonetic">[Данкэ]</div>
+        <div class="russian">Спасибо!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-next" onclick="goTo(1)">Дальше: Алфавит →</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- PAGE: CASE VIEW -->
-<!-- ══════════════════════════════════════════════════════ -->
-<div class="page" id="page-case">
-  <div id="global-topbar2" class="topbar">
-    <div class="topbar-logo">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
-        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
-      </svg>
-      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
+<!-- ===================== SECTION 2: АЛФАВИТ ===================== -->
+<div class="section" id="sec1">
+  <div class="section-title">🔤 Немецкий алфавит</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 8 мин</span>
+    <span class="badge tip">💡 Особые буквы!</span>
+  </div>
+
+  <div class="card purple">
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя</div>
+      «В немецком 30 букв — почти как в русском! Многие буквы мы уже знаем из английского. Но есть 4 особые немецкие буквы — их нет ни в одном другом языке!»
     </div>
-    <div class="topbar-divider"></div>
-    <div class="topbar-info">NORTHBRIDGE METROPOLITAN POLICE — MAJOR CRIMES UNIT</div>
-    <div class="topbar-right">
-      <div class="status-dot"></div>
-      <div class="clock-display" id="clock3">--:--:--</div>
-      <div class="det-badge">DET. LVL 3 — CLEARANCE: ALPHA</div>
+
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:12px;">⭐ Особые немецкие буквы</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
+      <div class="card" style="border-color:var(--pink); text-align:center; padding:18px;">
+        <div style="font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--pink);">Ä ä</div>
+        <div style="font-weight:700;">звук [э] как в «мэр»</div>
+        <div style="color:#888; font-size:0.85rem; margin-top:4px;">Mädchen [Мэдхен] — девочка</div>
+      </div>
+      <div class="card" style="border-color:var(--blue); text-align:center; padding:18px;">
+        <div style="font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--blue);">Ö ö</div>
+        <div style="font-weight:700;">звук [ё] как в «лёд»</div>
+        <div style="color:#888; font-size:0.85rem; margin-top:4px;">schön [шён] — красивый</div>
+      </div>
+      <div class="card" style="border-color:var(--green); text-align:center; padding:18px;">
+        <div style="font-family:'Fredoka One',cursive; font-size:2.5rem; color:#00B894);">Ü ü</div>
+        <div style="font-weight:700;">звук [ю] напряжённый</div>
+        <div style="color:#888; font-size:0.85rem; margin-top:4px;">über [юбэр] — над/сверх</div>
+      </div>
+      <div class="card" style="border-color:var(--orange); text-align:center; padding:18px;">
+        <div style="font-family:'Fredoka One',cursive; font-size:2.5rem; color:var(--orange);">ß</div>
+        <div style="font-weight:700;">звук [сс] двойное</div>
+        <div style="color:#888; font-size:0.85rem; margin-top:4px;">Straße [Штрасэ] — улица</div>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:12px;">Весь алфавит — нажми на букву!</h3>
+    <div class="alpha-grid">
+      <div class="alpha-letter"><div class="letter">A</div><div class="sound">[а]</div></div>
+      <div class="alpha-letter"><div class="letter">B</div><div class="sound">[бэ]</div></div>
+      <div class="alpha-letter"><div class="letter">C</div><div class="sound">[цэ]</div></div>
+      <div class="alpha-letter"><div class="letter">D</div><div class="sound">[дэ]</div></div>
+      <div class="alpha-letter"><div class="letter">E</div><div class="sound">[э]</div></div>
+      <div class="alpha-letter"><div class="letter">F</div><div class="sound">[эф]</div></div>
+      <div class="alpha-letter"><div class="letter">G</div><div class="sound">[гэ]</div></div>
+      <div class="alpha-letter"><div class="letter">H</div><div class="sound">[ха]</div></div>
+      <div class="alpha-letter"><div class="letter">I</div><div class="sound">[и]</div></div>
+      <div class="alpha-letter"><div class="letter">J</div><div class="sound">[йот]</div></div>
+      <div class="alpha-letter"><div class="letter">K</div><div class="sound">[ка]</div></div>
+      <div class="alpha-letter"><div class="letter">L</div><div class="sound">[эль]</div></div>
+      <div class="alpha-letter"><div class="letter">M</div><div class="sound">[эм]</div></div>
+      <div class="alpha-letter"><div class="letter">N</div><div class="sound">[эн]</div></div>
+      <div class="alpha-letter"><div class="letter">O</div><div class="sound">[о]</div></div>
+      <div class="alpha-letter"><div class="letter">P</div><div class="sound">[пэ]</div></div>
+      <div class="alpha-letter"><div class="letter">Q</div><div class="sound">[ку]</div></div>
+      <div class="alpha-letter"><div class="letter">R</div><div class="sound">[эр]</div></div>
+      <div class="alpha-letter"><div class="letter">S</div><div class="sound">[эс]</div></div>
+      <div class="alpha-letter"><div class="letter">T</div><div class="sound">[тэ]</div></div>
+      <div class="alpha-letter"><div class="letter">U</div><div class="sound">[у]</div></div>
+      <div class="alpha-letter"><div class="letter">V</div><div class="sound">[фау]</div></div>
+      <div class="alpha-letter"><div class="letter">W</div><div class="sound">[вэ]</div></div>
+      <div class="alpha-letter"><div class="letter">X</div><div class="sound">[икс]</div></div>
+      <div class="alpha-letter"><div class="letter">Y</div><div class="sound">[ипsilon]</div></div>
+      <div class="alpha-letter"><div class="letter">Z</div><div class="sound">[цэт]</div></div>
+      <div class="alpha-letter" style="border-color:var(--pink);"><div class="letter" style="color:var(--pink);">Ä</div><div class="sound">[э]</div></div>
+      <div class="alpha-letter" style="border-color:var(--blue);"><div class="letter" style="color:var(--blue);">Ö</div><div class="sound">[ё]</div></div>
+      <div class="alpha-letter" style="border-color:var(--green);"><div class="letter" style="color:var(--green);">Ü</div><div class="sound">[ю]</div></div>
+      <div class="alpha-letter" style="border-color:var(--orange);"><div class="letter" style="color:var(--orange);">ß</div><div class="sound">[сс]</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>🎮 Мини-игра:</strong> «Алфавитная эстафета» — ты говоришь букву по-немецки, ученик называет слово на эту букву (на любом языке). Потом меняетесь!
     </div>
   </div>
 
-  <div class="case-topbar">
-    <button class="btn-back" onclick="goToDashboard()">← ALL CASES</button>
-    <div class="case-id-title">
-      <span class="case-id" id="caseHeaderCode"></span>
-      <span class="case-view-title" id="caseHeaderTitle"></span>
-      <span class="status-tag OPEN" id="caseHeaderStatus">OPEN</span>
-    </div>
-    <button class="btn-accuse" id="accuseBtn" onclick="openModal()">⚖ MAKE ACCUSATION</button>
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(0)">← Назад</button>
+    <button class="btn btn-next" onclick="goTo(2)">Дальше: Числа →</button>
   </div>
-
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('overview')">OVERVIEW</button>
-    <button class="tab-btn" onclick="switchTab('timeline')">TIMELINE</button>
-    <button class="tab-btn" onclick="switchTab('evidence')">EVIDENCE</button>
-    <button class="tab-btn" onclick="switchTab('suspects')">SUSPECTS</button>
-    <button class="tab-btn" onclick="switchTab('board')">CASE BOARD</button>
-    <button class="tab-btn" onclick="switchTab('interrogation')">INTERROGATION</button>
-  </div>
-
-  <div class="tab-body" id="tabBody"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════ -->
-<!-- PAGE: OUTCOME -->
-<!-- ══════════════════════════════════════════════════════ -->
-<div class="page" id="page-outcome">
-  <div class="topbar">
-    <div class="topbar-logo">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <polygon points="9,1 16,5 16,13 9,17 2,13 2,5" stroke="#3a7bd5" stroke-width="1.5" fill="none"/>
-        <circle cx="9" cy="9" r="3" fill="#3a7bd5" opacity=".6"/>
-      </svg>
-      NEXUS <span>MAJOR CRIMES INVESTIGATION SYSTEM v4.2</span>
+<!-- ===================== SECTION 3: ЧИСЛА ===================== -->
+<div class="section" id="sec2">
+  <div class="section-title">🔢 Числа по-немецки</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 8 мин</span>
+    <span class="badge tip">💡 1–20</span>
+  </div>
+
+  <div class="card orange">
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя</div>
+      «А теперь будем считать по-немецки! Нажимай на числа и повторяй. Потом я буду показывать пальцы — ты назовёшь число по-немецки!»
     </div>
-    <div class="topbar-right">
-      <div class="clock-display" id="clock4">--:--:--</div>
+
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:12px;">1–10 → нажимай и слушай произношение</h3>
+    <div class="numbers-row">
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">1 — ein<span>[айн]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">2 — zwei<span>[цвай]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">3 — drei<span>[драй]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">4 — vier<span>[фир]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">5 — fünf<span>[фюнф]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">6 — sechs<span>[зэкс]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">7 — sieben<span>[зибэн]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">8 — acht<span>[ахт]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">9 — neun<span>[нойн]</span></div>
+      <div class="num-pill" onclick="this.style.transform='scale(0.95)'; setTimeout(()=>this.style.transform='',150)">10 — zehn<span>[цэн]</span></div>
+    </div>
+
+    <h3 style="font-family:'Fredoka One',cursive; margin:20px 0 12px;">11–20</h3>
+    <div class="numbers-row">
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">11 — elf<span>[эльф]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">12 — zwölf<span>[цвёльф]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">13 — dreizehn<span>[драйцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">14 — vierzehn<span>[фирцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">15 — fünfzehn<span>[фюнфцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">16 — sechzehn<span>[зэхцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">17 — siebzehn<span>[зипцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">18 — achtzehn<span>[ахтцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">19 — neunzehn<span>[нойнцэн]</span></div>
+      <div class="num-pill" style="background:linear-gradient(135deg,var(--purple),#D3CCF0)">20 — zwanzig<span>[цванциг]</span></div>
+    </div>
+
+    <div class="tip">
+      <strong>🎲 Игра «Fizzbuzz»:</strong> Считайте по очереди от 1 до 20. Если число делится на 3 — хлопни в ладоши вместо числа!
+    </div>
+
+    <!-- Викторина с числами -->
+    <div class="quiz-box" style="margin-top:20px;">
+      <div class="quiz-question" id="numQuestion">Что значит «acht»?</div>
+      <div class="quiz-options" id="numOptions"></div>
+      <div class="quiz-feedback" id="numFeedback"></div>
     </div>
   </div>
-  <div class="outcome-page">
-    <div id="outcomeCard" class="outcome-card solved"></div>
+
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(1)">← Назад</button>
+    <button class="btn btn-next" onclick="goTo(3)">Дальше: Цвета →</button>
   </div>
 </div>
+
+<!-- ===================== SECTION 4: ЦВЕТА ===================== -->
+<div class="section" id="sec3">
+  <div class="section-title">🌈 Цвета — die Farben</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 8 мин</span>
+    <span class="badge tip">💡 die Farben = цвета</span>
+  </div>
+
+  <div class="card" style="border-color:#rainbow; border-image:linear-gradient(90deg,red,orange,yellow,green,blue,purple) 1;">
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя</div>
+      Укажи на предметы вокруг: «Смотри — твоя ручка синяя. Скажи: Das ist blau!» Пусть ребёнок ходит по комнате и называет цвета предметов.
+    </div>
+
+    <div class="color-grid">
+      <div class="color-box" style="background:#FF4757; color:white;">
+        <div class="german">rot</div>
+        <div>[рот]</div>
+        <div class="russian">красный</div>
+      </div>
+      <div class="color-box" style="background:#FFA502; color:white;">
+        <div class="german">orange</div>
+        <div>[оранжэ]</div>
+        <div class="russian">оранжевый</div>
+      </div>
+      <div class="color-box" style="background:#FFD700; color:#333;">
+        <div class="german">gelb</div>
+        <div>[гэльб]</div>
+        <div class="russian">жёлтый</div>
+      </div>
+      <div class="color-box" style="background:#2ED573; color:white;">
+        <div class="german">grün</div>
+        <div>[грюн]</div>
+        <div class="russian">зелёный</div>
+      </div>
+      <div class="color-box" style="background:#1E90FF; color:white;">
+        <div class="german">blau</div>
+        <div>[блау]</div>
+        <div class="russian">синий</div>
+      </div>
+      <div class="color-box" style="background:#9B59B6; color:white;">
+        <div class="german">lila</div>
+        <div>[лила]</div>
+        <div class="russian">фиолетовый</div>
+      </div>
+      <div class="color-box" style="background:#FF69B4; color:white;">
+        <div class="german">rosa</div>
+        <div>[роза]</div>
+        <div class="russian">розовый</div>
+      </div>
+      <div class="color-box" style="background:#8B4513; color:white;">
+        <div class="german">braun</div>
+        <div>[браун]</div>
+        <div class="russian">коричневый</div>
+      </div>
+      <div class="color-box" style="background:#2C3E50; color:white;">
+        <div class="german">schwarz</div>
+        <div>[шварц]</div>
+        <div class="russian">чёрный</div>
+      </div>
+      <div class="color-box" style="background:#ECF0F1; color:#333; border:2px solid #ddd;">
+        <div class="german">weiß</div>
+        <div>[вайс]</div>
+        <div class="russian">белый</div>
+      </div>
+      <div class="color-box" style="background:#95A5A6; color:white;">
+        <div class="german">grau</div>
+        <div>[грау]</div>
+        <div class="russian">серый</div>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:18px;">
+      <strong>🎨 Игра «Угадай цвет»:</strong> Учитель называет цвет по-немецки — ученик должен дотронуться до чего-то такого цвета в комнате!
+    </div>
+
+    <!-- Match game -->
+    <h3 style="font-family:'Fredoka One',cursive; margin: 20px 0 12px;">🎯 Соедини пары!</h3>
+    <div class="match-game" id="matchGame">
+      <div class="match-col" id="deWords"></div>
+      <div class="match-col" id="ruWords"></div>
+    </div>
+    <div id="matchFeedback" style="text-align:center; font-weight:800; font-size:1rem; padding:10px; display:none;"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(2)">← Назад</button>
+    <button class="btn btn-next" onclick="goTo(4)">Дальше: Диалог →</button>
+  </div>
+</div>
+
+<!-- ===================== SECTION 5: ДИАЛОГ ===================== -->
+<div class="section" id="sec4">
+  <div class="section-title">💬 Первый диалог</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 12 мин</span>
+    <span class="badge tip">💡 Ролевая игра</span>
+  </div>
+
+  <div class="card blue">
+    <div class="teacher-box">
+      <div class="label">📋 Для учителя</div>
+      «Сейчас сыграем в сценку! Я буду Карл, ты будешь собой. Читай свои слова, я помогу. Потом поменяемся ролями!»
+    </div>
+
+    <div class="dialogue">
+      <div class="bubble left">
+        <div class="who">👦 Карл (учитель)</div>
+        <div class="de">Hallo! Wie heißt du?</div>
+        <div class="ph">[Хало! Ви хайст ду?]</div>
+        <div class="ru">Привет! Как тебя зовут?</div>
+      </div>
+
+      <div class="bubble right">
+        <div class="who">😊 Ты (ученик)</div>
+        <div class="de">Hallo! Ich heiße ____.</div>
+        <div class="ph">[Хало! Их хайсэ ____]</div>
+        <div class="ru">Привет! Меня зовут ____.</div>
+      </div>
+
+      <div class="bubble left">
+        <div class="who">👦 Карл</div>
+        <div class="de">Wie alt bist du?</div>
+        <div class="ph">[Ви альт бист ду?]</div>
+        <div class="ru">Сколько тебе лет?</div>
+      </div>
+
+      <div class="bubble right">
+        <div class="who">😊 Ты</div>
+        <div class="de">Ich bin ____ Jahre alt.</div>
+        <div class="ph">[Их бин ____ яре альт]</div>
+        <div class="ru">Мне ____ лет.</div>
+      </div>
+
+      <div class="bubble left">
+        <div class="who">👦 Карл</div>
+        <div class="de">Woher kommst du?</div>
+        <div class="ph">[Вохэр комст ду?]</div>
+        <div class="ru">Откуда ты?</div>
+      </div>
+
+      <div class="bubble right">
+        <div class="who">😊 Ты</div>
+        <div class="de">Ich komme aus Russland.</div>
+        <div class="ph">[Их комэ аус Русланд]</div>
+        <div class="ru">Я из России.</div>
+      </div>
+
+      <div class="bubble left">
+        <div class="who">👦 Карл</div>
+        <div class="de">Was ist deine Lieblingsfarbe?</div>
+        <div class="ph">[Вас ист дайнэ либлингсфарбэ?]</div>
+        <div class="ru">Какой твой любимый цвет?</div>
+      </div>
+
+      <div class="bubble right">
+        <div class="who">😊 Ты</div>
+        <div class="de">Meine Lieblingsfarbe ist ____.</div>
+        <div class="ph">[Майнэ либлингсфарбэ ист ____]</div>
+        <div class="ru">Мой любимый цвет — ____.</div>
+      </div>
+
+      <div class="bubble left">
+        <div class="who">👦 Карл</div>
+        <div class="de">Schön, dich kennenzulernen!</div>
+        <div class="ph">[Шён, дих кэнэнцулэрнэн!]</div>
+        <div class="ru">Приятно познакомиться!</div>
+      </div>
+
+      <div class="bubble right">
+        <div class="who">😊 Ты</div>
+        <div class="de">Danke! Tschüss!</div>
+        <div class="ph">[Данкэ! Чюс!]</div>
+        <div class="ru">Спасибо! Пока!</div>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:20px;">
+      <strong>🎭 Задание:</strong> Разыграйте диалог 2 раза — сначала с подсказками, потом закройте листок и попробуйте по памяти!
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(3)">← Назад</button>
+    <button class="btn btn-next" onclick="goTo(5)">Дальше: Игра →</button>
+  </div>
+</div>
+
+<!-- ===================== SECTION 6: ИГРА ===================== -->
+<div class="section" id="sec5">
+  <div class="section-title">🎮 Большая викторина!</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 10 мин</span>
+    <span class="badge tip">💡 За каждый ответ — звезда!</span>
+  </div>
+
+  <div class="card green">
+    <div id="bigQuizContainer">
+      <div class="stars" id="quizStars">⭐ x <span id="starCount">0</span></div>
+      <div class="quiz-box">
+        <div class="quiz-question" id="bigQuestion" style="font-size:1.4rem; margin-bottom:20px;"></div>
+        <div class="quiz-options" id="bigOptions" style="grid-template-columns:1fr 1fr; gap:12px;"></div>
+        <div class="quiz-feedback" id="bigFeedback" style="font-size:1.1rem;"></div>
+      </div>
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn btn-next" style="display:inline-flex;" id="nextQuizBtn" onclick="nextQuizQuestion()" disabled>
+          Следующий вопрос →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-prev" onclick="goTo(4)">← Назад</button>
+    <button class="btn btn-next" onclick="goTo(6)">Дальше: Итог →</button>
+  </div>
+</div>
+
+<!-- ===================== SECTION 7: ИТОГ ===================== -->
+<div class="section" id="sec6">
+  <div class="section-title">🏆 Молодец! Урок завершён!</div>
+  <div class="section-meta">
+    <span class="badge time">⏱ 4 мин</span>
+    <span class="badge tip">💡 Подведение итогов</span>
+  </div>
+
+  <div class="card yellow" style="text-align:center;">
+    <div style="font-size:4rem; margin-bottom:10px;">🥇</div>
+    <h2 style="font-family:'Fredoka One',cursive; font-size:2rem; margin-bottom:8px;">Ты справился!</h2>
+    <p style="font-size:1rem; color:#666;">За 60 минут ты изучил:</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-item" style="border-color:var(--yellow);">
+      <div style="font-size:2rem;">👋</div>
+      <h3>6</h3>
+      <p>приветствий</p>
+    </div>
+    <div class="summary-item" style="border-color:var(--blue);">
+      <div style="font-size:2rem;">🔢</div>
+      <h3>20</h3>
+      <p>числительных</p>
+    </div>
+    <div class="summary-item" style="border-color:var(--pink);">
+      <div style="font-size:2rem;">🌈</div>
+      <h3>11</h3>
+      <p>цветов</p>
+    </div>
+    <div class="summary-item" style="border-color:var(--green);">
+      <div style="font-size:2rem;">💬</div>
+      <h3>1</h3>
+      <p>полный диалог</p>
+    </div>
+  </div>
+
+  <div class="card purple">
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:14px; font-size:1.3rem;">📝 Домашнее задание</h3>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; gap:10px; align-items:flex-start; padding:10px; background:#F5F0FF; border-radius:12px;">
+        <span style="font-size:1.5rem;">1️⃣</span>
+        <div><strong>Считай каждый день!</strong> Утром считай шаги до ванной по-немецки: ein, zwei, drei...</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start; padding:10px; background:#F5F0FF; border-radius:12px;">
+        <span style="font-size:1.5rem;">2️⃣</span>
+        <div><strong>Карточки цветов</strong> — нарисуй 5 цветных квадратов и подпиши их по-немецки.</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start; padding:10px; background:#F5F0FF; border-radius:12px;">
+        <span style="font-size:1.5rem;">3️⃣</span>
+        <div><strong>Расскажи папе/маме</strong> о себе по-немецки: Ich heiße... Ich bin... Jahre alt.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--orange); background:linear-gradient(135deg,#FFF0E0,white);">
+    <h3 style="font-family:'Fredoka One',cursive; margin-bottom:12px; font-size:1.3rem;">🎵 Песня для запоминания чисел</h3>
+    <div class="song-card">
+      <h3>Eins, Zwei, Polizei 🚔</h3>
+      <p style="color:#888; font-size:0.85rem; margin-bottom:4px;">Немецкая детская считалочка</p>
+      <div class="song-lyrics">
+        <div class="lyrics-de">
+          <h4>🇩🇪 Немецкий</h4>
+          <p>
+            Eins, zwei, Polizei<br>
+            Drei, vier, Offizier<br>
+            Fünf, sechs, alte Hex<br>
+            Sieben, acht, gute Nacht<br>
+            Neun, zehn, auf Wiedersehen!
+          </p>
+        </div>
+        <div class="lyrics-ru">
+          <h4>🇷🇺 Перевод</h4>
+          <p>
+            Раз, два — полиция<br>
+            Три, четыре — офицер<br>
+            Пять, шесть — старая ведьма<br>
+            Семь, восемь — спокойной ночи<br>
+            Девять, десять — до свидания!
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--blue); text-align:center; padding:30px;">
+    <div style="font-size:3rem; margin-bottom:10px;">🌟🌟🌟</div>
+    <h2 style="font-family:'Fredoka One',cursive; font-size:1.8rem; color:var(--orange);">Bis zum nächsten Mal!</h2>
+    <p style="font-size:1.1rem; margin-top:6px; color:#666;">[Бис цум нэхстэн Маль] — До следующего раза!</p>
+  </div>
+
+  <div class="nav-row" style="justify-content:center;">
+    <button class="btn btn-next" style="background:linear-gradient(135deg,var(--blue),var(--purple));" onclick="goTo(0)">🔄 Начать урок заново</button>
+  </div>
+</div>
+
+</div><!-- end main -->
 
 <script>
-// ═══════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════
-var CASES = [
-  {
-    id: "case-001",
-    code: "HOM-2024-0117",
-    title: "The Whitmore Affair",
-    status: "OPEN",
-    priority: "CRITICAL",
-    date: "17 JAN 2024",
-    type: "Homicide",
-    location: "Whitmore Estate, 14 Ashford Lane, Northbridge",
-    synopsis: "Victor Whitmore, 64, CEO of Whitmore Pharmaceuticals, was found dead in his locked private study at 23:40 by his housekeeper. Cause of death: blunt force trauma. The study windows were locked from inside. No forced entry detected. Three individuals were present in the estate that evening.",
-    timeline: [
-      { time: "18:00", event: "Victor Whitmore hosts dinner with his son Daniel and business partner Elena Marsh.", locked: false },
-      { time: "19:45", event: "Dinner concludes. Elena Marsh seen leaving the dining room.", locked: false },
-      { time: "20:30", event: "Victor retreats to private study. Last seen alive by Mrs. Colton.", locked: false },
-      { time: "21:15", event: "Raised voices heard from the study — witness: Mrs. Colton. Second voice described as 'calm, measured, almost cold.'", locked: true, req: "ev-003" },
-      { time: "22:00", event: "Daniel Whitmore makes a 47-minute phone call to Calder & Voss — legal counsel for Elena Marsh's private holdings.", locked: true, req: "ev-007" },
-      { time: "23:40", event: "Mrs. Colton discovers the body. Study door locked from inside. Emergency services called at 23:44.", locked: false },
-      { time: "00:15", event: "Police arrive. No forced entry. Whiskey glass shattered near desk. Estimated time of death: 21:00–22:30.", locked: false }
-    ],
-    suspects: [
-      {
-        id: "s1", initials: "DW", name: "Daniel Whitmore", age: 32, relation: "Son / Heir",
-        motive: "Stands to inherit $40M estate. Recent bitter dispute over a pharmaceutical merger deal that Victor had rejected.",
-        alibi: "Claims he was in his bedroom all evening with a headache. Phone records contradict this entirely.",
-        threat: 78, interrogated: false,
-        notes: "Gambling debts estimated at $2.1M. Visited father's personal solicitor two days prior to the incident. Known associate of offshore accounting firm Calder & Voss.",
-        dob: "14 MAR 1992", nationality: "British", priors: "None on record",
-        questions: [
-          { id: "q1", text: "Where were you between 21:00 and 23:00 on the evening of the 17th?", answered: false,
-            answer: "I was in my room. I had a migraine. I didn't leave, didn't see anyone. I went to sleep early.", unlocks: null },
-          { id: "q2", text: "Phone records show a 47-minute call at 22:00 to Calder & Voss. Why were you calling Elena's law firm?", answered: false,
-            answer: "...I was — it was a personal matter. I didn't think it was relevant to any of this.", unlocks: "ev-007" },
-          { id: "q3", text: "We have a witness who heard raised voices from your father's study at 21:15. A voice that wasn't yours.", answered: false,
-            answer: "Mrs. Colton is elderly and she was upset. She must be mistaken. I didn't hear anything.", unlocks: "ev-003" }
-        ]
-      },
-      {
-        id: "s2", initials: "EM", name: "Elena Marsh", age: 47, relation: "Business Partner / CFO",
-        motive: "Victor had discovered financial irregularities in company accounts — $6.2M in unaccounted transfers over 18 months.",
-        alibi: "Claims to have driven home at 19:45. No witnesses can confirm arrival time at her residence.",
-        threat: 88, interrogated: false,
-        notes: "Wiped laptop hard drive with DoD-grade overwrite two days after the incident. Car GPS data places her returning to Ashford Lane at 21:03. She omitted this from her initial statement.",
-        dob: "02 SEP 1976", nationality: "British", priors: "Civil proceedings (dismissed), 2019",
-        questions: [
-          { id: "q1", text: "Did Victor raise any concerns about company finances at dinner?", answered: false,
-            answer: "Victor was always meticulous about money. Nothing unusual was discussed. We had a pleasant dinner.", unlocks: null },
-          { id: "q2", text: "Your vehicle GPS shows you returned to Ashford Lane at 21:03. Why did you go back?", answered: false,
-            answer: "(long pause) I forgot my scarf. I went back for it. It was brief. I didn't go inside — I knocked, no answer, I left.", unlocks: "ev-009" },
-          { id: "q3", text: "Your laptop hard drive was wiped with a seven-pass overwrite on January 19th at 02:14 AM. What were you deleting?", answered: false,
-            answer: "It was scheduled maintenance. I do it every quarter. My IT firm can confirm.", unlocks: "ev-008" }
-        ]
-      },
-      {
-        id: "s3", initials: "MC", name: "Margaret Colton", age: 58, relation: "Housekeeper / Discovery Witness",
-        motive: "No established motive. Victor was revising his will — she may have been removed as a beneficiary.",
-        alibi: "Present throughout the estate all evening. Discovered the body at 23:40.",
-        threat: 18, interrogated: false,
-        notes: "26-year loyal employee. Visibly distressed during all interviews. Has not retained legal counsel. Voluntary cooperation with police.",
-        dob: "11 JUN 1965", nationality: "British", priors: "None",
-        questions: [
-          { id: "q1", text: "Describe exactly what you heard at 21:15.", answered: false,
-            answer: "Victor's voice, loud and upset. And another voice — low, controlled. Almost cold. It wasn't Daniel. The tone was different. Sharper.", unlocks: "ev-003" },
-          { id: "q2", text: "Did you see any vehicles in the driveway after 20:00?", answered: false,
-            answer: "Around nine o'clock I was in the kitchen. I saw headlights in the driveway through the window. A dark car. I assumed someone had returned.", unlocks: "ev-009" },
-          { id: "q3", text: "Did Victor say anything to you in the days before his death that seemed unusual?", answered: false,
-            answer: "Last week. He said to me, very quietly: 'Margaret, if anything happens to me — look at the accounts.' I didn't know what to make of it. I wish I had.", unlocks: "ev-010" }
-        ]
-      }
-    ],
-    evidence: [
-      { id: "ev-001", name: "Forensic Post-Mortem Report", type: "FORENSIC", locked: false,
-        content: "CASE: HOM-2024-0117\nPATIENT: Victor Whitmore, M, 64\nFORENSIC PATHOLOGIST: Dr. R. Okafor\n\nCAUSE OF DEATH\nSingle blunt force trauma to posterior cranium. Impact consistent with a heavy cylindrical object approximately 4–6cm in diameter. No weapon recovered at scene.\n\nTIME OF DEATH\nEstimated 21:00–22:30 based on liver temperature and rigor mortis staging.\n\nADDITIONAL FINDINGS\n— No defensive wounds present\n— BAC: 0.08% (2–3 glasses whiskey, consistent with toxicology)\n— No sedatives, narcotics, or poisons detected\n— Single impact, high force, targeted — suggests intentional act by a familiar party\n— Victim did not anticipate the blow\n\nCONCLUSION: Homicide." },
-      { id: "ev-002", name: "Crime Scene Photographs — Study", type: "IMG", locked: false,
-        content: "SCENE: Ground floor study, Whitmore Estate\nPHOTOGRAPHER: DC Reeves, Scene of Crime\n\nFRAME 001: Overview of study. Victim found face-down, left of mahogany desk. Significant blood pooling.\n\nFRAME 002: Shattered whiskey glass, 1.2m from body. Contents scattered west — suggests glass knocked or thrown before fatal blow.\n\nFRAME 003: Study door, internal latch engaged from inside. No signs of picking or forced entry.\n\nFRAME 004: North-east window — sash lock engaged. Latch shows prior damage (see maintenance log, Dec 2023) but was locked at time of examination.\n\nFRAME 005: Victim's desk — papers disturbed. Handwritten note in margin of appointment calendar: 'EM — confirm figures. Cannot wait.'" },
-      { id: "ev-003", name: "Witness Audio Transcript — Mrs. Colton", type: "AUDIO", locked: true,
-        content: "TRANSCRIPT — RECORDED INTERVIEW\nSUBJECT: Margaret Colton\nOFFICER: DS Paulsen\nDATE: 18 JAN 2024, 09:22\n\nPAULSEN: Can you describe what you heard at approximately 21:15?\n\nCOLTON: I was in the kitchen making tea. I heard voices from the study — raised voices. Victor's, I knew it immediately. He sounded angry. Frightened, even.\n\nPAULSEN: And the second voice?\n\nCOLTON: That's what troubled me. It wasn't Daniel. It was... lower. Very controlled. Almost calm, which was more frightening, I think. I couldn't make out words. I thought about going to check. I didn't. I wish I had.\n\nPAULSEN: You're certain it wasn't Daniel Whitmore?\n\nCOLTON: Certain. I've known that boy since he was eight years old. It wasn't his voice." },
-      { id: "ev-004", name: "Toxicology Screen", type: "FORENSIC", locked: false,
-        content: "CASE: HOM-2024-0117\nLAB: Northbridge Forensic Sciences Unit\n\nRESULTS:\n— Ethanol: 0.08% (consistent with social consumption)\n— Benzodiazepines: NOT DETECTED\n— Opiates: NOT DETECTED\n— Barbiturates: NOT DETECTED\n— Heavy metals: NOT DETECTED\n— All other scheduled substances: NEGATIVE\n\nCONCLUSION: No evidence of chemical incapacitation or poisoning. Victim was conscious and alert at time of attack." },
-      { id: "ev-005", name: "Estate Floor Plan + Entry Analysis", type: "IMG", locked: false,
-        content: "ESTATE: 14 Ashford Lane, Northbridge\nSURVEY: Metropolitan Police Technical Unit\n\nSTUDY LAYOUT:\n— Ground floor, north-east corner\n— Single internal door: found locked from inside\n— Two sash windows: Window A (north) — locked. Window B (east) — locked but LATCH DEFECTIVE (maintenance log Dec 2023, repair not completed)\n\nKEY FINDING: Window B latch defect. When tested by forensic unit, window can be drawn shut from outside using a thin implement through the frame gap, allowing a person to exit and give the appearance of locking the window from inside.\n\nCONCLUSION: Locked-room scenario is achievable by someone with knowledge of the defective latch." },
-      { id: "ev-006", name: "Victor's Appointment Calendar", type: "DOC", locked: false,
-        content: "ITEM: Personal desk calendar, January 2024\nPHYSICAL EVIDENCE REF: WHM-006\n\nJAN 15 — 10:00  MEETING: Internal audit team present [E. Marsh noted]\nJAN 16 — 14:30  PERSONAL: Redmond & Holt Solicitors — will revision\nJAN 17 — 19:00  DINNER: Daniel, Elena\n\nMARGIN NOTE (handwritten, blue ink):\n'EM — confirm figures. Cannot wait. Referral to board if no response by end of week.'\n\nADDITIONAL NOTE (same hand, underlined):\n'R&H — remove EM clause. Add charity trust as primary.'\n\nANALYSIS: Victor was actively moving to remove Elena Marsh from estate considerations and escalate the financial discrepancy to board level. Timeline suggests Elena was aware, or about to become aware." },
-      { id: "ev-007", name: "Phone Records — Daniel Whitmore", type: "DOC", locked: true,
-        content: "SUBJECT: Daniel Whitmore\nPROVIDER: Vodafone UK\nDATE: 17 JAN 2024\nISSUED UNDER: Production Order, HOM-2024-0117\n\nOUTGOING CALL LOG:\n22:01 — 22:48  Duration: 47 min\nNumber: +44 1534 [REDACTED] — Isle of Man\nRegistered Entity: CALDER & VOSS LLP — Offshore legal & financial counsel\n\nINTELLIGENCE NOTE:\nCalder & Voss provides private legal services to Elena Marsh (personal holdings). Their Isle of Man office handles offshore corporate structures.\n\nSignificance: Daniel Whitmore was in contact with Elena Marsh's personal legal counsel within the estimated window of his father's death." },
-      { id: "ev-008", name: "Digital Forensics — Laptop Wipe Log", type: "FORENSIC", locked: true,
-        content: "DEVICE: ThinkPad X1 Carbon\nUSER: Marsh, Elena — CFO, Whitmore Pharmaceuticals\nFORENSICS: DCI Forensic Computing, Ref: WHM-DFCU-008\n\nWIPE EVENT:\nDate: 19 JAN 2024, 02:14 AM\nMethod: DoD 5220.22-M (7-pass overwrite)\nNote: 2:14 AM initiation is anomalous — not consistent with 'scheduled maintenance' claim\n\nPARTIAL RECOVERY (fragmented sectors):\n— Spreadsheet fragments: parallel ledger columns, amounts range £180K–£900K\n— Filename remnants: 'WP_PARALLEL_Q3', 'TRANSFER_LOG', 'EM_PRIVATE'\n— Amounts correspond to known $6.2M discrepancy in Whitmore Pharma accounts\n\nCONCLUSION: Evidence strongly suggests intentional destruction of financial records in the days following Victor Whitmore's death." },
-      { id: "ev-009", name: "GPS Vehicle Data — Marsh (17 Jan)", type: "DOC", locked: true,
-        content: "VEHICLE: Audi A6, Reg. [REDACTED]\nOWNER: Elena Marsh\nDATA SOURCE: Manufacturer GPS log (court-ordered)\nDATE: 17 JAN 2024\n\nLOG:\n19:52  — DEPARTS: Ashford Lane, Northbridge\n21:03  — ARRIVES: Ashford Lane, Northbridge [SECOND VISIT — NOT DECLARED IN STATEMENT]\n21:41  — DEPARTS: Ashford Lane, Northbridge (final)\n\nELENA MARSH'S INITIAL STATEMENT: 'I left at approximately 19:45 and drove directly home.'\n\nDISCREPANCY: Second visit to Ashford Lane at 21:03 falls within the estimated time of death window (21:00–22:30). This was omitted from her initial statement. Duration of second visit: approx. 38 minutes." },
-      { id: "ev-010", name: "Amended Will — Draft Copy", type: "DOC", locked: true,
-        content: "DOCUMENT: Last Will and Testament — Draft\nTESTATOR: Victor Whitmore\nSOLICITOR: Redmond & Holt\nDATED: 15 JAN 2024 (unsigned — draft only)\n\nMATERIAL AMENDMENTS vs. PRIOR WILL (2019):\n\n1. ELENA MARSH — REMOVED from all estate provisions. No consideration, no bequest.\n\n2. DANIEL WHITMORE — Conditional bequest only. Inheritance of real property and liquid assets contingent on completion of a certified addiction treatment programme and 12-month sobriety verification. Estimated value: £8.2M (conditional).\n\n3. WHITMORE CHARITABLE TRUST — Named as PRIMARY BENEFICIARY. Estimated allocation: £31.8M.\n\nNOTE FROM SOLICITOR (attached): 'Victor was insistent this be finalised by end of January. He mentioned concerns about a person with access to company finances. He did not name them directly in my presence.'" }
-    ],
-    correctSuspect: "s2"
-  },
-  {
-    id: "case-002",
-    code: "HOM-2024-0203",
-    title: "Station 9",
-    status: "OPEN",
-    priority: "HIGH",
-    date: "03 FEB 2024",
-    type: "Suspicious Death",
-    location: "Northbridge Central Station, Platform 9",
-    synopsis: "Dr. Priya Anand, 38, lead researcher at BioNova Labs, was found on the tracks of Platform 9 at 06:12. Initial assessment: fell from platform. CCTV footage for Platform 9 is missing — corrupted between 05:50 and 06:15. Three individuals have been placed at the station during this window. The post-mortem identified grip bruising on both arms.",
-    timeline: [
-      { time: "05:45", event: "Dr. Anand arrives at Northbridge Central. Observed on entrance CCTV. She appears anxious — checks over shoulder twice.", locked: false },
-      { time: "05:50", event: "Platform 9 CCTV feed goes dark. Signal corruption event begins. Analysis confirms deliberate RF interference.", locked: false },
-      { time: "06:12", event: "Body discovered on the tracks by platform attendant Roy Simms. He radios control immediately.", locked: false },
-      { time: "06:15", event: "CCTV feed restores automatically.", locked: false },
-      { time: "07:45", event: "Station Wi-Fi logs: device 'BIONOVA-TABLET-07' connected near Platform 9 at 05:55. Last authenticated user: M. Webb.", locked: true, req: "ev-b005" },
-      { time: "22:14", event: "(Previous evening, Jan 17) Dr. Anand sends encrypted submission to MHRA Whistleblower Portal regarding BioNova clinical trial fraud. She expressed fear for her safety.", locked: true, req: "ev-b007" }
-    ],
-    suspects: [
-      {
-        id: "s4", initials: "MW", name: "Marcus Webb", age: 44, relation: "BioNova — Director of Operations",
-        motive: "Dr. Anand was preparing to expose fraudulent clinical trial data that would implicate Webb directly and destroy the company.",
-        alibi: "Claims to have been home. No corroboration. Location data conflicts.",
-        threat: 86, interrogated: false,
-        notes: "History of aggressive NDAs. Terminated three senior researchers in 2023 citing 'performance'. Company tablet authenticated at station during critical window. Legal team contacted within 2 hours of Dr. Anand's death.",
-        dob: "07 MAY 1979", nationality: "British", priors: "None on record",
-        questions: [
-          { id: "q1", text: "Were you aware Dr. Anand planned to report clinical trial irregularities to the MHRA?", answered: false,
-            answer: "Priya was meticulous and passionate about her work. If she had concerns she would have raised them through proper internal channels. She never came to me.", unlocks: null },
-          { id: "q2", text: "A BioNova company tablet registered to your account was connected to station Wi-Fi at 05:55 — near Platform 9.", answered: false,
-            answer: "That's... not possible. Those tablets don't leave the lab. Access is key-card controlled. There must be an error in your data.", unlocks: "ev-b005" },
-          { id: "q3", text: "Dr. Anand submitted a whistleblower report to the MHRA the evening before she died, referencing you by name. Did you know about this?", answered: false,
-            answer: "(long pause, jaw tightens) I think I should speak to my solicitor before continuing.", unlocks: "ev-b007" }
-        ]
-      },
-      {
-        id: "s5", initials: "YT", name: "Yuki Tanaka", age: 31, relation: "BioNova Research Colleague",
-        motive: "Dr. Anand's upcoming paper would invalidate Yuki's doctoral thesis, effectively ending her academic and research career.",
-        alibi: "Admits to being at the station. Claims she was catching the 06:05 on Platform 4. Ticket purchased but not boarded.",
-        threat: 52, interrogated: false,
-        notes: "Distressed and tearful during initial interview. Unboarded ticket raises questions. Text message on phone: 'She's here. Platform 9.' — sent to unregistered number at 05:47.",
-        dob: "23 NOV 1992", nationality: "Japanese / British", priors: "None",
-        questions: [
-          { id: "q1", text: "You were at the station. Your ticket was for Platform 4. Did you at any point go to Platform 9?", answered: false,
-            answer: "No. I was on Platform 4. I didn't even know Priya took this route. We didn't speak about commuting.", unlocks: null },
-          { id: "q2", text: "At 05:47 you sent a text: 'She's here. Platform 9.' To an unregistered number. Who did you send that to?", answered: false,
-            answer: "(visibly shaken) That... I can explain that. I thought I saw her and I was texting a colleague. It sounds worse than it was.", unlocks: "ev-b004" },
-          { id: "q3", text: "Your ticket was purchased the night before but you never boarded the train. Why were you really at the station?", answered: false,
-            answer: "I was going to travel. I changed my mind. I wasn't feeling well. I walked home.", unlocks: null }
-        ]
-      },
-      {
-        id: "s6", initials: "RS", name: "Roy Simms", age: 52, relation: "Station Platform Attendant",
-        motive: "Unexplained financial deposits totalling £12,000 in the 30 days prior to the incident.",
-        alibi: "On duty. His assigned area was Platform 9. Discovered the body.",
-        threat: 38, interrogated: false,
-        notes: "Six-year employee with clean record. Three deposits of exactly £4,000 from an offshore shell company — Hadleigh Consult Ltd — which shares a registered address with a BioNova subsidiary.",
-        dob: "15 FEB 1971", nationality: "British", priors: "None",
-        questions: [
-          { id: "q1", text: "Take me through exactly what happened between 05:45 and 06:15.", answered: false,
-            answer: "I was doing my routine check. Platform 9. I walked to the far end, turned back. I saw something on the track near the gap. I radioed control right away.", unlocks: null },
-          { id: "q2", text: "Three deposits of £4,000 each, all from Hadleigh Consult Ltd. That's a BioNova-linked shell company. What were you paid for?", answered: false,
-            answer: "My brother. He lent me money for roof repairs. I can show you the messages. I didn't know anything about BioNova.", unlocks: "ev-b008" },
-          { id: "q3", text: "Several weeks ago, did anyone ask you about the CCTV coverage on Platform 9?", answered: false,
-            answer: "...There was a man. Said he was from maintenance. Asked which cameras covered which angles and blind spots. I showed him on the map. I thought nothing of it.", unlocks: "ev-b005" }
-        ]
-      }
-    ],
-    evidence: [
-      { id: "ev-b001", name: "Post-Mortem Report — Dr. Anand", type: "FORENSIC", locked: false,
-        content: "CASE: HOM-2024-0203\nPATIENT: Dr. Priya Anand, F, 38\nFORENSIC PATHOLOGIST: Dr. R. Okafor\n\nCAUSE OF DEATH\nBlunt force trauma consistent with train impact. Fatal injuries: skull fracture, spinal transection.\n\nCRITICAL ADDITIONAL FINDING:\nPre-existing bruising on both upper arms — posterior grip pattern. Bruising is bilateral, suggesting both arms were gripped simultaneously from behind by a single person. Contusions are recent: within 1 hour of death.\n\nINTERPRETATION: Dr. Anand was physically restrained prior to her death. Grip force indicates a person of above-average strength.\n\nMANNER OF DEATH: UNDETERMINED (consistent with homicide)\n\nNOTE: Initial first-response classification as 'accidental fall' should be revised pending further investigation." },
-      { id: "ev-b002", name: "CCTV Corruption Analysis", type: "FORENSIC", locked: false,
-        content: "CASE: HOM-2024-0203\nTECHNICAL UNIT: DC Marsh (Digital), Northbridge MPD\n\nFINDINGS:\nPlatform 9 CCTV disruption period: 05:50:11 — 06:15:03\n\nNATURE OF CORRUPTION:\nNot mechanical failure. Signal analysis confirms targeted radiofrequency interference consistent with a commercial-grade RF jammer (range: approx. 15m, cost: £200–800, freely available online).\n\nSOURCE:\nJammer device not recovered. Signal origin triangulated to Platform 9 access corridor, north end.\n\nMEANING:\nSomeone deliberately disabled the camera system before the victim arrived on the platform. This required advance knowledge of camera positions, signal frequencies, and the victim's route." },
-      { id: "ev-b003", name: "Entrance CCTV Stills — 05:45–05:52", type: "IMG", locked: false,
-        content: "STATION: Northbridge Central\nCAMERA: Entrance A (south), Entrance B (north)\nREFERENCE: WHM2-0203-CCTV\n\nFRAME 001 — 05:45:12  [Entrance A]\nDr. Priya Anand enters. Carries laptop bag and briefcase. Posture tense. Looks back twice at entrance before proceeding.\n\nFRAME 002 — 05:48:31  [Entrance A]\nUnidentified male figure, dark coat, hat obscuring face, enters 3 minutes after victim. Moves purposefully. Does not check displays.\n\nFRAME 003 — 05:51:44  [Entrance B — north]\nSecond individual, female, enters via north entrance. Partial view only. Carries tote bag. Moves toward inner concourse.\n\nNOTE: Both figures disappear from entrance coverage. No footage of Platform 9 due to RF disruption." },
-      { id: "ev-b004", name: "Text Message Record — Yuki Tanaka", type: "DOC", locked: true,
-        content: "SUBJECT: Tanaka, Yuki — mobile device extraction\nISSUED UNDER: Production Order, HOM-2024-0203\n\nMESSAGE LOG (relevant extract):\n05:47:09 — OUTGOING\nTO: +44 7[UNREGISTERED]\nTEXT: 'She's here. Platform 9.'\n\nCONTEXT:\nTicket purchased previous evening for 06:05 train, Platform 4. Ticket not scanned at barriers — Tanaka never boarded.\n\nPRIOR MESSAGE (05:31):\nINCOMING from same unregistered number:\n'Confirm when you see her. Do not approach.'\n\nANALYSIS: Tanaka was being used as a spotter. She identified the victim's location and relayed it to an unknown party. Whether she understood the implications is unclear." },
-      { id: "ev-b005", name: "Station Wi-Fi Device Log", type: "DOC", locked: true,
-        content: "STATION: Northbridge Central\nLOG TYPE: Wi-Fi authentication records\nISSUED UNDER: Production Order, HOM-2024-0203\n\nENTRY:\n05:55:12  DEVICE: 'BIONOVA-TABLET-07'\nNETWORK: NorthbridgeStation-Public\nACCESS POINT: Platform 9 corridor, north (within 15m)\n\nBIONOVA INTERNAL RECORDS:\nTablet last assigned to: WEBB, MARCUS — Director of Operations\nLast BioNova server authentication: 05:22 same morning (from BioNova HQ IP)\n\nCONCLUSION:\nMarcus Webb authenticated this tablet at BioNova HQ at 05:22, then the same tablet appeared at the station at 05:55 — 33 minutes later. This contradicts Webb's alibi of being at home.\n\nHousing to BioNova HQ: 12 minutes. HQ to station: 18 minutes. Timeline is consistent with Webb's movement." },
-      { id: "ev-b006", name: "Dr. Anand — Laptop: Recovered Draft", type: "DOC", locked: false,
-        content: "DEVICE: MacBook Pro, Dr. Priya Anand\nFORENSICS: DCI Digital, Ref: WHM2-DFCU-006\n\nRECOVERED DRAFT EMAIL (unsent, saved locally):\n\nTO: [left blank]\nSUBJECT: I don't know who to trust\n\n'I have the files. All of it. The suppressed data, the altered mortality records, the proof that patients were left on a placebo when we knew the compound worked. Forty-three people. I have names.\n\nI've already sent the formal report. But I'm scared. They know I have the backup files. I've seen a car outside my flat twice this week. I don't know if I'm being paranoid.\n\nIf something happens to me, the encrypted archive is in the cloud. Password is my mother's name and the year of her death.'\n\nNOTE: Email was never sent. The encrypted archive referenced has been located and is pending legal decryption." },
-      { id: "ev-b007", name: "MHRA Whistleblower Submission", type: "DOC", locked: true,
-        content: "AGENCY: Medicines & Healthcare Products Regulatory Agency\nCHANNEL: Whistleblower Portal — Confidential Submission\nRECEIPT DATE: 17 JAN 2024, 22:14\nARCHIVE ID: WHB-2024-0117\n\nSUBMITTED BY: Dr. Priya Anand, BioNova Labs (Researcher ID: BN-2041)\n\nSUMMARY OF ALLEGATIONS:\n— BioNova Phase III trial data was systematically manipulated between Q2 2022 and Q4 2023\n— Mortality rates in control group suppressed. Efficacy rates in treatment group inflated.\n— Estimated 40–50 patients received ineffective treatment during the manipulation period.\n— Primary beneficiary of data manipulation: accelerated regulatory approval pathway\n— Individuals named: WEBB, Marcus (Director of Operations); two unnamed data analysts\n\nDr. Anand expressed concern for her personal safety in an attached note. The submission was acknowledged. Dr. Anand was found dead 17 days later." },
-      { id: "ev-b008", name: "Bank Records — Roy Simms", type: "DOC", locked: true,
-        content: "SUBJECT: Simms, Roy — personal banking records\nISSUED UNDER: Production Order, HOM-2024-0203\n\nDEPOSIT LOG:\nJAN 05  — £4,000.00  [CREDIT]\nJAN 19  — £4,000.00  [CREDIT]\nFEB 01  — £4,000.00  [CREDIT]\n\nSOURCE ACCOUNT: Hadleigh Consult Ltd — Cayman Islands\n\nINTELLIGENCE:\nHadleigh Consult Ltd shares a registered address with NovaCare Holdings — a BioNova subsidiary used for contractor payments.\n\nPATTERN: Three equal payments, regular intervals, in the 30 days before Dr. Anand's death.\n\nSPECULATION (unconfirmed): Simms may have been paid to provide information about Platform 9 CCTV coverage and camera blind spots — consistent with his statement about the 'maintenance man' who questioned him weeks earlier." }
-    ],
-    correctSuspect: "s4"
-  }
+// NAVIGATION
+let currentSection = 0;
+
+function goTo(index) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.progress-step').forEach((s, i) => {
+    s.classList.remove('active');
+    if (i < index) s.classList.add('done');
+    else s.classList.remove('done');
+  });
+  document.getElementById('sec' + index).classList.add('active');
+  document.querySelectorAll('.progress-step')[index].classList.add('active');
+  currentSection = index;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (index === 2) initNumQuiz();
+  if (index === 3) initMatchGame();
+  if (index === 5) initBigQuiz();
+}
+
+// NUMBER QUIZ
+const numQuizData = [
+  { q: "Что значит «acht»?", a: "8", opts: ["5", "6", "7", "8"] },
+  { q: "Как по-немецки «три»?", a: "drei", opts: ["zwei", "vier", "drei", "sechs"] },
+  { q: "Что значит «zwölf»?", a: "12", opts: ["11", "12", "13", "14"] },
+  { q: "Как по-немецки «девять»?", a: "neun", opts: ["sieben", "acht", "neun", "zehn"] },
 ];
+let numQIdx = 0;
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-var state = {
-  activeCaseId: null,
-  activeTab: "overview",
-  selectedEvidence: null,
-  selectedSuspect: null,
-  interroSuspect: null,
-  boardNotes: {},
-  accusedSuspect: null,
-  caseStatuses: {}
-};
-
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function getCase(id) {
-  return CASES.find(function(c){ return c.id === (id || state.activeCaseId); });
+function initNumQuiz() {
+  numQIdx = 0;
+  renderNumQuiz();
 }
 
-function notify(msg, type) {
-  var el = document.getElementById("notification");
-  el.textContent = msg;
-  el.className = type || "";
-  el.style.display = "block";
-  setTimeout(function(){ el.style.display = "none"; }, 3200);
-}
-
-function addRadioEntry(msg) {
-  var log = document.getElementById("radioLog");
-  var entries = document.getElementById("radioEntries");
-  log.style.display = "block";
-  var el = document.createElement("div");
-  el.className = "radio-entry new";
-  var now = new Date();
-  var t = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
-  el.textContent = "[" + t + "] " + msg;
-  entries.insertBefore(el, entries.firstChild);
-  if (entries.children.length > 8) entries.removeChild(entries.lastChild);
-}
-
-function unlockEvidence(caseId, evId) {
-  var c = getCase(caseId);
-  var ev = c.evidence.find(function(e){ return e.id === evId; });
-  if (ev && ev.locked) {
-    ev.locked = false;
-    // unlock timeline items
-    c.timeline.forEach(function(t){
-      if (t.req === evId) t.locked = false;
-    });
-    notify("⚑ NEW EVIDENCE UNLOCKED: " + ev.name, "");
-    addRadioEntry("Evidence file unlocked: " + evId.toUpperCase());
-    return true;
-  }
-  return false;
-}
-
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
-  document.getElementById("page-" + pageId).classList.add("active");
-}
-
-// ═══════════════════════════════════════════
-// CLOCK
-// ═══════════════════════════════════════════
-function updateClocks() {
-  var now = new Date();
-  var t = now.toLocaleTimeString("en-GB", { hour12: false });
-  ["clock","clock2","clock3","clock4"].forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) el.textContent = t;
-  });
-}
-setInterval(updateClocks, 1000);
-updateClocks();
-
-// ═══════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════
-function renderDashboard() {
-  var grid = document.getElementById("caseGrid");
-  grid.innerHTML = "";
-
-  var open = CASES.filter(function(c){ return c.status === "OPEN"; }).length;
-  var closed = CASES.filter(function(c){ return c.status === "CLOSED"; }).length;
-  document.getElementById("stat-open").textContent = open;
-  document.getElementById("stat-closed").textContent = closed;
-
-  CASES.forEach(function(c){
-    var card = document.createElement("div");
-    card.className = "case-card " + c.status;
-    var susHtml = c.suspects.map(function(s){
-      return '<div class="sus-dot">' + s.initials + '</div>';
-    }).join("");
-    card.innerHTML =
-      '<div class="case-card-top">' +
-        '<span class="case-code">' + c.code + '</span>' +
-        '<span class="status-tag ' + c.status + '">' + c.status + '</span>' +
-      '</div>' +
-      '<div class="case-title">' + c.title + '</div>' +
-      '<div class="case-type-loc">' +
-        '<span class="case-type">' + c.type.toUpperCase() + '</span>' +
-        '<span class="case-loc">// ' + c.location.split(",")[0] + '</span>' +
-      '</div>' +
-      '<div class="case-synopsis">' + c.synopsis.substring(0,140) + '…</div>' +
-      '<div class="case-footer">' +
-        '<div class="suspect-mini-row">' + susHtml + '</div>' +
-        '<span class="priority-tag ' + c.priority + '">▲ ' + c.priority + '</span>' +
-      '</div>';
-    card.addEventListener("click", function(){ openCase(c.id); });
-    grid.appendChild(card);
-  });
-}
-
-// ═══════════════════════════════════════════
-// OPEN CASE
-// ═══════════════════════════════════════════
-function openCase(caseId) {
-  state.activeCaseId = caseId;
-  state.activeTab = "overview";
-  state.selectedEvidence = null;
-  state.selectedSuspect = null;
-  state.interroSuspect = null;
-
-  var c = getCase(caseId);
-  document.getElementById("caseHeaderCode").textContent = c.code;
-  document.getElementById("caseHeaderTitle").textContent = c.title;
-  document.getElementById("caseHeaderStatus").textContent = c.status;
-  document.getElementById("caseHeaderStatus").className = "status-tag " + c.status;
-
-  var accuseBtn = document.getElementById("accuseBtn");
-  accuseBtn.style.display = c.status !== "OPEN" ? "none" : "";
-
-  showPage("case");
-  renderTab("overview");
-  addRadioEntry("Case file opened: " + c.code);
-
-  // Random radio comms
-  var msgs = [
-    "Unit 7 responding to separate incident, Eastside.",
-    "Forensics confirm secondary analysis complete.",
-    "Dispatch: all units maintain radio silence on encrypted.",
-    "Background check results incoming on primary subject.",
-    "Lab processing expedited — priority flag on this file."
-  ];
-  setTimeout(function(){
-    addRadioEntry(msgs[Math.floor(Math.random()*msgs.length)]);
-  }, 4000);
-}
-
-function goToDashboard() {
-  state.activeCaseId = null;
-  renderDashboard();
-  showPage("dashboard");
-}
-
-// ═══════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════
-function switchTab(tabName) {
-  state.activeTab = tabName;
-  document.querySelectorAll(".tab-btn").forEach(function(b){
-    b.classList.remove("active");
-  });
-  document.querySelectorAll(".tab-btn").forEach(function(b){
-    if (b.textContent.toLowerCase().replace(" ","") === tabName.toLowerCase().replace(" ","") ||
-        b.getAttribute("onclick") === "switchTab('" + tabName + "')") {
-      b.classList.add("active");
-    }
-  });
-  renderTab(tabName);
-}
-
-function renderTab(tabName) {
-  var body = document.getElementById("tabBody");
-  body.innerHTML = "";
-  var c = getCase();
-  if (!c) return;
-
-  switch(tabName) {
-    case "overview": renderOverview(c, body); break;
-    case "timeline": renderTimeline(c, body); break;
-    case "evidence": renderEvidence(c, body); break;
-    case "suspects": renderSuspects(c, body); break;
-    case "board": renderBoard(c, body); break;
-    case "interrogation": renderInterrogation(c, body); break;
-  }
-}
-
-// ═══════════════════════════════════════════
-// OVERVIEW
-// ═══════════════════════════════════════════
-function renderOverview(c, body) {
-  var unlockedEv = c.evidence.filter(function(e){ return !e.locked; }).length;
-  var interrogated = c.suspects.filter(function(s){ return s.interrogated; }).length;
-
-  var html =
-    '<div class="overview-grid">' +
-      '<div>' +
-        '<div class="panel">' +
-          '<div class="panel-hdr"><div class="dot" style="background:var(--accent)"></div>CASE OVERVIEW</div>' +
-          '<div class="panel-body">' +
-            '<p class="synopsis-text">' + c.synopsis + '</p>' +
-            '<div class="detail-grid">' +
-              mkDetail("CASE CODE", c.code) +
-              mkDetail("TYPE", c.type) +
-              mkDetail("DATE", c.date) +
-              mkDetail("PRIORITY", '<span style="color:var(--' + (c.priority==="CRITICAL"?"red":"amber") + ')">' + c.priority + '</span>') +
-              mkDetail("LOCATION", c.location) +
-              mkDetail("STATUS", '<span style="color:var(--' + (c.status==="OPEN"?"red":"green") + ')">' + c.status + '</span>') +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="panel">' +
-          '<div class="panel-hdr"><div class="dot" style="background:var(--amber)"></div>PROGRESS METRICS</div>' +
-          '<div class="panel-body">' +
-            '<div class="detail-grid">' +
-              mkDetail("EVIDENCE UNLOCKED", unlockedEv + " / " + c.evidence.length) +
-              mkDetail("SUSPECTS INTERROGATED", interrogated + " / " + c.suspects.length) +
-              mkDetail("TIMELINE EVENTS", c.timeline.filter(function(t){return !t.locked;}).length + " / " + c.timeline.length + " VISIBLE") +
-              mkDetail("CASE FILE STATUS", c.status) +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div>' +
-        '<div class="panel">' +
-          '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>SUSPECTS — THREAT ASSESSMENT</div>' +
-          '<div class="panel-body">' +
-            c.suspects.map(function(s){
-              var col = s.threat > 70 ? "var(--red)" : s.threat > 40 ? "var(--amber)" : "var(--green)";
-              return '<div class="suspect-profile-row">' +
-                '<div class="sus-avatar">' + s.initials + '</div>' +
-                '<div>' +
-                  '<div class="sus-name">' + s.name + '</div>' +
-                  '<div class="sus-rel">' + s.relation + '</div>' +
-                '</div>' +
-                '<div class="threat-bar">' +
-                  '<div style="font-size:8px;color:var(--text3);margin-bottom:3px">THREAT</div>' +
-                  '<div class="threat-track">' +
-                    '<div class="threat-fill" style="width:' + s.threat + '%;background:' + col + '"></div>' +
-                  '</div>' +
-                  '<div class="threat-num" style="color:' + col + '">' + s.threat + '%</div>' +
-                '</div>' +
-              '</div>';
-            }).join("") +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-
-  body.innerHTML = html;
-}
-
-function mkDetail(k, v) {
-  return '<div class="detail-item"><div class="detail-key">' + k + '</div><div class="detail-val">' + v + '</div></div>';
-}
-
-// ═══════════════════════════════════════════
-// TIMELINE
-// ═══════════════════════════════════════════
-function renderTimeline(c, body) {
-  var html =
-    '<div class="panel">' +
-      '<div class="panel-hdr"><div class="dot" style="background:var(--accent)"></div>INCIDENT TIMELINE — ' + c.timeline.filter(function(t){return !t.locked;}).length + '/' + c.timeline.length + ' EVENTS UNLOCKED</div>' +
-      '<div class="panel-body">' +
-        '<div class="timeline-wrap">' +
-          c.timeline.map(function(t, i){
-            return '<div class="tl-item' + (t.locked?" locked":"") + '" style="animation-delay:' + (i*0.05) + 's">' +
-              '<div class="tl-time">' + t.time + '</div>' +
-              '<div class="tl-event">' +
-                (t.locked
-                  ? '<span class="tl-lock">🔒 LOCKED — Requires evidence: ' + (t.req||"") + '</span>'
-                  : t.event) +
-              '</div>' +
-            '</div>';
-          }).join("") +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  body.innerHTML = html;
-}
-
-// ═══════════════════════════════════════════
-// EVIDENCE
-// ═══════════════════════════════════════════
-function renderEvidence(c, body) {
-  body.innerHTML = '<div class="ev-layout"><div class="ev-list" id="evList"></div><div class="ev-viewer" id="evViewer"><div class="ev-empty">SELECT AN EVIDENCE FILE</div></div></div>';
-
-  var listEl = document.getElementById("evList");
-  var unlockedCount = c.evidence.filter(function(e){ return !e.locked; }).length;
-
-  var hdr = document.createElement("div");
-  hdr.className = "panel-hdr";
-  hdr.innerHTML = '<div class="dot" style="background:var(--accent)"></div>FILES — ' + unlockedCount + '/' + c.evidence.length + ' UNLOCKED';
-  listEl.appendChild(hdr);
-
-  c.evidence.forEach(function(ev){
-    var item = document.createElement("div");
-    item.className = "ev-item" + (ev.locked ? " locked" : "") + (state.selectedEvidence === ev.id ? " active" : "");
-    item.innerHTML =
-      '<span class="ev-type ' + ev.type + '">' + ev.type + '</span>' +
-      '<span class="ev-name">' + ev.name + '</span>' +
-      (ev.locked ? '<span class="lock-icon">🔒</span>' : '');
-    if (!ev.locked) {
-      item.addEventListener("click", function(){
-        state.selectedEvidence = ev.id;
-        renderEvidence(c, body);
-      });
-    }
-    listEl.appendChild(item);
-  });
-
-  if (state.selectedEvidence) {
-    var ev = c.evidence.find(function(e){ return e.id === state.selectedEvidence; });
-    if (ev) renderEvidenceViewer(ev, document.getElementById("evViewer"));
-  }
-}
-
-function renderEvidenceViewer(ev, container) {
-  var fileId = ev.id.toUpperCase();
-  var dateStr = new Date().toLocaleDateString("en-GB");
-
-  var inner = '';
-  if (ev.type === "AUDIO") {
-    // Parse transcript lines
-    var lines = ev.content.split("\n").filter(function(l){ return l.trim(); });
-    var inTranscript = false;
-    var transcriptHtml = "";
-    var metaHtml = "";
-    lines.forEach(function(line){
-      if (line.startsWith("TRANSCRIPT") || line.startsWith("SUBJECT:") || line.startsWith("OFFICER:") || line.startsWith("DATE:")) {
-        if (!inTranscript) metaHtml += '<div style="color:var(--text3);font-size:9px;letter-spacing:1px;margin-bottom:3px">' + line + '</div>';
-      } else if (line.includes(":") && (line.indexOf(":") < 20)) {
-        inTranscript = true;
-        var colon = line.indexOf(":");
-        var speaker = line.substring(0, colon).trim();
-        var text = line.substring(colon+1).trim();
-        var isSubject = (speaker !== "PAULSEN" && speaker !== "OFFICER" && speaker !== "DS PAULSEN");
-        transcriptHtml +=
-          '<div class="transcript-line">' +
-            '<div class="transcript-speaker' + (isSubject?" subject":"") + '">' + speaker + '</div>' +
-            '<div class="transcript-text">' + text + '</div>' +
-          '</div>';
-      }
-    });
-
-    inner =
-      '<div class="doc-hdr">' +
-        '<div class="doc-title">' + ev.name + '</div>' +
-        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>AUDIO TRANSCRIPT</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
-      '</div>' +
-      '<div class="audio-transcript" style="flex:1;overflow:auto">' +
-        '<div class="audio-hdr">' +
-          '<div class="audio-wave"><span></span><span></span><span></span><span></span><span></span></div>' +
-          '<span style="color:var(--amber);font-size:10px;letter-spacing:2px">AUDIO TRANSCRIPT — VERIFIED</span>' +
-        '</div>' +
-        '<div style="margin-bottom:12px">' + metaHtml + '</div>' +
-        transcriptHtml +
-      '</div>' +
-      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
-
-  } else if (ev.type === "IMG") {
-    var lines2 = ev.content.split("\n").filter(function(l){ return l.trim(); });
-    var frames = lines2.filter(function(l){ return l.match(/^FRAME/); });
-    var other = lines2.filter(function(l){ return !l.match(/^FRAME/) && l.trim(); });
-    var frameHtml = frames.map(function(f, i){
-      var parts = f.split("]");
-      var label = parts[0] ? parts[0].replace("[","").trim() : "FRAME " + (i+1);
-      return '<div class="img-thumb" data-label="' + label + '" style="height:90px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border2);padding:8px;font-size:9px;color:var(--text3);text-align:center">' +
-        '<span style="color:var(--text3)">[PHOTOGRAPH — ' + label + ']</span>' +
-      '</div>';
-    }).join("");
-
-    inner =
-      '<div class="doc-hdr">' +
-        '<div class="doc-title">' + ev.name + '</div>' +
-        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>PHOTOGRAPHIC EVIDENCE</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
-      '</div>' +
-      '<div class="img-evidence" style="flex:1;overflow:auto;padding:16px">' +
-        '<div style="color:var(--text2);font-size:11px;line-height:1.8;margin-bottom:14px">' +
-          other.map(function(l){ return l + '<br>'; }).join("") +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">' + frameHtml + '</div>' +
-      '</div>' +
-      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
-
-  } else {
-    inner =
-      '<div class="doc-hdr">' +
-        '<div class="doc-title">' + ev.name + '</div>' +
-        '<div class="doc-meta"><span>FILE: <b>' + fileId + '</b></span><span>TYPE: <b>' + ev.type + '</b></span><span>STATUS: <b>ADMITTED</b></span></div>' +
-        (ev.type === "FORENSIC" ? '<div class="classified-stamp">FORENSIC — RESTRICTED</div>' : '') +
-      '</div>' +
-      '<div class="doc-body" style="position:relative">' +
-        '<div class="doc-watermark">EVIDENCE</div>' +
-        escHtml(ev.content) +
-      '</div>' +
-      '<div class="doc-footer"><span>NORTHBRIDGE MPD — MAJOR CRIMES</span><span>CONFIDENTIAL — REF: ' + fileId + '</span><span>' + dateStr + '</span></div>';
-  }
-
-  container.innerHTML = '<div class="doc-viewer">' + inner + '</div>';
-}
-
-function escHtml(str) {
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-// ═══════════════════════════════════════════
-// SUSPECTS
-// ═══════════════════════════════════════════
-function renderSuspects(c, body) {
-  body.innerHTML = '<div class="sus-layout"><div class="sus-list" id="susList"></div><div class="sus-detail" id="susDetail"><div class="ev-empty">SELECT A SUSPECT</div></div></div>';
-
-  var listEl = document.getElementById("susList");
-  var hdr = document.createElement("div");
-  hdr.className = "panel-hdr";
-  hdr.innerHTML = '<div class="dot" style="background:var(--red)"></div>SUSPECT PROFILES — ' + c.suspects.length + ' LOGGED';
-  listEl.appendChild(hdr);
-
-  c.suspects.forEach(function(s){
-    var item = document.createElement("div");
-    item.className = "sus-list-item" + (state.selectedSuspect === s.id ? " active" : "");
-    item.innerHTML =
-      '<div class="sus-avatar">' + s.initials + '</div>' +
-      '<div>' +
-        '<div class="sus-name" style="font-size:12px">' + s.name + '</div>' +
-        '<div class="sus-rel">' + s.relation + '</div>' +
-      '</div>' +
-      (s.interrogated ? '<div class="sus-interrogated">INTERROGATED</div>' : '');
-    item.addEventListener("click", function(){
-      state.selectedSuspect = s.id;
-      renderSuspects(c, body);
-    });
-    listEl.appendChild(item);
-  });
-
-  if (state.selectedSuspect) {
-    var s = c.suspects.find(function(x){ return x.id === state.selectedSuspect; });
-    if (s) renderSuspectDetail(s, c, document.getElementById("susDetail"), body);
-  }
-}
-
-function renderSuspectDetail(s, c, container, body) {
-  var col = s.threat > 70 ? "var(--red)" : s.threat > 40 ? "var(--amber)" : "var(--green)";
-  container.innerHTML =
-    '<div class="sus-detail-hdr">' +
-      '<div class="sus-big-avatar">' + s.initials + '</div>' +
-      '<div>' +
-        '<div style="color:var(--text3);font-size:8px;letter-spacing:3px;margin-bottom:2px">SUSPECT FILE</div>' +
-        '<div class="sus-name" style="font-family:var(--sans);font-size:17px">' + s.name + '</div>' +
-        '<div class="sus-rel">' + s.relation + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="sus-detail-body">' +
-      mkSusField("DATE OF BIRTH", s.dob) +
-      mkSusField("NATIONALITY", s.nationality) +
-      mkSusField("PRIOR RECORD", s.priors) +
-      mkSusField("KNOWN MOTIVE", s.motive) +
-      mkSusField("STATED ALIBI", s.alibi) +
-      mkSusField("INVESTIGATOR NOTES", s.notes) +
-      '<div class="sus-field">' +
-        '<div class="sus-field-label">THREAT ASSESSMENT</div>' +
-        '<div class="threat-full">' +
-          '<div class="threat-track-full">' +
-            '<div class="threat-fill" style="width:' + s.threat + '%;background:' + col + '"></div>' +
-          '</div>' +
-          '<span style="color:' + col + ';font-size:12px;min-width:36px;text-align:right">' + s.threat + '%</span>' +
-        '</div>' +
-      '</div>' +
-      '<button class="btn-interrogate" onclick="goToInterrogation(\'' + s.id + '\')">→ OPEN INTERROGATION ROOM</button>' +
-    '</div>';
-}
-
-function mkSusField(label, val) {
-  return '<div class="sus-field"><div class="sus-field-label">' + label + '</div><div class="sus-field-val">' + val + '</div></div>';
-}
-
-function goToInterrogation(suspectId) {
-  state.interroSuspect = suspectId;
-  switchTab("interrogation");
-}
-
-// ═══════════════════════════════════════════
-// BOARD
-// ═══════════════════════════════════════════
-function renderBoard(c, body) {
-  var notes = state.boardNotes[c.id] || [];
-  var unlockedEv = c.evidence.filter(function(e){ return !e.locked; });
-
-  var boardCards = unlockedEv.map(function(ev){
-    return '<div class="board-card evidence">' +
-      '<div class="board-card-type">' + ev.type + '</div>' +
-      '<div class="board-card-name">' + ev.name + '</div>' +
-    '</div>';
-  }).join("") + c.suspects.map(function(s){
-    return '<div class="board-card suspect">' +
-      '<div class="board-card-type">SUSPECT</div>' +
-      '<div class="board-card-name">' + s.name + '</div>' +
-    '</div>';
-  }).join("");
-
-  var notesHtml = notes.length === 0
-    ? '<div style="color:var(--text3);font-size:10px;font-style:italic;padding:8px">No notes yet.</div>'
-    : notes.map(function(n){
-        return '<div class="note-entry">' +
-          '<div class="note-time">' + n.time + '</div>' +
-          '<div class="note-text">' + escHtml(n.text) + '</div>' +
-        '</div>';
-      }).join("");
-
-  body.innerHTML =
-    '<div class="board-layout">' +
-      '<div>' +
-        '<div class="panel-hdr" style="margin-bottom:10px"><div class="dot" style="background:var(--accent)"></div>INVESTIGATION BOARD — ' + unlockedEv.length + ' EVIDENCE FILES + ' + c.suspects.length + ' SUSPECTS</div>' +
-        '<div class="board-canvas">' +
-          '<div class="board-grid-bg"></div>' +
-          '<div class="board-items">' + boardCards + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="notes-panel">' +
-        '<div class="panel-hdr"><div class="dot" style="background:var(--amber)"></div>INVESTIGATOR NOTES</div>' +
-        '<div class="notes-list" id="notesList">' + notesHtml + '</div>' +
-        '<div class="note-input-area">' +
-          '<textarea class="note-textarea" id="noteText" rows="3" placeholder="Add note…"></textarea>' +
-          '<button class="btn-note" id="noteAddBtn">+ ADD NOTE</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-
-  document.getElementById("noteAddBtn").addEventListener("click", function(){
-    var txt = document.getElementById("noteText").value.trim();
-    if (!txt) return;
-    if (!state.boardNotes[c.id]) state.boardNotes[c.id] = [];
-    var now = new Date();
-    state.boardNotes[c.id].push({
-      text: txt,
-      time: now.toLocaleTimeString("en-GB",{hour12:false}) + " — " + now.toLocaleDateString("en-GB")
-    });
-    document.getElementById("noteText").value = "";
-    renderBoard(c, body);
-  });
-}
-
-// ═══════════════════════════════════════════
-// INTERROGATION
-// ═══════════════════════════════════════════
-function renderInterrogation(c, body) {
-  if (!state.interroSuspect) {
-    body.innerHTML =
-      '<div class="panel">' +
-        '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>INTERROGATION ROOM — SELECT SUBJECT</div>' +
-        '<div class="panel-body">' +
-          '<div class="int-select-title">SELECT SUBJECT TO INTERROGATE</div>' +
-          '<div class="int-sus-btns">' +
-            c.suspects.map(function(s){
-              return '<button class="int-sus-btn" onclick="startInterrogation(\'' + s.id + '\')">' +
-                '<span class="sus-avatar" style="width:32px;height:32px;font-size:11px">' + s.initials + '</span>' +
-                s.name +
-                (s.interrogated ? ' <span style="color:var(--green);font-size:9px">✓</span>' : '') +
-              '</button>';
-            }).join("") +
-          '</div>' +
-        '</div>' +
-      '</div>';
+function renderNumQuiz() {
+  if (numQIdx >= numQuizData.length) {
+    document.getElementById('numQuestion').textContent = "🎉 Отлично! Все верно!";
+    document.getElementById('numOptions').innerHTML = "";
     return;
   }
-
-  var s = c.suspects.find(function(x){ return x.id === state.interroSuspect; });
-  if (!s) return;
-
-  var exchangesHtml = s.questions.filter(function(q){ return q.answered; }).map(function(q){
-    return '<div class="exchange">' +
-      '<div class="exchange-q">' +
-        '<div class="exchange-q-label">INVESTIGATOR</div>' +
-        '<div class="exchange-q-text">' + q.text + '</div>' +
-      '</div>' +
-      '<div class="exchange-a">' +
-        '<div class="exchange-a-label">' + s.name.toUpperCase() + '</div>' +
-        '<div class="exchange-a-text">' + q.answer + '</div>' +
-        (q.unlocks ? '<div class="exchange-unlock">⚑ Evidence unlocked: ' + q.unlocks + '</div>' : '') +
-      '</div>' +
-    '</div>';
-  }).join("");
-
-  var pendingBtns = s.questions.filter(function(q){ return !q.answered; }).map(function(q){
-    return '<button class="int-q-btn" onclick="askQuestion(\'' + q.id + '\')">' +
-      '<span style="color:var(--text3)">Q:</span> ' + q.text +
-    '</button>';
-  }).join("");
-
-  body.innerHTML =
-    '<div class="int-layout">' +
-      '<div class="int-sidebar">' +
-        '<div class="int-sidebar-hdr">' +
-          '<div class="sus-big-avatar">' + s.initials + '</div>' +
-          '<div>' +
-            '<div class="int-subject-label">SUBJECT</div>' +
-            '<div class="int-subject-name">' + s.name + '</div>' +
-            '<div class="int-subject-rel">' + s.relation + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="int-recording">' +
-          '<div class="rec-dot"></div>' +
-          'REC — SESSION ACTIVE' +
-        '</div>' +
-        '<div class="int-meta">' +
-          '<div class="int-field"><div class="int-field-label">AGE</div><div class="int-field-val">' + s.age + '</div></div>' +
-          '<div class="int-field"><div class="int-field-label">ALIBI</div><div class="int-field-val">' + s.alibi + '</div></div>' +
-          '<div class="int-field"><div class="int-field-label">STATUS</div><div class="int-field-val">' + (s.interrogated ? '<span style="color:var(--green)">IN PROGRESS</span>' : 'NOT YET INTERROGATED') + '</div></div>' +
-        '</div>' +
-        '<button class="int-sus-btn" style="margin:12px 16px;width:calc(100% - 32px)" onclick="state.interroSuspect=null;renderTab(\'interrogation\')">← CHANGE SUBJECT</button>' +
-      '</div>' +
-      '<div class="int-main">' +
-        '<div class="panel-hdr"><div class="dot" style="background:var(--red)"></div>INTERROGATION TRANSCRIPT — ' + c.code + '</div>' +
-        '<div class="int-transcript" id="intTranscript">' +
-          (exchangesHtml || '<div style="color:var(--text3);font-size:10px;padding:8px">No questions asked yet. Select from below.</div>') +
-        '</div>' +
-        '<div class="int-questions" id="intQuestions">' +
-          (pendingBtns || '<div style="color:var(--text3);font-size:10px">All questions asked.</div>') +
-        '</div>' +
-      '</div>' +
-    '</div>';
+  const q = numQuizData[numQIdx];
+  document.getElementById('numQuestion').textContent = q.q;
+  document.getElementById('numFeedback').style.display = 'none';
+  const opts = document.getElementById('numOptions');
+  opts.innerHTML = '';
+  q.opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-btn';
+    btn.textContent = o;
+    btn.onclick = () => checkNumQuiz(btn, o, q.a);
+    opts.appendChild(btn);
+  });
 }
 
-function startInterrogation(suspectId) {
-  var c = getCase();
-  var s = c.suspects.find(function(x){ return x.id === suspectId; });
-  s.interrogated = true;
-  state.interroSuspect = suspectId;
-  addRadioEntry("Interrogation initiated: " + s.name);
-  renderTab("interrogation");
-}
-
-function askQuestion(qId) {
-  var c = getCase();
-  var s = c.suspects.find(function(x){ return x.id === state.interroSuspect; });
-  var q = s.questions.find(function(x){ return x.id === qId; });
-  if (!q) return;
-  q.answered = true;
-  if (q.unlocks) {
-    unlockEvidence(c.id, q.unlocks);
-  }
-  addRadioEntry("Subject responded to question. Review transcript.");
-  renderTab("interrogation");
-  // scroll transcript to bottom
-  setTimeout(function(){
-    var t = document.getElementById("intTranscript");
-    if (t) t.scrollTop = t.scrollHeight;
-  }, 100);
-}
-
-// ═══════════════════════════════════════════
-// ACCUSATION
-// ═══════════════════════════════════════════
-var selectedAccuseSuspect = null;
-
-function openModal() {
-  var c = getCase();
-  selectedAccuseSuspect = null;
-  document.getElementById("confirmAccuseBtn").disabled = true;
-
-  var opts = document.getElementById("accuseOptions");
-  opts.innerHTML = c.suspects.map(function(s){
-    return '<div class="accuse-option" onclick="selectAccuse(\'' + s.id + '\')" id="ao-' + s.id + '">' +
-      '<div class="sus-avatar">' + s.initials + '</div>' +
-      '<div>' +
-        '<div class="accuse-name">' + s.name + '</div>' +
-        '<div class="accuse-rel">' + s.relation + '</div>' +
-      '</div>' +
-    '</div>';
-  }).join("");
-
-  document.getElementById("accusationModal").style.display = "flex";
-}
-
-function selectAccuse(id) {
-  selectedAccuseSuspect = id;
-  document.querySelectorAll(".accuse-option").forEach(function(o){ o.classList.remove("selected"); });
-  var el = document.getElementById("ao-" + id);
-  if (el) el.classList.add("selected");
-  document.getElementById("confirmAccuseBtn").disabled = false;
-}
-
-function closeModal() {
-  document.getElementById("accusationModal").style.display = "none";
-  selectedAccuseSuspect = null;
-}
-
-function confirmAccuse() {
-  if (!selectedAccuseSuspect) return;
-  closeModal();
-  var c = getCase();
-  var accused = c.suspects.find(function(s){ return s.id === selectedAccuseSuspect; });
-  var isCorrect = selectedAccuseSuspect === c.correctSuspect;
-
-  c.status = isCorrect ? "CLOSED" : "COLD";
-  c.accusedSuspect = selectedAccuseSuspect;
-
-  addRadioEntry("FORMAL ACCUSATION FILED — CASE: " + c.code);
-  addRadioEntry(isCorrect ? "CASE CLOSED — SUSPECT IN CUSTODY" : "ACCUSATION REJECTED — INSUFFICIENT EVIDENCE");
-
-  renderOutcome(c, accused, isCorrect);
-  renderDashboard();
-  showPage("outcome");
-}
-
-// ═══════════════════════════════════════════
-// OUTCOME
-// ═══════════════════════════════════════════
-function renderOutcome(c, accused, isCorrect) {
-  var correct = c.suspects.find(function(s){ return s.id === c.correctSuspect; });
-  var card = document.getElementById("outcomeCard");
-  card.className = "outcome-card " + (isCorrect ? "solved" : "wrong");
-
-  var html =
-    '<div class="outcome-pre">CASE ' + c.code + ' — FINAL VERDICT</div>' +
-    '<div class="outcome-verdict">' + (isCorrect ? "CASE CLOSED" : "ACCUSATION REJECTED") + '</div>' +
-    '<div class="outcome-desc">' +
-      (isCorrect
-        ? 'Your investigation was thorough and your accusation correct. The Crown Prosecution Service has accepted the evidence file. The accused has been taken into custody pending trial.'
-        : 'Your accusation lacked sufficient grounding in the evidence. The suspect has been released without charge. The real perpetrator remains at large. The case has been marked cold.') +
-    '</div>' +
-    '<div class="outcome-block">' +
-      '<div class="outcome-label">YOUR ACCUSATION</div>' +
-      '<div class="outcome-name">' + accused.name + '</div>' +
-      '<div class="outcome-detail">' + accused.relation + '</div>' +
-    '</div>';
-
-  if (!isCorrect) {
-    html +=
-      '<div class="outcome-block">' +
-        '<div class="outcome-label">CORRECT ANSWER</div>' +
-        '<div class="outcome-correct-name">' + correct.name + '</div>' +
-        '<div class="outcome-detail">' + correct.motive + '</div>' +
-      '</div>';
+function checkNumQuiz(btn, selected, correct) {
+  const fb = document.getElementById('numFeedback');
+  document.querySelectorAll('#numOptions .quiz-btn').forEach(b => b.onclick = null);
+  if (selected === correct) {
+    btn.classList.add('correct');
+    fb.textContent = "✅ Верно!";
+    fb.style.background = "#E0FFF5"; fb.style.color = "#00B894";
   } else {
-    html +=
-      '<div class="outcome-block">' +
-        '<div class="outcome-label">CASE SUMMARY</div>' +
-        '<div class="outcome-detail">' +
-          accused.name + ' was arrested and charged with ' + c.type.toLowerCase() + '. ' +
-          'Key evidence including ' + (c.id === "case-001" ? "the GPS vehicle data, financial forensics, and the amended will draft" : "the Wi-Fi device log, MHRA submission, and financial deposits") +
-          ' proved decisive. The case has been forwarded to the Crown Prosecution Service.' +
-        '</div>' +
-      '</div>';
+    btn.classList.add('wrong');
+    document.querySelectorAll('#numOptions .quiz-btn').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    fb.textContent = "❌ Правильный ответ: " + correct;
+    fb.style.background = "#FFE5EE"; fb.style.color = "#E84393";
   }
-
-  html += '<button class="btn-back" style="margin-top:20px;padding:10px 20px" onclick="goToDashboard(); document.getElementById(\'radioLog\').style.display=\'none\'">← RETURN TO CASES</button>';
-
-  card.innerHTML = html;
+  fb.style.display = 'block';
+  numQIdx++;
+  setTimeout(renderNumQuiz, 1200);
 }
 
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-renderDashboard();
-showPage("dashboard");
-
-// Random ambient dispatch messages
-var ambientMsgs = [
-  "Unit 4 confirms perimeter secure.",
-  "Lab results expedited — 48hr turnaround authorised.",
-  "Warrant approved by duty magistrate.",
-  "Comms check — all units respond.",
-  "DCI requests daily briefing 08:00.",
-  "Forensic team available from 14:00.",
-  "Background checks processing — ETA 2 hours.",
-  "Intel has flagged two related names for review.",
-  "ANPR hit on registered vehicle — coordinates logged.",
-  "Encrypted comms channel verified."
+// MATCH GAME
+const matchPairs = [
+  { de: "rot", ru: "красный" },
+  { de: "blau", ru: "синий" },
+  { de: "grün", ru: "зелёный" },
+  { de: "gelb", ru: "жёлтый" },
+  { de: "schwarz", ru: "чёрный" },
 ];
-var ambientIdx = 0;
-setInterval(function(){
-  if (document.getElementById("radioLog").style.display !== "none") {
-    addRadioEntry(ambientMsgs[ambientIdx % ambientMsgs.length]);
-    ambientIdx++;
+
+let matchSelected = null;
+let matchCount = 0;
+
+function initMatchGame() {
+  matchSelected = null;
+  matchCount = 0;
+  document.getElementById('matchFeedback').style.display = 'none';
+  const deCol = document.getElementById('deWords');
+  const ruCol = document.getElementById('ruWords');
+  deCol.innerHTML = ''; ruCol.innerHTML = '';
+
+  const shuffled = [...matchPairs].sort(() => Math.random() - 0.5);
+  const ruShuffled = [...matchPairs].map(p => p.ru).sort(() => Math.random() - 0.5);
+
+  shuffled.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'match-item';
+    el.textContent = p.de;
+    el.dataset.de = p.de;
+    el.dataset.type = 'de';
+    el.onclick = () => handleMatch(el);
+    deCol.appendChild(el);
+  });
+
+  ruShuffled.forEach(ru => {
+    const el = document.createElement('div');
+    el.className = 'match-item';
+    el.textContent = ru;
+    el.dataset.ru = ru;
+    el.dataset.type = 'ru';
+    el.onclick = () => handleMatch(el);
+    ruCol.appendChild(el);
+  });
+}
+
+function handleMatch(el) {
+  if (el.classList.contains('matched')) return;
+  if (!matchSelected) {
+    matchSelected = el;
+    el.classList.add('selected');
+  } else {
+    if (matchSelected === el) { el.classList.remove('selected'); matchSelected = null; return; }
+    if (matchSelected.dataset.type === el.dataset.type) {
+      matchSelected.classList.remove('selected');
+      matchSelected = el;
+      el.classList.add('selected');
+      return;
+    }
+    const deEl = matchSelected.dataset.type === 'de' ? matchSelected : el;
+    const ruEl = matchSelected.dataset.type === 'ru' ? matchSelected : el;
+    const pair = matchPairs.find(p => p.de === deEl.dataset.de);
+    if (pair && pair.ru === ruEl.dataset.ru) {
+      deEl.classList.remove('selected'); deEl.classList.add('matched');
+      ruEl.classList.remove('selected'); ruEl.classList.add('matched');
+      matchCount++;
+      if (matchCount === matchPairs.length) {
+        const fb = document.getElementById('matchFeedback');
+        fb.textContent = "🎉 Все пары найдены! Ты молодец!";
+        fb.style.background = "#E0FFF5"; fb.style.color = "#00B894";
+        fb.style.display = 'block';
+      }
+    } else {
+      deEl.classList.add('wrong'); ruEl.classList.add('wrong');
+      setTimeout(() => { deEl.classList.remove('wrong','selected'); ruEl.classList.remove('wrong','selected'); }, 700);
+    }
+    matchSelected = null;
   }
-}, 18000);
+}
+
+// BIG QUIZ
+const bigQuizData = [
+  { q: "Как сказать 'Привет' по-немецки?", a: "Hallo!", opts: ["Tschüss!", "Danke!", "Hallo!", "Guten Tag!"] },
+  { q: "Что значит «blau»?", a: "синий", opts: ["красный", "зелёный", "жёлтый", "синий"] },
+  { q: "Как по-немецки «5»?", a: "fünf", opts: ["vier", "sechs", "fünf", "sieben"] },
+  { q: "Что значит «Gute Nacht»?", a: "Спокойной ночи!", opts: ["Доброе утро!", "Добрый день!", "Пока!", "Спокойной ночи!"] },
+  { q: "Как сказать 'Спасибо' по-немецки?", a: "Danke!", opts: ["Hallo!", "Tschüss!", "Danke!", "Bitte!"] },
+  { q: "Что значит «rot»?", a: "красный", opts: ["синий", "красный", "белый", "серый"] },
+  { q: "Как по-немецки «12»?", a: "zwölf", opts: ["elf", "zwölf", "dreizehn", "zehn"] },
+  { q: "Как спросить 'Как тебя зовут?' по-немецки?", a: "Wie heißt du?", opts: ["Wie alt bist du?", "Woher kommst du?", "Wie heißt du?", "Was ist das?"] },
+];
+
+let bigQIdx = 0;
+let stars = 0;
+
+function initBigQuiz() {
+  bigQIdx = 0;
+  stars = 0;
+  document.getElementById('starCount').textContent = 0;
+  renderBigQuiz();
+}
+
+function renderBigQuiz() {
+  if (bigQIdx >= bigQuizData.length) {
+    document.getElementById('bigQuestion').textContent = `🏆 Игра окончена! Ты заработал ${stars} звёзд из ${bigQuizData.length}!`;
+    document.getElementById('bigOptions').innerHTML = '';
+    document.getElementById('bigFeedback').style.display = 'none';
+    document.getElementById('nextQuizBtn').style.display = 'none';
+    return;
+  }
+  const q = bigQuizData[bigQIdx];
+  document.getElementById('bigQuestion').textContent = `Вопрос ${bigQIdx+1}/${bigQuizData.length}: ${q.q}`;
+  document.getElementById('bigFeedback').style.display = 'none';
+  document.getElementById('nextQuizBtn').disabled = true;
+  const opts = document.getElementById('bigOptions');
+  opts.innerHTML = '';
+  const shuffled = [...q.opts].sort(() => Math.random() - 0.5);
+  shuffled.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-btn';
+    btn.textContent = o;
+    btn.onclick = () => checkBigQuiz(btn, o, q.a);
+    opts.appendChild(btn);
+  });
+}
+
+function checkBigQuiz(btn, selected, correct) {
+  document.querySelectorAll('#bigOptions .quiz-btn').forEach(b => b.onclick = null);
+  const fb = document.getElementById('bigFeedback');
+  if (selected === correct) {
+    btn.classList.add('correct');
+    stars++;
+    document.getElementById('starCount').textContent = stars;
+    fb.textContent = "✅ Правильно! ⭐";
+    fb.style.background = "#E0FFF5"; fb.style.color = "#00B894";
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('#bigOptions .quiz-btn').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
+    fb.textContent = "❌ Правильный ответ: " + correct;
+    fb.style.background = "#FFE5EE"; fb.style.color = "#E84393";
+  }
+  fb.style.display = 'block';
+  bigQIdx++;
+  document.getElementById('nextQuizBtn').disabled = false;
+}
+
+function nextQuizQuestion() {
+  renderBigQuiz();
+}
+
+// Init
+goTo(0);
 </script>
 </body>
 </html>
