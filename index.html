@@ -3,337 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detective Transformer</title>
+<title>H.H. Holmes - The Murder Castle</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #0a0a0f;
-    color: #c8c8d0;
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  /* Grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 100;
-    opacity: 0.4;
-  }
-
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2rem;
-    letter-spacing: 0.3em;
-    color: #e8e0d0;
-    text-shadow: 0 0 30px rgba(180,160,120,0.3);
-    margin-bottom: 16px;
-    animation: flicker 8s infinite;
-  }
-
-  @keyframes flicker {
-    0%,95%,100% { opacity: 1; }
-    96% { opacity: 0.85; }
-    97% { opacity: 1; }
-    98% { opacity: 0.9; }
-  }
-
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    z-index: 1;
-  }
-
-  .video-wrapper {
-    position: relative;
-    border: 1px solid #333340;
-    box-shadow: 0 0 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
-  }
-
-  canvas, video {
-    display: block;
-    width: 640px;
-    height: 480px;
-    object-fit: cover;
-  }
-
-  video { display: none; }
-
-  /* Scanlines */
-  .video-wrapper::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
-    pointer-events: none;
-  }
-
-  /* Corner brackets */
-  .corner { position: absolute; width: 20px; height: 20px; border-color: #b8a878; border-style: solid; }
-  .corner.tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
-  .corner.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
-  .corner.bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
-  .corner.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
-
-  .hud {
-    position: absolute;
-    top: 12px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    color: #b8a878;
-    opacity: 0.8;
-  }
-
-  .fps {
-    position: absolute;
-    bottom: 12px; right: 14px;
-    font-size: 0.6rem;
-    color: #666;
-  }
-
-  .mode-label {
-    position: absolute;
-    bottom: 12px; left: 14px;
-    font-size: 0.6rem;
-    color: #b8a878;
-    letter-spacing: 0.12em;
-  }
-
-  .controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  button {
-    background: transparent;
-    border: 1px solid #333340;
-    color: #888;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
-
-  button:hover { border-color: #b8a878; color: #e8e0d0; }
-  button.active { border-color: #b8a878; color: #b8a878; background: rgba(184,168,120,0.08); }
-
-  .start-btn {
-    background: rgba(184,168,120,0.1);
-    border-color: #b8a878;
-    color: #e8e0d0;
-    padding: 10px 32px;
-    font-size: 0.8rem;
-  }
-
-  .hint {
-    font-size: 0.6rem;
-    color: #444;
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-
-  #status {
-    font-size: 0.65rem;
-    color: #666;
-    letter-spacing: 0.1em;
-    min-height: 16px;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0a0a0f;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Press Start 2P',monospace;}
+  .phone-frame{width:390px;height:844px;background:#0d0d1a;border:3px solid #1a1a2e;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 0 60px rgba(180,0,0,0.3),inset 0 0 30px rgba(0,0,0,0.5);}
+  .scene{width:100%;height:100%;position:relative;background:linear-gradient(180deg,#0a0010 0%,#1a0020 40%,#2d0a0a 70%,#1a0505 100%);}
+  .stars{position:absolute;top:0;left:0;right:0;bottom:0;}
+  .star{position:absolute;background:#fff;image-rendering:pixelated;}
+  .moon{position:absolute;top:30px;right:40px;width:40px;height:40px;background:#d4c5a9;box-shadow:inset -8px -4px 0 #b8a882,0 0 20px rgba(212,197,169,0.3);}
+  .castle{position:absolute;bottom:182px;left:50%;transform:translateX(-50%);width:200px;height:160px;}
+  .castle-body{position:absolute;bottom:0;left:20px;width:160px;height:120px;background:#1a0a0a;border-top:4px solid #3d1515;border-left:4px solid #3d1515;border-right:4px solid #3d1515;}
+  .castle-window{position:absolute;background:#ff4400;animation:flicker 0.3s infinite alternate;}
+  .w1{width:16px;height:24px;top:20px;left:20px}.w2{width:16px;height:24px;top:20px;left:60px}.w3{width:16px;height:24px;top:20px;left:100px}.w4{width:16px;height:24px;top:60px;left:20px}.w5{width:16px;height:24px;top:60px;left:100px}
+  .castle-door{position:absolute;bottom:0;left:60px;width:40px;height:50px;background:#0d0505;border-top-left-radius:4px;border-top-right-radius:4px;}
+  .tower{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:40px;height:40px;background:#1a0a0a;border:4px solid #3d1515;}
+  @keyframes flicker{0%{background:#ff4400;opacity:0.8}100%{background:#ff6600;opacity:1}}
+  .ground{position:absolute;bottom:170px;left:0;right:0;height:12px;background:repeating-linear-gradient(90deg,#1a0a0a 0px,#1a0a0a 8px,#2d1515 8px,#2d1515 16px);}
+  .detective{position:absolute;bottom:182px;left:30px;width:80px;height:130px;image-rendering:pixelated;animation:detBob 0.8s ease-in-out infinite alternate;}
+  @keyframes detBob{0%{transform:translateY(0)}100%{transform:translateY(-4px)}}
+  .det-hat{position:absolute;top:0;left:16px;width:48px;height:12px;background:#2d1f0e;box-shadow:0 -8px 0 0 #2d1f0e,-8px -4px 0 0 #2d1f0e,56px -4px 0 0 #2d1f0e;}
+  .det-face{position:absolute;top:12px;left:20px;width:40px;height:32px;background:#d4a574;}
+  .det-eye-l{position:absolute;top:18px;left:26px;width:6px;height:6px;background:#1a0a0a;}
+  .det-eye-r{position:absolute;top:18px;left:48px;width:6px;height:6px;background:#1a0a0a;}
+  .det-mustache{position:absolute;top:30px;left:26px;width:28px;height:4px;background:#1a0a0a;}
+  .det-mouth{position:absolute;top:34px;left:30px;width:20px;height:4px;background:#7a3f2d;}
+  .det-mouth.talking{animation:talk 0.15s infinite alternate;}
+  @keyframes talk{0%{height:4px;top:34px}100%{height:10px;top:30px;background:#3d1515}}
+  .det-body{position:absolute;top:44px;left:12px;width:56px;height:48px;background:#1a1a2e;border-top:4px solid #2d2d4e;}
+  .det-lapel-l{position:absolute;top:44px;left:12px;width:12px;height:24px;background:#0d0d1a;}
+  .det-lapel-r{position:absolute;top:44px;left:56px;width:12px;height:24px;background:#0d0d1a;}
+  .det-tie{position:absolute;top:48px;left:36px;width:8px;height:20px;background:#8b0000;}
+  .det-arm-l{position:absolute;top:48px;left:0;width:12px;height:36px;background:#1a1a2e;transform-origin:top center;animation:armSwing 1s ease-in-out infinite alternate;}
+  .det-arm-r{position:absolute;top:48px;right:0;width:12px;height:36px;background:#1a1a2e;transform-origin:top center;animation:armSwing 1s ease-in-out infinite alternate-reverse;}
+  @keyframes armSwing{0%{transform:rotate(-5deg)}100%{transform:rotate(5deg)}}
+  .det-legs{position:absolute;top:92px;left:16px;width:48px;height:28px;display:flex;gap:8px;}
+  .det-leg{width:20px;height:28px;background:#0d0d1a;}
+  .det-shoe-l{position:absolute;top:118px;left:12px;width:24px;height:8px;background:#1a0a0a;}
+  .det-shoe-r{position:absolute;top:118px;left:44px;width:24px;height:8px;background:#1a0a0a;}
+  .magnify{position:absolute;top:68px;right:-4px;width:24px;height:24px;border:4px solid #8b7355;border-radius:50%;background:rgba(180,220,255,0.15);animation:magnifyHold 2s ease-in-out infinite;}
+  .magnify-handle{position:absolute;top:88px;right:-4px;width:4px;height:14px;background:#8b7355;transform:rotate(45deg);}
+  @keyframes magnifyHold{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
+  .speech-bubble{position:absolute;bottom:310px;left:16px;right:16px;background:#0d0d1a;border:3px solid #8b0000;padding:16px;min-height:90px;box-shadow:3px 0 0 #8b0000,-3px 0 0 #8b0000,0 3px 0 #8b0000,0 -3px 0 #8b0000,0 0 20px rgba(139,0,0,0.3);}
+  .speech-bubble::after{content:'';position:absolute;bottom:-18px;left:50px;width:0;height:0;border-left:12px solid transparent;border-top:18px solid #8b0000;}
+  .speech-bubble::before{content:'';position:absolute;bottom:-12px;left:52px;width:0;height:0;border-left:10px solid transparent;border-top:16px solid #0d0d1a;z-index:1;}
+  .speech-text{color:#e8e0d0;font-size:7px;line-height:1.8;letter-spacing:0.5px;min-height:60px;}
+  .cursor{display:inline-block;width:6px;height:10px;background:#8b0000;animation:blink 0.5s infinite;vertical-align:middle;margin-left:2px;}
+  @keyframes blink{50%{opacity:0}}
+  .bottom-ui{position:absolute;bottom:0;left:0;right:0;height:165px;background:linear-gradient(180deg,transparent,#0a0010 30%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;gap:10px;}
+  .title-main{color:#cc0000;font-size:9px;text-shadow:0 0 10px #ff0000,2px 2px 0 #000;letter-spacing:1px;text-align:center;}
+  .title-sub{color:#8b6914;font-size:6px;margin-top:4px;letter-spacing:2px;text-align:center;}
+  .progress-bar{width:280px;height:8px;background:#1a0a0a;border:2px solid #3d1515;}
+  .progress-fill{height:100%;background:#8b0000;transition:width 0.3s linear;box-shadow:2px 0 0 #ff4444 inset;}
+  .controls{display:flex;gap:16px;align-items:center;}
+  .btn{background:#1a0a0a;border:2px solid #8b0000;color:#cc0000;font-family:'Press Start 2P',monospace;font-size:7px;padding:8px 14px;cursor:pointer;letter-spacing:0.5px;}
+  .btn:hover{background:#2d0a0a;}
+  .btn.active{background:#2d0000;border-color:#ff4444;color:#ff4444;}
+  .slide-counter{color:#5a3a3a;font-size:6px;text-align:center;}
+  .scanlines{position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px);pointer-events:none;z-index:10;}
+  .vignette{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(80,0,0,0.4) 100%);pointer-events:none;z-index:9;}
+  .particle{position:absolute;width:4px;height:4px;background:#8b0000;animation:floatUp linear infinite;opacity:0;}
+  @keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:0.7}100%{transform:translateY(-200px) scale(0);opacity:0}}
+  .case-header{position:absolute;top:20px;left:0;right:0;text-align:center;}
+  .case-label{color:#5a3a1a;font-size:6px;letter-spacing:3px;border:1px solid #3d1515;display:inline-block;padding:4px 12px;background:rgba(10,0,0,0.5);}
+  .bat{position:absolute;top:80px;right:60px;width:20px;height:10px;background:#1a0a0a;clip-path:polygon(0% 100%,20% 0%,40% 60%,50% 0%,60% 60%,80% 0%,100% 100%);animation:batFly 3s ease-in-out infinite;opacity:0.6;}
+  @keyframes batFly{0%,100%{transform:translate(0,0) scaleX(1)}25%{transform:translate(-20px,-10px) scaleX(-1)}50%{transform:translate(-40px,5px) scaleX(1)}75%{transform:translate(-20px,-5px) scaleX(-1)}}
+  .ghost-light{position:absolute;width:8px;height:8px;background:rgba(180,255,200,0.6);border-radius:50%;filter:blur(2px);}
+  @keyframes ghostMove{0%,100%{transform:translate(0,0);opacity:0.8}50%{transform:translate(8px,-12px);opacity:0.2}}
 </style>
 </head>
 <body>
-
-<div class="container">
-  <h1>DETECTIVE TRANSFORMER</h1>
-
-  <div id="status">— AWAITING CAMERA —</div>
-
-  <div class="video-wrapper">
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-    <div class="hud" id="hud">◈ OFFLINE</div>
-    <div class="fps" id="fps">-- FPS</div>
-    <div class="mode-label" id="modeLabel">MODE: --</div>
+<div class="phone-frame">
+  <div class="scene">
+    <div class="stars" id="stars"></div>
+    <div class="moon"></div>
+    <div class="bat"></div>
+    <div class="case-header"><div class="case-label">▶ CASE FILE #001</div></div>
+    <div class="castle">
+      <div class="tower"></div>
+      <div class="castle-body">
+        <div class="castle-window w1"></div><div class="castle-window w2"></div>
+        <div class="castle-window w3"></div><div class="castle-window w4"></div>
+        <div class="castle-window w5"></div><div class="castle-door"></div>
+        <div class="ghost-light" style="top:30px;left:45px;animation:ghostMove 3s ease-in-out infinite;"></div>
+        <div class="ghost-light" style="top:70px;left:85px;animation:ghostMove 4.5s ease-in-out infinite 1.5s;"></div>
+      </div>
+    </div>
+    <div class="ground"></div>
+    <div id="particles"></div>
+    <div class="detective">
+      <div class="det-hat"></div>
+      <div class="det-face">
+        <div class="det-eye-l"></div><div class="det-eye-r"></div>
+        <div class="det-mustache"></div>
+        <div class="det-mouth" id="mouth"></div>
+      </div>
+      <div class="det-lapel-l"></div><div class="det-lapel-r"></div>
+      <div class="det-body"></div><div class="det-tie"></div>
+      <div class="det-arm-l"></div><div class="det-arm-r"></div>
+      <div class="magnify"></div><div class="magnify-handle"></div>
+      <div class="det-legs"><div class="det-leg"></div><div class="det-leg"></div></div>
+      <div class="det-shoe-l"></div><div class="det-shoe-r"></div>
+    </div>
+    <div class="speech-bubble">
+      <div class="speech-text" id="speechText"><span class="cursor"></span></div>
+    </div>
+    <div class="bottom-ui">
+      <div><div class="title-main">H.H. HOLMES</div><div class="title-sub">AMERICA'S FIRST SERIAL KILLER</div></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="controls">
+        <button class="btn" id="prevBtn">◀ PREV</button>
+        <button class="btn active" id="playBtn">❚❚ PAUSE</button>
+        <button class="btn" id="nextBtn">NEXT ▶</button>
+      </div>
+      <div class="slide-counter" id="slideCounter">CLUE 1 / 7</div>
+    </div>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
   </div>
-
-  <div class="controls">
-    <button class="start-btn" onclick="startCamera()">▶ START CAMERA</button>
-  </div>
-
-  <div class="controls" id="modeButtons" style="display:none">
-    <button onclick="setMode('raw')" id="btn-raw">RAW</button>
-    <button onclick="setMode('detective')" id="btn-detective" class="active">DETECTIVE</button>
-    <button onclick="setMode('smooth')" id="btn-smooth">SMOOTH</button>
-    <button onclick="setMode('sharp')" id="btn-sharp">SHARP</button>
-    <button onclick="setMode('noir')" id="btn-noir">NOIR B&W</button>
-  </div>
-
-  <div class="hint">Press button above to activate mode</div>
 </div>
-
 <script>
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
-const status = document.getElementById('status');
-const hud = document.getElementById('hud');
-const fpsEl = document.getElementById('fps');
-const modeLabel = document.getElementById('modeLabel');
-
-let mode = 'detective';
-let running = false;
-let lastTime = performance.now();
-let frameCount = 0;
-let fps = 0;
-
-async function startCamera() {
-  try {
-    status.textContent = '— CONNECTING TO CAMERA —';
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-    video.srcObject = stream;
-    await new Promise(r => video.onloadedmetadata = r);
-    video.play();
-    running = true;
-    hud.textContent = '◈ LIVE';
-    status.textContent = '— ACTIVE —';
-    document.getElementById('modeButtons').style.display = 'flex';
-    requestAnimationFrame(processFrame);
-  } catch(e) {
-    status.textContent = '— CAMERA ERROR: ' + e.message + ' —';
-  }
-}
-
-function setMode(m) {
-  mode = m;
-  document.querySelectorAll('#modeButtons button').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + m).classList.add('active');
-}
-
-function applyDetective(data) {
-  const d = data.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const r = d[i], g = d[i+1], b = d[i+2];
-
-    // Cool blue-grey tint
-    let nr = r * 0.88;
-    let ng = g * 0.92;
-    let nb = b * 1.05;
-
-    // S-curve contrast
-    nr = Math.pow(nr/255, 0.85) * 255 * 1.1;
-    ng = Math.pow(ng/255, 0.85) * 255 * 1.1;
-    nb = Math.pow(nb/255, 0.85) * 255 * 1.1;
-
-    d[i]   = Math.min(255, nr);
-    d[i+1] = Math.min(255, ng);
-    d[i+2] = Math.min(255, nb);
-  }
-  return data;
-}
-
-function applyNoir(data) {
-  const d = data.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const gray = d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114;
-    const contrast = Math.pow(gray/255, 0.8) * 255 * 1.15;
-    const val = Math.min(255, contrast);
-    d[i] = d[i+1] = d[i+2] = val;
-  }
-  return data;
-}
-
-function applySharp(data, w, h) {
-  const src = new Uint8ClampedArray(data.data);
-  const d = data.data;
-  const kernel = [0, -0.5, 0, -0.5, 3, -0.5, 0, -0.5, 0];
-  for (let y = 1; y < h-1; y++) {
-    for (let x = 1; x < w-1; x++) {
-      for (let c = 0; c < 3; c++) {
-        let val = 0;
-        for (let ky = -1; ky <= 1; ky++)
-          for (let kx = -1; kx <= 1; kx++)
-            val += src[((y+ky)*w+(x+kx))*4+c] * kernel[(ky+1)*3+(kx+1)];
-        d[(y*w+x)*4+c] = Math.min(255, Math.max(0, val));
-      }
-    }
-  }
-  return data;
-}
-
-function applySmooth(data, w, h) {
-  const src = new Uint8ClampedArray(data.data);
-  const d = data.data;
-  for (let y = 1; y < h-1; y++) {
-    for (let x = 1; x < w-1; x++) {
-      for (let c = 0; c < 3; c++) {
-        let sum = 0;
-        for (let ky = -1; ky <= 1; ky++)
-          for (let kx = -1; kx <= 1; kx++)
-            sum += src[((y+ky)*w+(x+kx))*4+c];
-        d[(y*w+x)*4+c] = sum / 9;
-      }
-    }
-  }
-  return data;
-}
-
-function processFrame() {
-  if (!running) return;
-
-  ctx.drawImage(video, 0, 0, 640, 480);
-
-  if (mode !== 'raw') {
-    const imageData = ctx.getImageData(0, 0, 640, 480);
-
-    if (mode === 'detective') applyDetective(imageData);
-    else if (mode === 'noir') applyNoir(imageData);
-    else if (mode === 'sharp') { applyDetective(imageData); applySharp(imageData, 640, 480); }
-    else if (mode === 'smooth') applySmooth(imageData, 640, 480);
-
-    ctx.putImageData(imageData, 0, 0);
-  }
-
-  // FPS
-  frameCount++;
-  const now = performance.now();
-  if (now - lastTime >= 1000) {
-    fps = frameCount;
-    frameCount = 0;
-    lastTime = now;
-    fpsEl.textContent = fps + ' FPS';
-    modeLabel.textContent = 'MODE: ' + mode.toUpperCase();
-  }
-
-  requestAnimationFrame(processFrame);
-}
+  const starsEl=document.getElementById('stars');
+  for(let i=0;i<40;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()<0.3?4:2;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*45}%;left:${Math.random()*100}%;opacity:${0.4+Math.random()*0.6};animation:blink ${1+Math.random()*2}s infinite ${Math.random()}s alternate;`;starsEl.appendChild(s);}
+  const particlesEl=document.getElementById('particles');
+  for(let i=0;i<8;i++){const p=document.createElement('div');p.className='particle';p.style.cssText=`left:${10+Math.random()*80}%;bottom:${150+Math.random()*100}px;animation-duration:${3+Math.random()*4}s;animation-delay:${Math.random()*4}s;`;particlesEl.appendChild(p);}
+  const slides=["Most serial killers are caught because they make mistakes. This one was caught because of a horse.","Herman Webster Mudgett. Born 1861. Charming. Handsome. A real doctor. He moved to Chicago under a fake name — H.H. Holmes.","He built a hotel with secret rooms. No windows. Doors locked only from outside. Gas pipes. A furnace in the basement large enough to destroy a human body.","He called it a hotel. The world called it The Murder Castle.","1893. World's Fair. Young women came looking for safety. Holmes offered it. They were never seen again.","He didn't kill from rage. He killed because he enjoyed watching people realize there was no escape.","Part 2 tomorrow. What police found inside those walls made a grown officer walk outside and never come back."];
+  let currentSlide=0,typeInterval=null,isPlaying=true,autoTimer=null,charIndex=0;
+  const speechText=document.getElementById('speechText'),progressFill=document.getElementById('progressFill'),slideCounter=document.getElementById('slideCounter'),mouth=document.getElementById('mouth'),playBtn=document.getElementById('playBtn');
+  function typeText(text,onDone){charIndex=0;speechText.innerHTML='<span class="cursor"></span>';mouth.classList.add('talking');clearInterval(typeInterval);typeInterval=setInterval(()=>{if(charIndex<text.length){speechText.innerHTML=text.substring(0,charIndex+1)+'<span class="cursor"></span>';charIndex++;}else{clearInterval(typeInterval);mouth.classList.remove('talking');speechText.innerHTML=text+'<span class="cursor"></span>';if(onDone)setTimeout(onDone,2500);}},38);}
+  function showSlide(index){currentSlide=Math.max(0,Math.min(slides.length-1,index));progressFill.style.width=((currentSlide+1)/slides.length*100)+'%';slideCounter.textContent=`CLUE ${currentSlide+1} / ${slides.length}`;clearInterval(typeInterval);clearTimeout(autoTimer);mouth.classList.remove('talking');typeText(slides[currentSlide],()=>{if(isPlaying&&currentSlide<slides.length-1)autoTimer=setTimeout(()=>showSlide(currentSlide+1),500);});}
+  document.getElementById('prevBtn').addEventListener('click',()=>{clearTimeout(autoTimer);showSlide(currentSlide-1);});
+  document.getElementById('nextBtn').addEventListener('click',()=>{clearTimeout(autoTimer);showSlide(currentSlide+1);});
+  playBtn.addEventListener('click',()=>{isPlaying=!isPlaying;playBtn.textContent=isPlaying?'❚❚ PAUSE':'▶ PLAY';if(isPlaying){clearTimeout(autoTimer);clearInterval(typeInterval);typeText(slides[currentSlide],()=>{if(currentSlide<slides.length-1)autoTimer=setTimeout(()=>showSlide(currentSlide+1),500);});}else{clearTimeout(autoTimer);clearInterval(typeInterval);mouth.classList.remove('talking');}});
+  setTimeout(()=>showSlide(0),500);
 </script>
 </body>
 </html>
